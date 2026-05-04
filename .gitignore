@@ -1,0 +1,24 @@
+# 微信开发者工具生成
+miniprogram_npm/
+
+# 依赖
+node_modules/
+
+# 云函数本地调试
+.cloudbase/
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# 环境变量（如有）
+.env
+.env.local
+
+# 日志
+*.log
+npm-debug.log*
