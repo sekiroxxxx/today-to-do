@@ -1,0 +1,9 @@
+{
+  "name": "addJob",
+  "version": "1.0.0",
+  "description": "添加求职岗位：向 job_applications 集合插入一条新的岗位记录",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
