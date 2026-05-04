@@ -1,0 +1,9 @@
+{
+  "name": "updateJob",
+  "version": "1.0.0",
+  "description": "更新求职岗位：修改岗位的基本信息字段（不含状态变更）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
