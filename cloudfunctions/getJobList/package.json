@@ -1,0 +1,9 @@
+{
+  "name": "getJobList",
+  "version": "1.0.0",
+  "description": "获取求职岗位列表：查询当前用户的所有岗位，支持按状态筛选和关键词搜索",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
