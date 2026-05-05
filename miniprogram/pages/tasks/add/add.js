@@ -1,6 +1,10 @@
 // 添加/编辑自定义任务
 const api = require('../../../utils/api')
 
+// 节流：防止连点重复提交。2 秒内仅执行第一次
+let lastSubmitTime = 0
+const SUBMIT_GAP = 2000
+
 Page({
   data: {
     isEdit: false,
@@ -87,6 +91,11 @@ Page({
 
   // ========== 提交 ==========
   onSubmit() {
+    // 节流：2 秒内的重复点击直接丢弃
+    const now = Date.now()
+    if (now - lastSubmitTime < SUBMIT_GAP) return
+    lastSubmitTime = now
+
     const { form } = this.data
     if (!form.title.trim()) {
       return wx.showToast({ title: '请输入任务标题', icon: 'none' })

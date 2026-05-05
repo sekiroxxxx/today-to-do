@@ -1,6 +1,10 @@
 // 添加/编辑求职岗位
 const api = require('../../../utils/api')
 
+// 节流：防止连点重复提交
+let lastSubmitTime = 0
+const SUBMIT_GAP = 2000
+
 Page({
   data: {
     isEdit: false,          // 是否编辑模式
@@ -66,6 +70,11 @@ Page({
 
   // ========== 提交 ==========
   onSubmit() {
+    // 节流：2 秒内的重复点击直接丢弃
+    const now = Date.now()
+    if (now - lastSubmitTime < SUBMIT_GAP) return
+    lastSubmitTime = now
+
     const { form } = this.data
     // 校验必填
     if (!form.company.trim()) return wx.showToast({ title: '请输入公司名称', icon: 'none' })
