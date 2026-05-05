@@ -1,0 +1,9 @@
+{
+  "name": "getTaskList",
+  "version": "1.0.0",
+  "description": "获取自定义任务列表：查询当前用户所有任务，支持按优先级、启用状态筛选和关键词搜索",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
