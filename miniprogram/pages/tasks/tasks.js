@@ -1,5 +1,6 @@
 // 任务管理 — 自定义任务列表
 const api = require('../../utils/api')
+const app = getApp()
 
 Page({
   data: {
@@ -21,7 +22,9 @@ Page({
   },
 
   onShow() {
-    // 已有数据 → 静默刷新；首次加载 → 显示加载态
+    // 缓存干净直接跳过
+    if (!app.globalData.dirty.tasks) return
+
     const hasData = this.data.tasks.length > 0
     this.loadTasks(!hasData)
   },
@@ -41,6 +44,7 @@ Page({
         disabledTasks: tasks.filter(t => !t.enabled),
         loading: false
       })
+      app.globalData.dirty.tasks = false
     })
   },
 
@@ -96,6 +100,7 @@ Page({
           enabled: !task.enabled
         }).then(res => {
           if (res.success) {
+            app.markDirty(['today', 'mine'])
             wx.showToast({ title: task.enabled ? '已禁用' : '已启用', icon: 'success' })
             this.loadTasks()
           } else {
@@ -112,6 +117,7 @@ Page({
             if (res.confirm) {
               api.deleteTask(task._id).then(result => {
                 if (result.success) {
+                  app.markDirty(['today', 'mine'])
                   wx.showToast({ title: '已删除', icon: 'success' })
                   this.loadTasks()
                 }

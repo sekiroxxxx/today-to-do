@@ -1,5 +1,6 @@
 // 岗位详情页
 const api = require('../../../utils/api')
+const app = getApp()
 
 Page({
   data: {
@@ -79,6 +80,7 @@ Page({
             newStatus: item.value
           }).then(result => {
             if (result.success) {
+              app.markDirty(['jobs', 'today', 'mine'])
               wx.showToast({ title: '状态已更新', icon: 'success' })
               this.loadJob()
             } else {
@@ -105,6 +107,7 @@ Page({
           this.setData({ deleting: true })
           api.deleteJob(this.data.jobId).then(result => {
             if (result.success) {
+              app.markDirty(['jobs', 'today', 'mine'])
               wx.showToast({ title: '已删除', icon: 'success' })
               setTimeout(() => wx.navigateBack(), 1500)
             } else {

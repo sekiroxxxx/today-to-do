@@ -18,9 +18,28 @@ App({
     // ========== 全局数据 ==========
     this.globalData = {
       userInfo: null,           // 当前用户信息（login 后填充）
-      todayActions: [],         // 今日清单缓存
-      todayActionsDate: ''      // 缓存的日期
+      // 缓存脏标记：true=数据已过期需重新请求，false=缓存有效
+      // 用户做增删改操作后标记为 true，成功拉取数据后标记为 false
+      dirty: {
+        today: true,            // 初始为 true，首次进入各 Tab 时会拉数据
+        jobs: true,
+        tasks: true,
+        mine: true
+      }
     }
+  },
+
+  /**
+   * 标记指定 Tab 的数据需要刷新
+   * @param {string|string[]} tabs - 'today' | 'jobs' | 'tasks' | 'mine'
+   */
+  markDirty: function (tabs) {
+    const list = Array.isArray(tabs) ? tabs : [tabs]
+    list.forEach(t => {
+      if (this.globalData.dirty[t] !== undefined) {
+        this.globalData.dirty[t] = true
+      }
+    })
   },
 
   // ========== 全局方法 ==========

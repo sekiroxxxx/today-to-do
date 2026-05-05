@@ -12,6 +12,8 @@ Page({
   },
 
   onShow() {
+    // 缓存干净直接跳过
+    if (!app.globalData.dirty.mine) return
     this.loadData()
   },
 
@@ -30,6 +32,7 @@ Page({
           statsFormatted: this.formatStats(res.summary)
         })
       }
+      app.globalData.dirty.mine = false
     })
   },
 

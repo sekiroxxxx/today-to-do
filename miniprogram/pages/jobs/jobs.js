@@ -1,5 +1,6 @@
 // 求职管理 — 岗位列表 + 投递漏斗
 const api = require('../../utils/api')
+const app = getApp()
 
 Page({
   data: {
@@ -15,7 +16,9 @@ Page({
   },
 
   onShow() {
-    // 已有数据 → 静默刷新；首次加载 → 显示加载态
+    // 缓存干净直接跳过，脏了才重新请求
+    if (!app.globalData.dirty.jobs) return
+
     const hasData = this.data.jobs.length > 0
     this.loadData(!hasData)
   },
@@ -39,6 +42,7 @@ Page({
         funnelTotal: (statsRes.funnel ? Object.values(statsRes.funnel).reduce((a, b) => a + b, 0) : 0),
         loading: false
       })
+      app.globalData.dirty.jobs = false
     } catch {
       this.setData({ loading: false })
     }
@@ -109,6 +113,7 @@ Page({
           api.updateJobStatus({ jobId: id, newStatus: next.next }).then(result => {
             if (result.success) {
               wx.showToast({ title: '已更新', icon: 'success' })
+              app.markDirty(['today', 'mine'])
               this.loadData()
             } else {
               wx.showToast({ title: result.errMsg, icon: 'none' })

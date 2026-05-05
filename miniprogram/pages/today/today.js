@@ -1,4 +1,5 @@
 const api = require('../../utils/api')
+const app = getApp()
 
 Page({
   data: {
@@ -9,14 +10,16 @@ Page({
   },
 
   onShow() {
-    // 已有数据 → 静默刷新；首次加载 → 显示骨架屏
+    // 缓存干净就跳过，脏了才重新请求
+    if (!app.globalData.dirty.today) return
+
     const hasData = this.data.actions.length > 0
     this.loadTodayActions(!hasData)
   },
 
   /**
    * 加载今日清单
-   * @param {boolean} showLoading - 是否显示骨架屏。false=静默刷新，不打断用户
+   * @param {boolean} showLoading - 首次加载显示骨架屏，切Tab静默刷新
    */
   loadTodayActions(showLoading = false) {
     if (showLoading) {
@@ -30,7 +33,6 @@ Page({
           todayDate: res.date, loading: false
         })
       } else {
-        // 今日还没生成，调用生成
         return api.generateDailyActions().then(genRes => {
           this.setData({
             actions: genRes.actions || [],
@@ -40,8 +42,8 @@ Page({
           })
         })
       }
-    }).catch(() => {
-      this.setData({ loading: false })
+    }).finally(() => {
+      app.globalData.dirty.today = false
     })
   },
 
@@ -52,12 +54,14 @@ Page({
         empty: !res.actions || res.actions.length === 0,
         todayDate: res.date
       })
+      app.globalData.dirty.today = false
       wx.stopPullDownRefresh()
     })
   },
 
   onComplete() {
-    // 卡片消失后静默刷新，不闪骨架屏
+    // 完成操作后标记需要刷新
+    app.markDirty(['today', 'mine'])
     this.loadTodayActions(true)
   },
 
@@ -67,8 +71,11 @@ Page({
       if (res.needRegenerate) {
         api.generateDailyActions(true).then(genRes => {
           this.setData({ actions: genRes.actions || [] })
+          app.globalData.dirty.today = false
         })
       }
+      // 推迟会影响源任务数据，标记相关 Tab 为脏
+      app.markDirty(['mine'])
     })
   }
 })

@@ -99,6 +99,7 @@ Page({
     action.then(res => {
       this.setData({ saving: false })
       if (res.success) {
+        getApp().markDirty(['jobs', 'today', 'mine'])
         wx.showToast({ title: this.data.isEdit ? '已更新' : '已添加', icon: 'success' })
         setTimeout(() => wx.navigateBack(), 1500)
       } else {
