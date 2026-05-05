@@ -1,27 +1,53 @@
-/**app.wxss**/
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
-} 
-
-button {
-  background: initial;
-}
-
-button:focus{
-  outline: 0;
-}
-
-button::after{
-  border: none;
-}
-
+/* ============================================
+   今日行动清单 — 全局样式变量
+   ============================================ */
 
 page {
-  background: #f6f6f6;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  --color-primary: #1677FF;
+  --color-primary-light: #E6F4FF;
+  --color-success: #52C41A;
+  --color-warning: #FAAD14;
+  --color-danger: #FF4D4F;
+  --color-text: #1A1A1A;
+  --color-text-secondary: #666666;
+  --color-text-hint: #999999;
+  --color-border: #E8E8E8;
+  --color-bg: #F5F5F5;
+  --color-white: #FFFFFF;
+  --color-tag-pending: #1677FF;
+  --color-tag-applied: #FAAD14;
+  --color-tag-interview: #52C41A;
+  --color-tag-offer: #722ED1;
+  --color-tag-rejected: #999999;
+
+  --font-title: 18px;
+  --font-body: 15px;
+  --font-caption: 13px;
+  --font-tag: 11px;
+
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-round: 999px;
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  background-color: var(--color-bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  font-size: var(--font-body);
+  color: var(--color-text);
+  line-height: 1.5;
 }
+
+/* 通用弹性布局 */
+.flex-row { display: flex; flex-direction: row; align-items: center; }
+.flex-column { display: flex; flex-direction: column; }
+.flex-between { display: flex; flex-direction: row; align-items: center; justify-content: space-between; }
+.flex-1 { flex: 1; }
+
+/* 文字截断 */
+.text-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

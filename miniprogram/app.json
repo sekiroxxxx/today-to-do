@@ -1,14 +1,31 @@
 {
   "pages": [
-    "pages/index/index",
-    "pages/example/index"
+    "pages/today/today",
+    "pages/jobs/jobs",
+    "pages/jobs/add/add",
+    "pages/jobs/detail/detail",
+    "pages/tasks/tasks",
+    "pages/tasks/add/add",
+    "pages/mine/mine"
   ],
   "window": {
-    "backgroundColor": "#F6F6F6",
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#F6F6F6",
-    "navigationBarTitleText": "云开发 QuickStart",
+    "backgroundColor": "#F5F5F5",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTitleText": "今日行动清单",
     "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#1677FF",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/today/today", "text": "今日" },
+      { "pagePath": "pages/jobs/jobs", "text": "求职" },
+      { "pagePath": "pages/tasks/tasks", "text": "任务" },
+      { "pagePath": "pages/mine/mine", "text": "我的" }
+    ]
   },
   "sitemapLocation": "sitemap.json",
   "style": "v2",
