@@ -10,7 +10,7 @@
 .form-input {
   background: var(--color-bg); border-radius: var(--radius-sm);
   padding: 10px var(--spacing-sm); font-size: var(--font-body); width: 100%;
-  box-sizing: border-box;
+  box-sizing: border-box; line-height: 1.5; min-height: 44px;
 }
 .score-row { display: flex; align-items: center; gap: var(--spacing-sm); }
 .score-hint { font-size: var(--font-caption); color: var(--color-text-hint); }

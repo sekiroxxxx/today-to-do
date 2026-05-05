@@ -4,8 +4,8 @@
 .form-item { margin-bottom: var(--spacing-md); }
 .form-label { font-size: var(--font-caption); color: var(--color-text-secondary); display: block; margin-bottom: 6px; }
 .required { color: var(--color-danger); }
-.form-input { background: var(--color-bg); border-radius: var(--radius-sm); padding: 10px var(--spacing-sm); font-size: var(--font-body); width: 100%; box-sizing: border-box; }
-.form-textarea { background: var(--color-bg); border-radius: var(--radius-sm); padding: 10px var(--spacing-sm); font-size: var(--font-body); width: 100%; height: 80px; box-sizing: border-box; }
+.form-input { background: var(--color-bg); border-radius: var(--radius-sm); padding: 10px var(--spacing-sm); font-size: var(--font-body); width: 100%; box-sizing: border-box; line-height: 1.5; min-height: 44px; }
+.form-textarea { background: var(--color-bg); border-radius: var(--radius-sm); padding: 10px var(--spacing-sm); font-size: var(--font-body); width: 100%; height: 80px; box-sizing: border-box; line-height: 1.5; }
 
 /* 优先级选择 */
 .priority-row { display: flex; gap: var(--spacing-sm); }
