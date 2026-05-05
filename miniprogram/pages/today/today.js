@@ -52,6 +52,7 @@ Page({
   },
 
   onPullDownRefresh() {
+    wx.showNavigationBarLoading()
     api.generateDailyActions(true).then(res => {
       this.setData({
         actions: res.actions || [],
@@ -59,6 +60,7 @@ Page({
         todayDate: res.date
       })
       app.globalData.dirty.today = false
+      wx.hideNavigationBarLoading()
       wx.stopPullDownRefresh()
     })
   },

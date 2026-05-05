@@ -3,5 +3,7 @@
     "status-tag": "/components/status-tag/status-tag",
     "star-rating": "/components/star-rating/star-rating",
     "empty-state": "/components/empty-state/empty-state"
-  }
+  },
+  "enablePullDownRefresh": true,
+  "navigationBarTitleText": "求职管理"
 }

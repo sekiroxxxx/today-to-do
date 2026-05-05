@@ -147,6 +147,10 @@ Page({
 
   // ========== 下拉刷新 ==========
   onPullDownRefresh() {
-    this.loadData().then(() => wx.stopPullDownRefresh())
+    wx.showNavigationBarLoading()
+    this.loadData().then(() => {
+      wx.hideNavigationBarLoading()
+      wx.stopPullDownRefresh()
+    })
   }
 })
