@@ -1,1 +1,71 @@
-<text>我的</text>
+<!-- 我的 -->
+<view class="page">
+  <!-- 用户信息 -->
+  <view class="user-card">
+    <view class="user-avatar">{{userInfo ? (userInfo.nickname || '👤') : '👤'}}</view>
+    <view class="user-info">
+      <text class="user-name">{{userInfo && userInfo.nickname ? userInfo.nickname : '用户'}}</text>
+      <text class="user-id">{{userInfo ? userInfo._openid : ''}}</text>
+    </view>
+  </view>
+
+  <!-- 统计切换 -->
+  <view class="tab-row">
+    <view class="tab {{currentRange === 'week' ? 'tab--active' : ''}}" data-range="week" bindtap="onRangeSwitch">本周</view>
+    <view class="tab {{currentRange === 'month' ? 'tab--active' : ''}}" data-range="month" bindtap="onRangeSwitch">本月</view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-row" wx:if="{{statsFormatted}}">
+    <view class="stat-card">
+      <text class="stat-num">{{statsFormatted.completed}}</text>
+      <text class="stat-label">已完成</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-num stat-num--warn">{{statsFormatted.postponed}}</text>
+      <text class="stat-label">已推迟</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-num stat-num--primary">{{statsFormatted.completionRate}}%</text>
+      <text class="stat-label">完成率</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-num">{{statsFormatted.total}}</text>
+      <text class="stat-label">总行动</text>
+    </view>
+  </view>
+
+  <!-- 投递漏斗概览 -->
+  <view class="card" wx:if="{{funnel}}">
+    <text class="card-title">求职漏斗</text>
+    <view class="mini-funnel flex-row">
+      <view class="mf-item">{{funnel.pending}}<text class="mf-label">待投</text></view>
+      <text class="mf-arrow">→</text>
+      <view class="mf-item">{{funnel.applied}}<text class="mf-label">已投</text></view>
+      <text class="mf-arrow">→</text>
+      <view class="mf-item">{{funnel.interviewing}}<text class="mf-label">面试</text></view>
+      <text class="mf-arrow">→</text>
+      <view class="mf-item mf-item--highlight">{{funnel.offer}}<text class="mf-label">Offer</text></view>
+    </view>
+  </view>
+
+  <!-- 设置 -->
+  <view class="card">
+    <text class="card-title">偏好设置</text>
+    <view class="setting-item flex-between">
+      <text>每日清单上限</text>
+      <slider min="3" max="5" value="5" show-value block-size="18"
+              activeColor="#1677FF" bindchange="onDailyLimitChange" style="width:50%" />
+    </view>
+  </view>
+
+  <!-- 其他 -->
+  <view class="card">
+    <view class="menu-item flex-between" bindtap="onClearCache">
+      <text>清除缓存</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="version">今日行动清单 v1.0</view>
+</view>

@@ -1,1 +1,54 @@
-/* mine */
+.page { padding: var(--spacing-md); min-height: 100vh; }
+
+/* 用户卡片 */
+.user-card {
+  display: flex; align-items: center; gap: var(--spacing-md);
+  background: linear-gradient(135deg, #1677FF, #69B1FF);
+  border-radius: var(--radius-md); padding: var(--spacing-lg);
+  color: #fff; margin-bottom: var(--spacing-md);
+}
+.user-avatar { font-size: 40px; }
+.user-name { font-size: var(--font-title); font-weight: 600; display: block; }
+.user-id { font-size: var(--font-tag); opacity: 0.7; }
+
+/* 切换 Tab */
+.tab-row {
+  display: flex; background: #fff; border-radius: var(--radius-round);
+  padding: 4px; margin-bottom: var(--spacing-md);
+}
+.tab { flex: 1; text-align: center; padding: 8px; border-radius: var(--radius-round); color: var(--color-text-secondary); font-size: var(--font-body); }
+.tab--active { background: var(--color-primary); color: #fff; }
+
+/* 统计四格 */
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+.stat-card {
+  background: #fff; border-radius: var(--radius-md); padding: var(--spacing-md);
+  text-align: center; box-shadow: var(--shadow-card);
+}
+.stat-num { font-size: 28px; font-weight: 700; display: block; }
+.stat-num--warn { color: var(--color-warning); }
+.stat-num--primary { color: var(--color-primary); }
+.stat-label { font-size: var(--font-caption); color: var(--color-text-hint); margin-top: 4px; }
+
+/* 卡片 */
+.card {
+  background: #fff; border-radius: var(--radius-md); padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm); box-shadow: var(--shadow-card);
+}
+.card-title { font-size: var(--font-body); font-weight: 600; display: block; margin-bottom: var(--spacing-sm); }
+
+/* 迷你漏斗 */
+.mini-funnel { justify-content: space-around; padding: var(--spacing-sm) 0; }
+.mf-item { text-align: center; font-size: 22px; font-weight: 700; }
+.mf-label { font-size: var(--font-tag); color: var(--color-text-hint); display: block; font-weight: 400; }
+.mf-item--highlight { color: var(--color-primary); }
+.mf-arrow { color: var(--color-text-hint); }
+
+/* 设置 */
+.setting-item { padding: var(--spacing-xs) 0; }
+
+/* 菜单 */
+.menu-item { padding: var(--spacing-sm) 0; }
+.menu-arrow { font-size: 18px; color: #CCC; }
+
+.version { text-align: center; color: var(--color-text-hint); font-size: var(--font-caption); padding: var(--spacing-lg) 0; }
