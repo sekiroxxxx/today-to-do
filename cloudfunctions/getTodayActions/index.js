@@ -34,11 +34,13 @@ exports.main = async (event, context) => {
 
   try {
     // ========== 查询今天的 daily_actions ==========
-    // 按推荐分降序排列，让用户看到最重要的排最上面
+    // 过滤掉已完成和已跳过的记录，只展示待处理的
     const result = await db.collection('daily_actions')
       .where({
         _openid: openid,
-        date: todayDate
+        date: todayDate,
+        completed: false,
+        postponed: false
       })
       .orderBy('normalizedScore', 'desc')
       .get()
