@@ -56,6 +56,7 @@ Page({
       }
     } catch {
       this.setData({ loading: false })
+      app.globalData.dirty.jobs = false
     }
   },
 

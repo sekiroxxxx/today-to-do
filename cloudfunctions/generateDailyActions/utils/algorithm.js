@@ -324,30 +324,47 @@ function enforceDiversity(selected, allCandidates, missingType) {
  *   - diversityApplied: 是否触发了强制插入
  */
 function generateDailyList(options) {
-  const { jobs = [], tasks = [], recentActions = [], dailyLimit = 5 } = options
+  const { jobs = [], tasks = [], recentActions = [], dailyLimit = 5, excludeSourceIds = [] } = options
   const today = options.today || new Date()
 
+  // 今天的起止时戳，用于判断 lastCompletedAt 是否在今天之内
+  const todayStart = new Date(today)
+  todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date(today)
+  todayEnd.setHours(23, 59, 59, 999)
+
   // ---- Step 1: 计算每个岗位的分数 ----
-  const scoredJobs = jobs.map(job => ({
-    sourceType: 'job',
-    sourceId: job._id,
-    // 原始字段透传，用于后续生成 action 描述
-    company: job.company,
-    position: job.position,
-    status: job.status,
-    attractionScore: job.attractionScore,
-    preparednessScore: job.preparednessScore,
-    priority: null,  // 任务才有优先级，求职类用不上
-    rawScore: calcJobScore(job, today)
-  }))
+  const scoredJobs = jobs
+    .filter(job => !excludeSourceIds.includes(job._id))
+    .map(job => ({
+      sourceType: 'job',
+      sourceId: job._id,
+      company: job.company,
+      position: job.position,
+      status: job.status,
+      attractionScore: job.attractionScore,
+      preparednessScore: job.preparednessScore,
+      priority: null,
+      rawScore: calcJobScore(job, today)
+    }))
 
   // ---- Step 2: 计算每个任务的分数 ----
-  const scoredTasks = tasks.map(task => ({
-    sourceType: 'custom',
-    sourceId: task._id,
-    company: null,
-    position: null,
-    status: null,
+  // 过滤：排除 excludeSourceIds 中的 + lastCompletedAt 在今天之内的
+  const scoredTasks = tasks
+    .filter(task => {
+      if (excludeSourceIds.includes(task._id)) return false
+      if (task.lastCompletedAt) {
+        const completedAt = new Date(task.lastCompletedAt)
+        if (completedAt >= todayStart && completedAt <= todayEnd) return false
+      }
+      return true
+    })
+    .map(task => ({
+      sourceType: 'custom',
+      sourceId: task._id,
+      company: null,
+      position: null,
+      status: null,
     attractionScore: null,
     preparednessScore: null,
     priority: task.priority,

@@ -39,6 +39,9 @@ exports.main = async (event, context) => {
   const todayDate = getDateString(new Date())  // "2026-05-05"
 
   try {
+    // 今天已完成的源任务 ID（重新生成时需要排除）
+    let completedSourceIds = []
+
     // ========== 第1步：检查是否已有今日清单（缓存逻辑） ==========
     // 如果今天已经生成过，且前端没有要求强制重新生成，直接返回
     if (!event.forceRegenerate) {
@@ -61,11 +64,19 @@ exports.main = async (event, context) => {
         }
       }
     } else {
-      // 强制重新生成：先删除今天的旧记录
+      // 强制重新生成：先保留今天已完成的源任务 ID，再删除旧记录
+      const todayRecords = await db.collection('daily_actions')
+        .where({ _openid: openid, date: todayDate })
+        .get()
+      // 收集今天已完成的源任务（完成后不可再生成）
+      completedSourceIds = todayRecords.data
+        .filter(a => a.completed)
+        .map(a => a.sourceId)
+
       await db.collection('daily_actions')
         .where({ _openid: openid, date: todayDate })
         .remove()
-      console.log('强制重新生成，已清除今日旧记录:', openid)
+      console.log('强制重新生成，已清除今日旧记录:', openid, '已完成源任务:', completedSourceIds.length)
     }
 
     // ========== 第2步：获取用户偏好 ==========
@@ -113,7 +124,8 @@ exports.main = async (event, context) => {
       jobs: jobsResult.data,
       tasks: tasksResult.data,
       recentActions: recentResult.data,
-      dailyLimit: dailyLimit
+      dailyLimit: dailyLimit,
+      excludeSourceIds: completedSourceIds || []
     })
 
     console.log(`算法生成完成: ${result.actions.length} 条, 多样性修正: ${result.diversityApplied}`)

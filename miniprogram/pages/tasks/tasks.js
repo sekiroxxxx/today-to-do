@@ -41,10 +41,14 @@ Page({
         highTasks: active.filter(t => t.priority === 1),
         midTasks: active.filter(t => t.priority === 2),
         lowTasks: active.filter(t => t.priority === 3),
-        disabledTasks: tasks.filter(t => !t.enabled),
-        loading: false
+        disabledTasks: tasks.filter(t => !t.enabled)
       })
       app.globalData.dirty.tasks = false
+    }).catch(() => {
+      // 请求失败也要清除脏标记，防止每次切 Tab 都重试
+      app.globalData.dirty.tasks = false
+    }).finally(() => {
+      this.setData({ loading: false })
     })
   },
 
