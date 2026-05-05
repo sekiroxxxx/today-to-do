@@ -1,0 +1,9 @@
+{
+  "name": "completeAction",
+  "version": "1.0.0",
+  "description": "完成行动：标记 daily_action 为已完成，更新源任务的完成时间",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
