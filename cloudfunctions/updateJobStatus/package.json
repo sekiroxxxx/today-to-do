@@ -1,0 +1,9 @@
+{
+  "name": "updateJobStatus",
+  "version": "1.0.0",
+  "description": "推进求职岗位状态：校验状态流转合法性，记录时间轴，自动计算下次行动日",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
