@@ -9,26 +9,38 @@ Page({
   },
 
   onShow() {
-    this.loadTodayActions()
+    // 已有数据 → 静默刷新；首次加载 → 显示骨架屏
+    const hasData = this.data.actions.length > 0
+    this.loadTodayActions(!hasData)
   },
 
-  loadTodayActions() {
-    this.setData({ loading: true })
+  /**
+   * 加载今日清单
+   * @param {boolean} showLoading - 是否显示骨架屏。false=静默刷新，不打断用户
+   */
+  loadTodayActions(showLoading = false) {
+    if (showLoading) {
+      this.setData({ loading: true })
+    }
 
     api.getTodayActions().then(res => {
       if (res.actions && res.actions.length > 0) {
-        this.setData({ actions: res.actions, empty: false, todayDate: res.date })
+        this.setData({
+          actions: res.actions, empty: false,
+          todayDate: res.date, loading: false
+        })
       } else {
         // 今日还没生成，调用生成
         return api.generateDailyActions().then(genRes => {
           this.setData({
             actions: genRes.actions || [],
             empty: !genRes.actions || genRes.actions.length === 0,
-            todayDate: genRes.date
+            todayDate: genRes.date,
+            loading: false
           })
         })
       }
-    }).finally(() => {
+    }).catch(() => {
       this.setData({ loading: false })
     })
   },
@@ -44,15 +56,13 @@ Page({
     })
   },
 
-  onComplete(e) {
-    const { id } = e.detail
-    // 将在组件中处理完成逻辑后触发，这里刷新列表
-    this.loadTodayActions()
+  onComplete() {
+    // 卡片消失后静默刷新，不闪骨架屏
+    this.loadTodayActions(true)
   },
 
   onPostpone(e) {
     const { id, type } = e.detail
-    // 将在组件中处理推迟逻辑后触发，需要补入备选
     api.postponeAction(id, type).then(res => {
       if (res.needRegenerate) {
         api.generateDailyActions(true).then(genRes => {

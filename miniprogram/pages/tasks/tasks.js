@@ -21,11 +21,15 @@ Page({
   },
 
   onShow() {
-    this.loadTasks()
+    // 已有数据 → 静默刷新；首次加载 → 显示加载态
+    const hasData = this.data.tasks.length > 0
+    this.loadTasks(!hasData)
   },
 
-  loadTasks() {
-    this.setData({ loading: true })
+  loadTasks(showLoading = false) {
+    if (showLoading) {
+      this.setData({ loading: true })
+    }
     api.getTaskList().then(res => {
       const tasks = res.tasks || []
       const active = tasks.filter(t => t.enabled)

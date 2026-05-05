@@ -15,12 +15,16 @@ Page({
   },
 
   onShow() {
-    this.loadData()
+    // 已有数据 → 静默刷新；首次加载 → 显示加载态
+    const hasData = this.data.jobs.length > 0
+    this.loadData(!hasData)
   },
 
   // ========== 加载数据 ==========
-  async loadData() {
-    this.setData({ loading: true })
+  async loadData(showLoading = false) {
+    if (showLoading) {
+      this.setData({ loading: true })
+    }
     try {
       const [jobRes, statsRes] = await Promise.all([
         api.getJobList(),
