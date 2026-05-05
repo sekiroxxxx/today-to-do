@@ -112,8 +112,8 @@ Page({
       return wx.showToast({ title: '请输入任务标题', icon: 'none' })
     }
     // 每周重复必须选至少一天
-    if (form.repeatType === 'weekly' && form.repeatDays.length === 0) {
-      return wx.showToast({ title: '请选择至少一个星期几', icon: 'none' })
+    if (form.repeatType === 'weekly' && (!Array.isArray(form.repeatDays) || form.repeatDays.length === 0)) {
+      return wx.showToast({ title: '请选择至少一个星期几', icon: 'none', duration: 2000 })
     }
 
     this.setData({ saving: true })
