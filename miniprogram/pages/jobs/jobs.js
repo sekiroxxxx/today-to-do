@@ -29,23 +29,44 @@ Page({
       this.setData({ loading: true })
     }
     try {
-      const [jobRes, statsRes] = await Promise.all([
-        api.getJobList(),
-        api.getStats('week')
-      ])
-
+      // 先拉岗位列表，马上渲染
+      const jobRes = await api.getJobList()
       const jobs = jobRes.jobs || []
+      const filtered = this.applyFilter(jobs, this.data.currentFilter, this.data.keyword)
+
+      // 从岗位列表本地算出漏斗，不等 getStats（消除延迟）
+      const localFunnel = this.calcFunnel(jobs)
+
       this.setData({
         jobs,
-        filteredJobs: this.applyFilter(jobs, this.data.currentFilter, this.data.keyword),
-        funnel: statsRes.funnel || { pending: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0 },
-        funnelTotal: (statsRes.funnel ? Object.values(statsRes.funnel).reduce((a, b) => a + b, 0) : 0),
+        filteredJobs: filtered,
+        funnel: localFunnel,
+        funnelTotal: jobs.length,
         loading: false
       })
       app.globalData.dirty.jobs = false
+
+      // 后台无声更新来自 getStats 的漏斗（可能含已删除岗位的历史数据）
+      const statsRes = await api.getStats('week')
+      if (statsRes.funnel) {
+        this.setData({
+          funnel: statsRes.funnel,
+          funnelTotal: Object.values(statsRes.funnel).reduce((a, b) => a + b, 0)
+        })
+      }
     } catch {
       this.setData({ loading: false })
     }
+  },
+
+  // 从岗位列表本地计算漏斗（马上渲染，不等 getStats 云函数）
+  calcFunnel(jobs) {
+    const funnel = { pending: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0 }
+    jobs.forEach(j => {
+      const key = { '待投递': 'pending', '已投递': 'applied', '面试中': 'interviewing', 'Offer': 'offer', '已拒绝': 'rejected' }[j.status]
+      if (key) funnel[key]++
+    })
+    return funnel
   },
 
   // ========== 筛选 ==========
