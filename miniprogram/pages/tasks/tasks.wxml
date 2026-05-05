@@ -84,6 +84,12 @@
     </view>
   </view>
 
+  <!-- 长按提示 -->
+  <view wx:if="{{filter === 'active' && (highTasks.length + midTasks.length + lowTasks.length > 0)}}"
+        class="hint-text" style="text-align:center; padding: var(--spacing-sm); color: var(--color-text-hint); font-size: var(--font-caption)">
+    长按任务卡片可编辑、禁用或删除
+  </view>
+
   <!-- 悬浮按钮 -->
   <view class="fab" bindtap="onAdd">＋</view>
 </view>
