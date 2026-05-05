@@ -1,0 +1,9 @@
+{
+  "name": "addTask",
+  "version": "1.0.0",
+  "description": "添加自定义任务：向 custom_tasks 集合插入一条新的通用任务记录",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
