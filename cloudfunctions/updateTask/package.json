@@ -1,0 +1,9 @@
+{
+  "name": "updateTask",
+  "version": "1.0.0",
+  "description": "更新自定义任务：修改任务的基本信息字段",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
