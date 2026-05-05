@@ -1,0 +1,9 @@
+{
+  "name": "deleteJob",
+  "version": "1.0.0",
+  "description": "删除求职岗位：校验归属后从 job_applications 移除记录",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
