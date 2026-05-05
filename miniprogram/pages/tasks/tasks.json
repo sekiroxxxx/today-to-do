@@ -1,1 +1,7 @@
-{}
+{
+  "usingComponents": {
+    "empty-state": "/components/empty-state/empty-state",
+    "action-sheet": "/components/action-sheet/action-sheet"
+  },
+  "navigationBarTitleText": "任务管理"
+}

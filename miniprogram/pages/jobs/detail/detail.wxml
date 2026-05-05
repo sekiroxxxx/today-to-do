@@ -1,1 +1,68 @@
-<text>岗位详情</text>
+<!-- 岗位详情 -->
+<view class="page" wx:if="{{!loading && job}}">
+  <!-- 头部信息 -->
+  <view class="card">
+    <view class="flex-between">
+      <status-tag status="{{job.status}}" />
+      <text class="edit-link" bindtap="onEdit">编辑</text>
+    </view>
+    <text class="detail-company">{{job.company}}</text>
+    <text class="detail-position">{{job.position}}</text>
+    <view class="detail-meta" wx:if="{{job.salaryRange || job.applyLink || job.deadline}}">
+      <text wx:if="{{job.salaryRange}}" class="meta-item">💰 {{job.salaryRange}}</text>
+      <text wx:if="{{job.applyLink}}" class="meta-item">🔗 有投递链接</text>
+      <text wx:if="{{job.deadline}}" class="meta-item">📅 截止 {{job.deadline}}</text>
+    </view>
+  </view>
+
+  <!-- 评分 -->
+  <view class="card">
+    <view class="flex-between" style="margin-bottom:12px">
+      <view>
+        <text class="score-label">吸引力</text>
+        <star-rating value="{{job.attractionScore}}" readonly="{{true}}" size="md" />
+      </view>
+      <view>
+        <text class="score-label">准备度</text>
+        <star-rating value="{{job.preparednessScore}}" readonly="{{true}}" size="md" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 状态时间轴 -->
+  <view class="card">
+    <text class="section-title">状态时间轴</text>
+    <view class="timeline">
+      <view wx:for="{{job.statusHistory}}" wx:key="index" class="timeline-item">
+        <view class="timeline-dot {{index === 0 ? 'timeline-dot--active' : ''}}"></view>
+        <view class="timeline-content">
+          <text class="timeline-status">{{item.status}}</text>
+          <text wx:if="{{item.note}}" class="timeline-note">{{item.note}}</text>
+          <text class="timeline-time">{{item.time}}</text>
+        </view>
+      </view>
+      <view wx:if="{{!job.statusHistory || job.statusHistory.length === 0}}" class="timeline-empty">
+        暂无状态变更记录
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="actions">
+    <button class="btn-advance" bindtap="onAdvanceStatus" wx:if="{{job.status !== 'Offer' && job.status !== '已拒绝'}}">
+      {{job.status === '待投递' ? '📤 已投递简历' : job.status === '已投递' ? '💬 进入面试' : '🎉 拿到 Offer'}}
+    </button>
+    <button class="btn-delete" bindtap="onDelete" disabled="{{deleting}}">
+      {{deleting ? '删除中...' : '删除岗位'}}
+    </button>
+  </view>
+</view>
+
+<!-- 状态推进弹窗 -->
+<action-sheet
+  visible="{{showStatusSheet}}"
+  title="推进状态"
+  items="{{statusItems}}"
+  bind:select="onStatusSelect"
+  bind:close="onSheetClose"
+/>

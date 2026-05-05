@@ -1,1 +1,86 @@
-<text>求职管理</text>
+<!-- 求职管理 -->
+<view class="page">
+  <!-- ===== 投递漏斗看板 ===== -->
+  <view class="funnel">
+    <view class="funnel-item">
+      <text class="funnel-num">{{funnel.pending}}</text>
+      <text class="funnel-label">待投递</text>
+    </view>
+    <text class="funnel-arrow">→</text>
+    <view class="funnel-item">
+      <text class="funnel-num">{{funnel.applied}}</text>
+      <text class="funnel-label">已投递</text>
+    </view>
+    <text class="funnel-arrow">→</text>
+    <view class="funnel-item">
+      <text class="funnel-num">{{funnel.interviewing}}</text>
+      <text class="funnel-label">面试中</text>
+    </view>
+    <text class="funnel-arrow">→</text>
+    <view class="funnel-item">
+      <text class="funnel-num funnel-num--highlight">{{funnel.offer}}</text>
+      <text class="funnel-label">Offer</text>
+    </view>
+  </view>
+
+  <!-- ===== 搜索 + 筛选 ===== -->
+  <view class="toolbar">
+    <input class="search-input" placeholder="搜索公司或岗位" value="{{keyword}}" bindinput="onSearchInput" />
+    <scroll-view class="filter-scroll" scroll-x enable-flex>
+      <view class="filter-tags">
+        <view class="filter-tag {{currentFilter === 'all' ? 'filter-tag--active' : ''}}"
+              data-filter="all" bindtap="onFilterTap">全部</view>
+        <view class="filter-tag {{currentFilter === '待投递' ? 'filter-tag--active' : ''}}"
+              data-filter="待投递" bindtap="onFilterTap">待投递</view>
+        <view class="filter-tag {{currentFilter === '已投递' ? 'filter-tag--active' : ''}}"
+              data-filter="已投递" bindtap="onFilterTap">已投递</view>
+        <view class="filter-tag {{currentFilter === '面试中' ? 'filter-tag--active' : ''}}"
+              data-filter="面试中" bindtap="onFilterTap">面试中</view>
+        <view class="filter-tag {{currentFilter === 'Offer' ? 'filter-tag--active' : ''}}"
+              data-filter="Offer" bindtap="onFilterTap">Offer</view>
+        <view class="filter-tag {{currentFilter === '已拒绝' ? 'filter-tag--active' : ''}}"
+              data-filter="已拒绝" bindtap="onFilterTap">已拒绝</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- ===== 岗位列表 ===== -->
+  <empty-state wx:if="{{!loading && filteredJobs.length === 0}}"
+    text="暂无岗位，去添加第一个吧" showBtn="{{true}}" btnText="添加岗位" bind:action="onAddJob" />
+
+  <view wx:else class="job-list">
+    <view
+      wx:for="{{filteredJobs}}"
+      wx:key="_id"
+      class="job-card"
+      data-id="{{item._id}}"
+      bindtap="onJobDetail"
+    >
+      <!-- 左：信息 -->
+      <view class="job-info">
+        <view class="flex-row">
+          <status-tag status="{{item.status}}" />
+          <text class="job-title text-ellipsis">{{item.company}}</text>
+        </view>
+        <text class="job-position text-ellipsis">{{item.position}}</text>
+        <view class="job-scores flex-row">
+          <text class="job-score-label">吸引力</text>
+          <star-rating value="{{item.attractionScore}}" readonly="{{true}}" size="sm" />
+          <text class="job-score-label" style="margin-left:12px">准备度</text>
+          <star-rating value="{{item.preparednessScore}}" readonly="{{true}}" size="sm" />
+        </view>
+      </view>
+      <!-- 右：快速推进按钮 -->
+      <view class="job-advance" wx:if="{{item.status !== 'Offer' && item.status !== '已拒绝'}}"
+            data-id="{{item._id}}" data-status="{{item.status}}" catchtap="onQuickAdvance">
+        <text class="advance-icon">
+          {{item.status === '待投递' ? '📤' : item.status === '已投递' ? '💬' : '🎉'}}
+        </text>
+        <text class="advance-text">{{item.status === '待投递' ? '投了' : item.status === '已投递' ? '面试' : 'Offer'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 添加按钮（右下角悬浮） ===== -->
+  <view class="fab" bindtap="onAddJob">＋</view>
+</view>

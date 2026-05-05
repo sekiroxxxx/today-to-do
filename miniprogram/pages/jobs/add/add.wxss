@@ -1,1 +1,24 @@
-/* add job */
+.page { padding: var(--spacing-md); min-height: 100vh; }
+
+.form-card {
+  background: #fff; border-radius: var(--radius-md);
+  padding: var(--spacing-md); box-shadow: var(--shadow-card);
+}
+.form-item { margin-bottom: var(--spacing-md); }
+.form-label { font-size: var(--font-caption); color: var(--color-text-secondary); display: block; margin-bottom: 6px; }
+.required { color: var(--color-danger); }
+.form-input {
+  background: var(--color-bg); border-radius: var(--radius-sm);
+  padding: 10px var(--spacing-sm); font-size: var(--font-body); width: 100%;
+  box-sizing: border-box;
+}
+.score-row { display: flex; align-items: center; gap: var(--spacing-sm); }
+.score-hint { font-size: var(--font-caption); color: var(--color-text-hint); }
+
+.submit-btn {
+  margin-top: var(--spacing-lg); width: 100%;
+  background: var(--color-primary); color: #fff;
+  font-size: var(--font-body); border-radius: var(--radius-round);
+  padding: 12px 0;
+}
+.submit-btn[disabled] { opacity: 0.5; }

@@ -1,1 +1,40 @@
-/* job detail */
+.page { padding: var(--spacing-md); padding-bottom: 120px; min-height: 100vh; }
+
+/* 卡片 */
+.card {
+  background: #fff; border-radius: var(--radius-md);
+  padding: var(--spacing-md); margin-bottom: var(--spacing-sm);
+  box-shadow: var(--shadow-card);
+}
+.edit-link { font-size: var(--font-caption); color: var(--color-primary); }
+.detail-company { font-size: 22px; font-weight: 700; margin-top: var(--spacing-xs); }
+.detail-position { font-size: var(--font-body); color: var(--color-text-secondary); margin: 4px 0; }
+.detail-meta { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin-top: var(--spacing-xs); }
+.meta-item { font-size: var(--font-caption); color: var(--color-text-hint); }
+
+/* 评分 */
+.score-label { font-size: var(--font-caption); color: var(--color-text-hint); display: block; margin-bottom: 4px; }
+
+/* 时间轴 */
+.section-title { font-size: var(--font-body); font-weight: 600; margin-bottom: var(--spacing-sm); display: block; }
+.timeline { padding-left: 12px; }
+.timeline-item { display: flex; gap: var(--spacing-sm); padding-bottom: var(--spacing-md); position: relative; }
+.timeline-item:not(:last-child)::before {
+  content: ''; position: absolute; left: 4px; top: 14px;
+  width: 1px; height: calc(100% - 4px); background: var(--color-border);
+}
+.timeline-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--color-border); flex-shrink: 0; margin-top: 4px;
+}
+.timeline-dot--active { background: var(--color-primary); }
+.timeline-content { flex: 1; }
+.timeline-status { font-size: var(--font-body); font-weight: 500; display: block; }
+.timeline-note { font-size: var(--font-caption); color: var(--color-text-secondary); display: block; }
+.timeline-time { font-size: var(--font-tag); color: var(--color-text-hint); display: block; }
+.timeline-empty { color: var(--color-text-hint); font-size: var(--font-caption); padding: var(--spacing-sm) 0; }
+
+/* 操作按钮 */
+.actions { position: fixed; bottom: 0; left: 0; right: 0; padding: var(--spacing-md); background: #fff; box-shadow: 0 -2px 8px rgba(0,0,0,0.06); display: flex; gap: var(--spacing-sm); }
+.btn-advance { flex: 1; background: var(--color-primary); color: #fff; font-size: var(--font-body); border-radius: var(--radius-round); }
+.btn-delete { flex: 1; background: #fff; color: var(--color-danger); font-size: var(--font-body); border-radius: var(--radius-round); border: 1px solid #FF4D4F; }

@@ -1,1 +1,8 @@
-{}
+{
+  "usingComponents": {
+    "status-tag": "/components/status-tag/status-tag",
+    "star-rating": "/components/star-rating/star-rating",
+    "action-sheet": "/components/action-sheet/action-sheet"
+  },
+  "navigationBarTitleText": "岗位详情"
+}

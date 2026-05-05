@@ -1,1 +1,6 @@
-{}
+{
+  "usingComponents": {
+    "star-rating": "/components/star-rating/star-rating"
+  },
+  "navigationBarTitleText": "添加岗位"
+}
