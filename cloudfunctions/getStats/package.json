@@ -1,0 +1,9 @@
+{
+  "name": "getStats",
+  "version": "1.0.0",
+  "description": "获取统计数据：周/月完成率 + 投递漏斗 + 每日明细",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
