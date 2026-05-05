@@ -60,7 +60,7 @@
         <view
           wx:for="{{weekdays}}"
           wx:key="value"
-          class="weekday-item {{form.repeatDays.indexOf(item.value) > -1 ? 'weekday-item--active' : ''}}"
+          class="weekday-item {{item.active ? 'weekday-item--active' : ''}}"
           data-day="{{item.value}}"
           bindtap="onWeekdayToggle"
         >{{item.label}}</view>

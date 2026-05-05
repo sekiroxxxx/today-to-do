@@ -20,13 +20,13 @@ Page({
     },
     // 星期几选择器
     weekdays: [
-      { value: 1, label: '一' },
-      { value: 2, label: '二' },
-      { value: 3, label: '三' },
-      { value: 4, label: '四' },
-      { value: 5, label: '五' },
-      { value: 6, label: '六' },
-      { value: 7, label: '日' }
+      { value: 1, label: '一', active: false },
+      { value: 2, label: '二', active: false },
+      { value: 3, label: '三', active: false },
+      { value: 4, label: '四', active: false },
+      { value: 5, label: '五', active: false },
+      { value: 6, label: '六', active: false },
+      { value: 7, label: '日', active: false }
     ],
     saving: false
   },
@@ -53,6 +53,7 @@ Page({
             repeatDays: (task.repeatRule && task.repeatRule.daysOfWeek) || []
           }
         })
+        this.syncWeekdayActive(this.data.form.repeatDays)
         wx.setNavigationBarTitle({ title: '编辑任务' })
       }
     })
@@ -77,12 +78,22 @@ Page({
     let days = [...this.data.form.repeatDays]
     const idx = days.indexOf(day)
     if (idx > -1) {
-      days.splice(idx, 1)       // 取消选中
+      days.splice(idx, 1)
     } else {
-      days.push(day)            // 选中
+      days.push(day)
     }
     days.sort((a, b) => a - b)
     this.setData({ 'form.repeatDays': days })
+    this.syncWeekdayActive(days)
+  },
+
+  // 同步 weekdays 的 active 状态（WXML 不能用 .indexOf()）
+  syncWeekdayActive(days) {
+    const weekdays = this.data.weekdays.map(w => ({
+      ...w,
+      active: days.includes(w.value)
+    }))
+    this.setData({ weekdays })
   },
 
   onDeadlineChange(e) {
