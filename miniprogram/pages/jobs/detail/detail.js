@@ -34,7 +34,7 @@ Page({
         wx.setNavigationBarTitle({ title: `${job.company} - ${job.position}` })
       } else {
         wx.showToast({ title: '岗位不存在', icon: 'none' })
-        setTimeout(() => wx.navigateBack(), 1500)
+        setTimeout(() => wx.navigateBack(), 800)
       }
     })
   },
@@ -109,7 +109,7 @@ Page({
             if (result.success) {
               app.markDirty(['jobs', 'today', 'mine'])
               wx.showToast({ title: '已删除', icon: 'success' })
-              setTimeout(() => wx.navigateBack(), 1500)
+              setTimeout(() => wx.navigateBack(), 800)
             } else {
               wx.showToast({ title: result.errMsg, icon: 'none' })
               this.setData({ deleting: false })
