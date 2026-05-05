@@ -1,5 +1,6 @@
 // 行动卡片组件 — 今日首页的核心展示单元
 const api = require('../../utils/api')
+const app = getApp()
 
 Component({
   /**
@@ -79,6 +80,7 @@ Component({
               jobId: jobInfo._id,
               newStatus: option.next
             }).then(() => {
+              app.markDirty(['jobs', 'today', 'mine'])
               wx.showToast({ title: '状态已更新', icon: 'success', duration: 1500 })
               this.animateAndRemove()
             })
