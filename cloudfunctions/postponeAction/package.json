@@ -1,0 +1,9 @@
+{
+  "name": "postponeAction",
+  "version": "1.0.0",
+  "description": "推迟行动：支持稍后提醒和跳过今天两种模式，更新源任务推迟次数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
