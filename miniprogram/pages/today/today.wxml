@@ -4,7 +4,8 @@
   <skeleton wx:if="{{loading}}" count="{{3}}" />
 
   <!-- 空状态：无任务 -->
-  <empty-state wx:elif="{{empty}}" text="今日无任务，去添加一个目标吧" />
+  <empty-state wx:elif="{{empty}}" text="今日无任务，去添加一个目标吧"
+               showBtn="{{true}}" btnText="去添加任务" bind:action="onGoToTasks"/>
 
   <!-- 行动卡片列表 -->
   <view wx:else class="action-list">

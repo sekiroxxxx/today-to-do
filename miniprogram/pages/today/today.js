@@ -47,6 +47,10 @@ Page({
     })
   },
 
+  onGoToTasks() {
+    wx.switchTab({ url: '/pages/tasks/tasks' })
+  },
+
   onPullDownRefresh() {
     api.generateDailyActions(true).then(res => {
       this.setData({
