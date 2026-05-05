@@ -1,0 +1,9 @@
+{
+  "name": "generateDailyActions",
+  "version": "1.0.0",
+  "description": "核心云函数：调用算法模块生成今日行动清单，写入 daily_actions 集合",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
