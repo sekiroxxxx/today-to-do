@@ -1,0 +1,23 @@
+<!-- 今日首页 -->
+<view class="page">
+  <!-- 骨架屏：加载中 -->
+  <skeleton wx:if="{{loading}}" count="{{3}}" />
+
+  <!-- 空状态：无任务 -->
+  <empty-state wx:elif="{{empty}}" text="今日无任务，去添加一个目标吧" />
+
+  <!-- 行动卡片列表 -->
+  <view wx:else class="action-list">
+    <view class="date-header">
+      <text class="date-text">{{todayDate}}</text>
+      <text class="date-sub">今日 {{actions.length}} 项行动</text>
+    </view>
+    <action-card
+      wx:for="{{actions}}"
+      wx:key="_id"
+      action="{{item}}"
+      bind:complete="onComplete"
+      bind:postpone="onPostpone"
+    />
+  </view>
+</view>
