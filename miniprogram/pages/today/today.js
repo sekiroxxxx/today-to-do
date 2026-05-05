@@ -59,22 +59,28 @@ Page({
     })
   },
 
-  onComplete() {
-    // 完成操作后标记需要刷新
+  onComplete(e) {
+    // 直接从本地数组移除已完成卡片，不重新请求（避免页面整体重渲染）
+    const { id } = e.detail
+    const actions = this.data.actions.filter(a => a._id !== id)
+    this.setData({ actions, empty: actions.length === 0 })
     app.markDirty(['today', 'mine'])
-    this.loadTodayActions(true)
   },
 
   onPostpone(e) {
     const { id, type } = e.detail
+    // 先本地移除，再异步处理
+    const actions = this.data.actions.filter(a => a._id !== id)
+    this.setData({ actions, empty: actions.length === 0 })
+
     api.postponeAction(id, type).then(res => {
       if (res.needRegenerate) {
+        // 需要补入备选，重新请求完整列表
         api.generateDailyActions(true).then(genRes => {
           this.setData({ actions: genRes.actions || [] })
           app.globalData.dirty.today = false
         })
       }
-      // 推迟会影响源任务数据，标记相关 Tab 为脏
       app.markDirty(['mine'])
     })
   }
