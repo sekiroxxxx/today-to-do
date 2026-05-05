@@ -9,6 +9,8 @@ Page({
   data: {
     isEdit: false,          // 是否编辑模式
     jobId: '',              // 编辑时传入的 _id
+    today: '',              // 今天日期，限制 picker 不能选过去
+
     form: {
       company: '',
       position: '',
@@ -22,7 +24,7 @@ Page({
   },
 
   onLoad(options) {
-    // 如果有 id 参数，说明是编辑模式
+    this.setData({ today: getDateString(new Date()) })
     if (options.id) {
       this.setData({ isEdit: true, jobId: options.id })
       this.loadJob(options.id)
@@ -110,3 +112,10 @@ Page({
     })
   }
 })
+
+function getDateString(date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}

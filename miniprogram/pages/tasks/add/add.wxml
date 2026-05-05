@@ -38,7 +38,7 @@
     <!-- 截止日 -->
     <view class="form-item">
       <text class="form-label">截止日期</text>
-      <picker mode="date" value="{{form.deadline}}" bindchange="onDeadlineChange">
+      <picker mode="date" value="{{form.deadline}}" start="{{today}}" bindchange="onDeadlineChange">
         <view class="form-input">{{form.deadline || '选择日期'}}</view>
       </picker>
     </view>

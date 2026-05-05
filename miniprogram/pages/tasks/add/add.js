@@ -19,6 +19,8 @@ Page({
       repeatDays: []        // [1,3,5] 周一三五
     },
     // 星期几选择器
+    today: '',             // 今天日期，限制 picker 不能选过去
+
     weekdays: [
       { value: 1, label: '一', active: false },
       { value: 2, label: '二', active: false },
@@ -32,6 +34,7 @@ Page({
   },
 
   onLoad(options) {
+    this.setData({ today: getDateString(new Date()) })
     if (options.id) {
       this.setData({ isEdit: true, taskId: options.id })
       this.loadTask(options.id)
@@ -148,3 +151,10 @@ Page({
     })
   }
 })
+
+function getDateString(date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
