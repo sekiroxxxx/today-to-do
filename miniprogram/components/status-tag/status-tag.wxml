@@ -1,0 +1,4 @@
+<!-- 状态标签 -->
+<view class="tag {{status === '待投递' || status === 'job' ? 'tag--pending' : ''}}{{status === '已投递' ? 'tag--applied' : ''}}{{status === '面试中' ? 'tag--interview' : ''}}{{status === 'Offer' ? 'tag--offer' : ''}}{{status === '已拒绝' ? 'tag--rejected' : ''}}{{status === 'custom' ? 'tag--custom' : ''}}">
+  {{text || status}}
+</view>

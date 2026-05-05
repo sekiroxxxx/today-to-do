@@ -1,0 +1,18 @@
+<!-- 骨架屏 -->
+<view class="skeleton-list">
+  <view wx:for="{{[1,2,3,4,5]}}" wx:key="*this" wx:if="{{index < count}}" class="sk-card">
+    <view class="sk-row sk-row--header">
+      <view class="sk-tag"></view>
+      <view class="sk-title"></view>
+    </view>
+    <view class="sk-desc"></view>
+    <view class="sk-desc sk-desc--short"></view>
+    <view class="sk-footer flex-between">
+      <view class="sk-score"></view>
+      <view class="sk-btns">
+        <view class="sk-btn"></view>
+        <view class="sk-btn"></view>
+      </view>
+    </view>
+  </view>
+</view>

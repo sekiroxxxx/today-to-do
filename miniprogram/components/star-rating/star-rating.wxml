@@ -1,0 +1,10 @@
+<!-- 星级评分 -->
+<view class="stars stars--{{size}}">
+  <text
+    wx:for="{{[1,2,3,4,5]}}"
+    wx:key="*this"
+    class="star {{index < value ? 'star--active' : ''}} {{readonly ? '' : 'star--clickable'}}"
+    data-index="{{item}}"
+    bindtap="onTap"
+  >★</text>
+</view>

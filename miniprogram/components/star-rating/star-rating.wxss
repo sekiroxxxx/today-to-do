@@ -1,0 +1,7 @@
+.stars { display: flex; gap: 4px; }
+.star { color: #E8E8E8; }
+.star--active { color: #FAAD14; }
+.star--clickable { cursor: pointer; }
+.stars--sm .star { font-size: 16px; }
+.stars--md .star { font-size: 24px; }
+.stars--lg .star { font-size: 32px; }

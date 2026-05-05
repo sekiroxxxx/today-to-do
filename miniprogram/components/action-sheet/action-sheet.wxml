@@ -1,0 +1,18 @@
+<!-- 通用底部弹窗 -->
+<view class="sheet-mask" wx:if="{{visible}}" bindtap="onClose"></view>
+<view class="sheet {{visible ? 'sheet--show' : ''}}">
+  <view class="sheet-header" wx:if="{{title}}">{{title}}</view>
+  <view
+    wx:for="{{items}}"
+    wx:key="index"
+    class="sheet-item"
+    data-index="{{index}}"
+    bindtap="onSelect"
+  >
+    <text class="sheet-item-label {{item.highlight ? 'sheet-item-label--danger' : ''}}">
+      {{item.label}}
+    </text>
+    <text wx:if="{{item.desc}}" class="sheet-item-desc">{{item.desc}}</text>
+  </view>
+  <view class="sheet-cancel" bindtap="onClose">取消</view>
+</view>

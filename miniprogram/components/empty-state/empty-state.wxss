@@ -1,0 +1,11 @@
+.empty {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 80px var(--spacing-lg);
+}
+.empty-icon { font-size: 48px; margin-bottom: var(--spacing-md); }
+.empty-text { font-size: var(--font-body); color: var(--color-text-hint); }
+.empty-btn {
+  margin-top: var(--spacing-lg); padding: 8px 24px;
+  background: var(--color-primary); color: #fff;
+  font-size: var(--font-body); border-radius: var(--radius-round);
+}

@@ -1,0 +1,6 @@
+<!-- 空状态 -->
+<view class="empty">
+  <view class="empty-icon">📋</view>
+  <text class="empty-text">{{text}}</text>
+  <button wx:if="{{showBtn}}" class="empty-btn" bindtap="onTapBtn">{{btnText}}</button>
+</view>

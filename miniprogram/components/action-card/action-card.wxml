@@ -1,0 +1,58 @@
+<!-- 行动卡片 -->
+<view class="card {{removed ? 'card--removed' : ''}} {{completing ? 'card--completing' : ''}}">
+  <!-- 头部：来源标签 + 标题 -->
+  <view class="card-header">
+    <status-tag
+      wx:if="{{action.sourceType === 'job'}}"
+      status="{{action.sourceType}}"
+      text="求职"
+    />
+    <view wx:else class="tag tag--custom">自定义</view>
+    <text class="card-title text-ellipsis">{{action.title}}</text>
+  </view>
+
+  <!-- 描述 -->
+  <view class="card-body">
+    <text class="card-desc text-ellipsis-2">{{action.description || '暂无描述'}}</text>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="card-footer flex-between">
+    <view class="card-score">
+      <text class="score-label">推荐度</text>
+      <!-- 分数条 -->
+      <view class="score-bar">
+        <view class="score-fill" style="width: {{action.normalizedScore}}%"></view>
+      </view>
+    </view>
+    <view class="card-actions flex-row">
+      <button class="btn btn--complete" bindtap="onTapComplete" disabled="{{completing}}">
+        {{completing ? '...' : '完成'}}
+      </button>
+      <button class="btn btn--postpone" bindtap="onTapPostpone" disabled="{{postponing}}">
+        {{postponing ? '...' : '推迟'}}
+      </button>
+    </view>
+  </view>
+</view>
+
+<!-- 推迟方式选择弹窗 -->
+<view class="sheet-mask" wx:if="{{showPostponeSheet}}" bindtap="closeSheet"></view>
+<view class="sheet {{showPostponeSheet ? 'sheet--show' : ''}}">
+  <view class="sheet-header">选择推迟方式</view>
+  <view class="sheet-item" data-type="later" bindtap="onPostponeSelect">
+    <view class="sheet-item-icon">🔔</view>
+    <view class="sheet-item-content">
+      <text class="sheet-item-title">稍后提醒</text>
+      <text class="sheet-item-desc">今天晚些时候再次出现</text>
+    </view>
+  </view>
+  <view class="sheet-item" data-type="skip" bindtap="onPostponeSelect">
+    <view class="sheet-item-icon">⏭</view>
+    <view class="sheet-item-content">
+      <text class="sheet-item-title">跳过今天</text>
+      <text class="sheet-item-desc">明天再处理，会影响排序优先级</text>
+    </view>
+  </view>
+  <view class="sheet-cancel" bindtap="closeSheet">取消</view>
+</view>
