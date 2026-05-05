@@ -1,6 +1,6 @@
 <!-- 行动卡片 -->
 <view class="card {{removed ? 'card--removed' : ''}} {{completing ? 'card--completing' : ''}}">
-  <!-- 头部：来源标签 + 标题 -->
+  <!-- 头部：标签 + 标题 + 分数 -->
   <view class="card-header">
     <status-tag
       wx:if="{{action.sourceType === 'job'}}"
@@ -9,30 +9,22 @@
     />
     <view wx:else class="tag tag--custom">自定义</view>
     <text class="card-title text-ellipsis">{{action.title}}</text>
+    <text class="score-badge">{{action.normalizedScore}}%</text>
   </view>
 
   <!-- 描述 -->
   <view class="card-body">
-    <text class="card-desc text-ellipsis-2">{{action.description || '暂无描述'}}</text>
+    <text class="card-desc">{{action.description || '暂无描述'}}</text>
   </view>
 
-  <!-- 底部操作栏 -->
-  <view class="card-footer flex-between">
-    <view class="card-score">
-      <text class="score-label">推荐度</text>
-      <!-- 分数条 -->
-      <view class="score-bar">
-        <view class="score-fill" style="width: {{action.normalizedScore}}%"></view>
-      </view>
-    </view>
-    <view class="card-actions flex-row">
-      <button class="btn btn--complete" bindtap="onTapComplete" disabled="{{completing}}">
-        {{completing ? '...' : '完成'}}
-      </button>
-      <button class="btn btn--postpone" bindtap="onTapPostpone" disabled="{{postponing}}">
-        {{postponing ? '...' : '推迟'}}
-      </button>
-    </view>
+  <!-- 底部：两个等宽按钮 -->
+  <view class="card-footer">
+    <button class="btn btn--complete" bindtap="onTapComplete" disabled="{{completing || postponing}}">
+      {{completing ? '...' : '✅ 完成'}}
+    </button>
+    <button class="btn btn--postpone" bindtap="onTapPostpone" disabled="{{completing || postponing}}">
+      {{postponing ? '...' : '⏳ 推迟'}}
+    </button>
   </view>
 </view>
 

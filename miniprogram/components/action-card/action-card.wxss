@@ -10,9 +10,21 @@
 .card--completing { opacity: 0.6; transform: scale(0.97); }
 .card--removed { opacity: 0; height: 0; padding: 0; margin: 0; overflow: hidden; }
 
-/* 头部 */
+/* 头部：标签 + 标题 + 分数徽章 */
 .card-header { display: flex; align-items: center; margin-bottom: var(--spacing-sm); }
-.card-title { font-size: var(--font-body); font-weight: 600; margin-left: var(--spacing-xs); flex: 1; }
+.card-title { font-size: var(--font-body); font-weight: 600; margin-left: var(--spacing-xs); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 分数小徽章 */
+.score-badge {
+  font-size: var(--font-tag);
+  color: var(--color-primary);
+  font-weight: 600;
+  background: var(--color-primary-light);
+  padding: 2px 8px;
+  border-radius: var(--radius-round);
+  margin-left: var(--spacing-xs);
+  flex-shrink: 0;
+}
 
 /* 标签 */
 .tag { font-size: var(--font-tag); padding: 2px 10px; border-radius: var(--radius-round); }
@@ -22,21 +34,19 @@
 .card-body { margin-bottom: var(--spacing-sm); }
 .card-desc { font-size: var(--font-caption); color: var(--color-text-secondary); }
 
-/* 底部 */
-.card-footer { padding-top: var(--spacing-xs); border-top: 1px solid var(--color-border); }
-.card-score { display: flex; align-items: center; gap: 6px; }
-.score-label { font-size: var(--font-tag); color: var(--color-text-hint); }
-.score-bar { width: 80px; height: 4px; background: #F0F0F0; border-radius: 2px; overflow: hidden; }
-.score-fill { height: 100%; background: var(--color-primary); border-radius: 2px; transition: width 0.5s; }
-
-/* 按钮 */
-.card-actions { gap: var(--spacing-xs); }
+/* 底部按钮行 */
+.card-footer {
+  display: flex; gap: var(--spacing-sm); padding-top: var(--spacing-xs);
+  border-top: 1px solid var(--color-border);
+}
 .btn {
-  padding: 6px 16px;
-  font-size: var(--font-caption);
-  border-radius: var(--radius-round);
+  flex: 1;
+  padding: 8px 0;
+  font-size: var(--font-body);
+  border-radius: var(--radius-sm);
   border: none;
   line-height: 1.5;
+  display: flex; align-items: center; justify-content: center;
 }
 .btn--complete { background: var(--color-primary); color: #fff; }
 .btn--postpone { background: var(--color-bg); color: var(--color-text-secondary); }
