@@ -14,17 +14,19 @@
 .card-header { display: flex; align-items: center; margin-bottom: var(--spacing-sm); }
 .card-title { font-size: var(--font-body); font-weight: 600; margin-left: var(--spacing-xs); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* 分数小徽章 */
-.score-badge {
+/* S/A/B/C 评级徽章 */
+.badge {
   font-size: var(--font-tag);
-  color: var(--color-primary);
   font-weight: 600;
-  background: var(--color-primary-light);
   padding: 2px 8px;
   border-radius: var(--radius-round);
   margin-left: var(--spacing-xs);
   flex-shrink: 0;
 }
+.badge--s { background: #F9F0FF; color: #722ED1; }
+.badge--a { background: #E6F4FF; color: #1677FF; }
+.badge--b { background: #F5F5F5; color: #999999; }
+.badge--c { background: #FAFAFA; color: #CCCCCC; }
 
 /* 标签 */
 .tag { font-size: var(--font-tag); padding: 2px 10px; border-radius: var(--radius-round); }
