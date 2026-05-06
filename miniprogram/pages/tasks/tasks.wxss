@@ -11,6 +11,10 @@
 /* 分组 */
 .section { margin-bottom: var(--spacing-md); }
 .section-title { font-size: var(--font-body); font-weight: 600; margin-bottom: var(--spacing-sm); display: block; }
+.pri-dot { font-size: 14px; }
+.pri-dot--high { color: #D46B08; }   /* S 橙 */
+.pri-dot--mid { color: #722ED1; }    /* A 紫 */
+.pri-dot--low { color: #1677FF; }    /* B 蓝 */
 
 /* 任务卡片 */
 .task-card {

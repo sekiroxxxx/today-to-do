@@ -19,7 +19,7 @@
   <!-- 按优先级分组 -->
   <view wx:if="{{filter === 'active'}}">
     <view wx:if="{{highTasks.length > 0}}" class="section">
-      <text class="section-title">🔴 高优先级</text>
+      <text class="section-title"><text class="pri-dot pri-dot--high">◆</text> 高优先级</text>
       <view wx:for="{{highTasks}}" wx:key="_id" class="task-card"
             data-id="{{item._id}}" data-enabled="{{item.enabled}}"
             bindtap="onEdit" bindlongpress="onLongPress">
@@ -39,7 +39,7 @@
     </view>
 
     <view wx:if="{{midTasks.length > 0}}" class="section">
-      <text class="section-title">🟡 中优先级</text>
+      <text class="section-title"><text class="pri-dot pri-dot--mid">◆</text> 中优先级</text>
       <view wx:for="{{midTasks}}" wx:key="_id" class="task-card"
             data-id="{{item._id}}" data-enabled="{{item.enabled}}"
             bindtap="onEdit" bindlongpress="onLongPress">
@@ -56,7 +56,7 @@
     </view>
 
     <view wx:if="{{lowTasks.length > 0}}" class="section">
-      <text class="section-title">🟢 低优先级</text>
+      <text class="section-title"><text class="pri-dot pri-dot--low">◆</text> 低优先级</text>
       <view wx:for="{{lowTasks}}" wx:key="_id" class="task-card"
             data-id="{{item._id}}" data-enabled="{{item.enabled}}"
             bindtap="onEdit" bindlongpress="onLongPress">

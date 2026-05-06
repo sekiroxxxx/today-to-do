@@ -16,17 +16,17 @@
 
 /* S/A/B/C 评级徽章 */
 .badge {
-  font-size: var(--font-tag);
-  font-weight: 600;
-  padding: 2px 8px;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 4px 12px;
   border-radius: var(--radius-round);
   margin-left: var(--spacing-xs);
   flex-shrink: 0;
 }
-.badge--s { background: #F9F0FF; color: #722ED1; }
-.badge--a { background: #E6F4FF; color: #1677FF; }
-.badge--b { background: #F5F5F5; color: #999999; }
-.badge--c { background: #FAFAFA; color: #CCCCCC; }
+.badge--s { background: #FFF2E0; color: #D46B08; }
+.badge--a { background: #F9F0FF; color: #722ED1; }
+.badge--b { background: #E6F4FF; color: #1677FF; }
+.badge--c { background: #F5F5F5; color: #999999; }
 
 /* 标签 */
 .tag { font-size: var(--font-tag); padding: 2px 10px; border-radius: var(--radius-round); }
