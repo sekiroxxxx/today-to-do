@@ -46,19 +46,28 @@
       </view>
     </view>
   </view>
+</view>
 
-  <!-- 操作按钮 -->
-  <view class="actions">
-    <button class="btn-advance" bindtap="onAdvanceStatus" wx:if="{{job.status !== 'Offer' && job.status !== '已拒绝'}}">
-      {{job.status === '待投递' ? '📤 已投递简历' : job.status === '已投递' ? '💬 进入面试' : '🎉 拿到 Offer'}}
-    </button>
-    <button class="btn-delete" bindtap="onDelete" disabled="{{deleting}}">
-      {{deleting ? '删除中...' : '删除岗位'}}
-    </button>
+<!-- 底部操作区（固定底部） -->
+<view class="actions-bar" wx:if="{{!loading && job}}">
+  <!-- 推进状态：主按钮 -->
+  <button class="btn-advance" bindtap="onAdvanceStatus" wx:if="{{job.status !== 'Offer' && job.status !== '已拒绝'}}">
+    📤 推进状态
+  </button>
+
+  <!-- 已拒绝 + 删除：两个文字按钮 -->
+  <view class="actions-sub" wx:if="{{job.status !== 'Offer' && job.status !== '已拒绝'}}">
+    <text class="btn-text btn-text--reject" bindtap="onReject">已拒绝（放弃该岗位）</text>
+    <text class="divider">｜</text>
+    <text class="btn-text btn-text--delete" bindtap="onDelete">{{deleting ? '删除中...' : '删除'}}</text>
+  </view>
+  <!-- 终态只显示删除 -->
+  <view class="actions-sub" wx:else>
+    <text class="btn-text btn-text--delete" bindtap="onDelete">{{deleting ? '删除中...' : '删除'}}</text>
   </view>
 </view>
 
-<!-- 状态推进弹窗 -->
+<!-- ===== 推进状态弹窗 ===== -->
 <action-sheet
   visible="{{showStatusSheet}}"
   title="推进状态"
@@ -66,3 +75,21 @@
   bind:select="onStatusSelect"
   bind:close="onSheetClose"
 />
+
+<!-- ===== 拒绝原因选择面板 ===== -->
+<view class="reject-mask" wx:if="{{showRejectSheet}}" catchtap="closeRejectSheet"></view>
+<view class="reject-panel {{showRejectSheet ? 'reject-panel--show' : ''}}">
+  <view class="reject-title">该岗位为什么结束了？</view>
+  <view wx:for="{{rejectReasons}}" wx:key="value" class="reject-item" catchtap="onRejectSelect" data-value="{{item.value}}" data-index="{{index}}">
+    <view class="reject-radio {{selectedRejectReason === item.value ? 'reject-radio--active' : ''}}"></view>
+    <text>{{item.label}}</text>
+  </view>
+  <!-- 其他原因输入 -->
+  <view wx:if="{{selectedRejectReason === 'other'}}" style="margin-top: 8px">
+    <input class="form-input" placeholder="请输入原因" value="{{customRejectReason}}" bindinput="onRejectReasonInput" />
+  </view>
+  <button class="btn-advance" style="margin-top:12px;width:100%" bindtap="onRejectConfirm">
+    确认标记为已拒绝
+  </button>
+  <view class="sheet-cancel" bindtap="closeRejectSheet">取消</view>
+</view>

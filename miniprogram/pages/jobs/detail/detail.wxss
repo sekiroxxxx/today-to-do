@@ -1,4 +1,4 @@
-.page { padding: var(--spacing-md); padding-bottom: 120px; min-height: 100vh; }
+.page { padding: var(--spacing-md); min-height: 100vh; }
 
 /* 卡片 */
 .card {
@@ -34,7 +34,60 @@
 .timeline-time { font-size: var(--font-tag); color: var(--color-text-hint); display: block; }
 .timeline-empty { color: var(--color-text-hint); font-size: var(--font-caption); padding: var(--spacing-sm) 0; }
 
-/* 操作按钮 */
-.actions { position: fixed; bottom: 0; left: 0; right: 0; padding: var(--spacing-md); background: #fff; box-shadow: 0 -2px 8px rgba(0,0,0,0.06); display: flex; gap: var(--spacing-sm); }
-.btn-advance { flex: 1; background: var(--color-primary); color: #fff; font-size: var(--font-body); border-radius: var(--radius-round); }
-.btn-delete { flex: 1; background: #fff; color: var(--color-danger); font-size: var(--font-body); border-radius: var(--radius-round); border: 1px solid #FF4D4F; }
+/* ===== 底部操作区 ===== */
+.actions-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: var(--spacing-md); background: #fff;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+
+/* 推进：蓝色满宽大按钮 */
+.btn-advance {
+  width: 100%; background: var(--color-primary); color: #fff;
+  font-size: var(--font-body); border-radius: var(--radius-round);
+  padding: 12px 0; margin-bottom: var(--spacing-sm);
+}
+
+/* 两个次级操作 */
+.actions-sub { display: flex; justify-content: center; align-items: center; gap: 4px; }
+.btn-text { font-size: var(--font-caption); padding: 4px 0; }
+.btn-text--reject { color: var(--color-text-hint); }
+.btn-text--delete { color: var(--color-danger); }
+.divider { color: var(--color-border); font-size: var(--font-caption); }
+
+/* ===== 拒绝原因面板 ===== */
+.reject-mask {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4); z-index: 100;
+}
+.reject-panel {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 101;
+  background: #fff; border-radius: 16px 16px 0 0;
+  padding: var(--spacing-md);
+  transform: translateY(100%); transition: transform 0.3s;
+}
+.reject-panel--show { transform: translateY(0); }
+.reject-title {
+  font-size: var(--font-body); font-weight: 600;
+  text-align: center; margin-bottom: var(--spacing-md);
+}
+.reject-item {
+  display: flex; align-items: center; gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+}
+.reject-radio {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--color-border); flex-shrink: 0;
+}
+.reject-radio--active {
+  border-color: var(--color-primary); background: var(--color-primary);
+}
+.form-input {
+  background: var(--color-bg); border-radius: var(--radius-sm);
+  padding: 10px var(--spacing-sm); font-size: var(--font-body); width: 100%;
+  box-sizing: border-box; line-height: 1.5; min-height: 44px;
+}
+.sheet-cancel {
+  text-align: center; padding: var(--spacing-sm); margin-top: var(--spacing-xs);
+  color: var(--color-text-hint);
+}
