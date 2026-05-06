@@ -9,8 +9,17 @@
 .edit-link { font-size: var(--font-caption); color: var(--color-primary); }
 .detail-company { font-size: 22px; font-weight: 700; margin-top: var(--spacing-xs); }
 .detail-position { font-size: var(--font-body); color: var(--color-text-secondary); margin: 4px 0; }
-.detail-meta { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin-top: var(--spacing-xs); }
-.meta-item { font-size: var(--font-caption); color: var(--color-text-hint); }
+
+/* 信息行 */
+.detail-info-row {
+  display: flex; align-items: center;
+  padding: var(--spacing-xs) 0;
+  border-top: 1px solid var(--color-border);
+}
+.detail-info-label { font-size: var(--font-caption); color: var(--color-text-hint); width: 80px; flex-shrink: 0; }
+.detail-info-value { font-size: var(--font-body); color: var(--color-text); }
+.detail-link-text { color: var(--color-primary); text-decoration: underline; }
+.detail-link:active { opacity: 0.6; }
 
 /* 评分 */
 .score-label { font-size: var(--font-caption); color: var(--color-text-hint); display: block; margin-bottom: 4px; }

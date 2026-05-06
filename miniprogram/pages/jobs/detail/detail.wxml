@@ -8,10 +8,20 @@
     </view>
     <text class="detail-company">{{job.company}}</text>
     <text class="detail-position">{{job.position}}</text>
-    <view class="detail-meta" wx:if="{{job.salaryRange || job.applyLink || job.deadline}}">
-      <text wx:if="{{job.salaryRange}}" class="meta-item">💰 {{job.salaryRange}}</text>
-      <text wx:if="{{job.applyLink}}" class="meta-item">🔗 有投递链接</text>
-      <text wx:if="{{job.deadline}}" class="meta-item">📅 截止 {{job.deadline}}</text>
+    <!-- 薪资 -->
+    <view wx:if="{{job.salaryRange}}" class="detail-info-row">
+      <text class="detail-info-label">💰 薪资范围</text>
+      <text class="detail-info-value">{{job.salaryRange}}</text>
+    </view>
+    <!-- 投递链接（点击复制） -->
+    <view wx:if="{{job.applyLink}}" class="detail-info-row detail-link" bindtap="onCopyLink" data-link="{{job.applyLink}}">
+      <text class="detail-info-label">🔗 投递链接</text>
+      <text class="detail-info-value detail-link-text">{{job.applyLink}}</text>
+    </view>
+    <!-- 截止日 -->
+    <view wx:if="{{job.deadline}}" class="detail-info-row">
+      <text class="detail-info-label">📅 截止日期</text>
+      <text class="detail-info-value">{{job.deadline}}</text>
     </view>
   </view>
 

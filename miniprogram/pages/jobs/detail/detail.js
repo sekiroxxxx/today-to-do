@@ -66,6 +66,16 @@ Page({
     })
   },
 
+  // ========== 复制投递链接 ==========
+  onCopyLink(e) {
+    const link = e.currentTarget.dataset.link
+    if (!link) return
+    wx.setClipboardData({
+      data: link,
+      success: () => wx.showToast({ title: '链接已复制', icon: 'success' })
+    })
+  },
+
   // ========== 编辑 ==========
   onEdit() {
     wx.navigateTo({ url: `/pages/jobs/add/add?id=${this.data.jobId}` })
