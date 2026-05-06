@@ -81,11 +81,12 @@ exports.main = async (event, context) => {
       _openid: openid,
       nickname: '',
       avatar: '',
+      persona: '',             // 用户画像（v1.1 启用）
       preferences: {
-        dailyLimit: 5,       // 每日清单默认显示 5 条
-        pushEnabled: false   // 消息推送默认关闭
+        dailyLimit: 5,
+        pushEnabled: false
       },
-      createdAt: db.serverDate()  // 使用服务器时间，避免客户端时间不准
+      createdAt: db.serverDate()
     }
 
     // .add() 把数据写入数据库，返回的 _id 是自动生成的唯一 ID

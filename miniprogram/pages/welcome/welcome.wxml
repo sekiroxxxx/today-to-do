@@ -1,0 +1,23 @@
+<!-- Welcome 欢迎页 -->
+<view class="page" wx:if="{{!checking}}">
+  <view class="hero">
+    <!-- 图标 -->
+    <view class="hero-icon">⚔️</view>
+
+    <!-- 产品名 -->
+    <text class="logo">刷日常</text>
+
+    <!-- 一句话 -->
+    <text class="slogan">每天上线，领取你的今日委托</text>
+  </view>
+
+  <view class="actions">
+    <!-- CTA 按钮 -->
+    <button class="btn-start" bindtap="onStart" disabled="{{starting}}">
+      {{starting ? '加载中...' : '开始刷日常'}}
+    </button>
+
+    <!-- 跳过提示 -->
+    <text class="btn-skip" bindtap="onSkip">不是第一次？直接开始</text>
+  </view>
+</view>
