@@ -12,9 +12,9 @@
 .section { margin-bottom: var(--spacing-md); }
 .section-title { font-size: var(--font-body); font-weight: 600; margin-bottom: var(--spacing-sm); display: block; }
 .pri-dot { font-size: 14px; }
-.pri-dot--high { color: #D46B08; }   /* S 橙 */
-.pri-dot--mid { color: #722ED1; }    /* A 紫 */
-.pri-dot--low { color: #1677FF; }    /* B 蓝 */
+.pri-dot--high { color: #CF1322; }   /* S 红 */
+.pri-dot--mid { color: #D46B08; }    /* A 橙 */
+.pri-dot--low { color: #722ED1; }    /* B 紫 */
 
 /* 任务卡片 */
 .task-card {
