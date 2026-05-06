@@ -4,14 +4,14 @@ const app = getApp()
 
 Page({
   data: {
-    tasks: [],              // 全部任务
-    highTasks: [],          // 高优先级
-    midTasks: [],           // 中优先级
-    lowTasks: [],           // 低优先级
-    disabledTasks: [],      // 已禁用的任务
-    filter: 'active',       // 'active' | 'disabled'
+    tasks: [],
+    sections: [],           // [{ level, label, dotClass, tasks }]
+    highTasks: [],          // 保留用于空状态判断
+    midTasks: [],
+    lowTasks: [],
+    disabledTasks: [],
+    filter: 'active',
     loading: true,
-    // 长按操作弹窗
     showActionSheet: false,
     selectedTask: null,
     actionItems: [
@@ -34,22 +34,40 @@ Page({
       this.setData({ loading: true })
     }
     api.getTaskList().then(res => {
-      const tasks = res.tasks || []
+      const tasks = (res.tasks || []).map(t => this.addTagLine(t))
       const active = tasks.filter(t => t.enabled)
+      const high = active.filter(t => t.priority === 1)
+      const mid  = active.filter(t => t.priority === 2)
+      const low  = active.filter(t => t.priority === 3)
+
+      const sections = []
+      if (high.length) sections.push({ level: 'high', label: '高优先级', dotClass: 'pri-dot--high', tasks: high })
+      if (mid.length)  sections.push({ level: 'mid',  label: '中优先级', dotClass: 'pri-dot--mid',  tasks: mid })
+      if (low.length)  sections.push({ level: 'low',  label: '低优先级', dotClass: 'pri-dot--low',  tasks: low })
+
       this.setData({
-        tasks,
-        highTasks: active.filter(t => t.priority === 1),
-        midTasks: active.filter(t => t.priority === 2),
-        lowTasks: active.filter(t => t.priority === 3),
+        tasks, sections,
+        highTasks: high, midTasks: mid, lowTasks: low,
         disabledTasks: tasks.filter(t => !t.enabled)
       })
       app.globalData.dirty.tasks = false
     }).catch(() => {
-      // 请求失败也要清除脏标记，防止每次切 Tab 都重试
       app.globalData.dirty.tasks = false
     }).finally(() => {
       this.setData({ loading: false })
     })
+  },
+
+  // 计算第二行标签文本（纯 · 分隔，无 emoji）
+  addTagLine(task) {
+    const parts = []
+    if (task.estimatedMinutes) parts.push(`${task.estimatedMinutes}分钟`)
+    if (task.repeatRule && task.repeatRule.type !== 'none') {
+      parts.push(task.repeatRule.type === 'daily' ? '每天' : `每周${task.repeatRule.daysOfWeek.length}天`)
+    }
+    if (task.postponeCount >= 3) parts.push(`已推迟${task.postponeCount}次`)
+    task.tagLine = parts.join(' · ')
+    return task
   },
 
   // ========== 导航 ==========

@@ -16,20 +16,18 @@
 .pri-dot--mid { color: #D46B08; }    /* A 橙 */
 .pri-dot--low { color: #722ED1; }    /* B 紫 */
 
-/* 任务卡片 */
+/* 任务卡片 — 极简两行 */
 .task-card {
   background: #fff; border-radius: var(--radius-md); padding: var(--spacing-md);
   margin-bottom: var(--spacing-xs); box-shadow: var(--shadow-card);
-  display: flex; align-items: center;
+  display: flex; align-items: flex-start; gap: var(--spacing-sm);
 }
 .task-card--disabled { opacity: 0.5; }
-.task-info { flex: 1; min-width: 0; }
-.task-title { font-size: var(--font-body); font-weight: 500; }
-.task-meta { margin-top: 4px; gap: var(--spacing-sm); flex-wrap: wrap; }
-.task-meta-item { font-size: var(--font-tag); color: var(--color-text-hint); }
-.task-warn { color: var(--color-warning); font-weight: 500; }
-.task-disabled-tag { font-size: var(--font-tag); color: var(--color-text-hint); }
-.task-arrow { font-size: 20px; color: #CCC; margin-left: var(--spacing-xs); }
+.task-body { flex: 1; min-width: 0; }
+.task-title { font-size: var(--font-body); font-weight: 500; line-height: 1.4; display: block; }
+.task-tagline { font-size: var(--font-tag); color: var(--color-text-hint); margin-top: 4px; }
+.task-arrow { font-size: 20px; color: #CCC; flex-shrink: 0; margin-top: 2px; }
+.task-disabled-tag { font-size: var(--font-tag); color: var(--color-text-hint); margin-left: auto; }
 
 /* 悬浮按钮 */
 .fab {

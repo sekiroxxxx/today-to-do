@@ -2,69 +2,26 @@
 <view class="page">
   <!-- 切换 Tab -->
   <view class="tab-row">
-    <view class="tab {{filter === 'active' ? 'tab--active' : ''}}" data-filter="active" bindtap="onFilterSwitch">
-      进行中
-    </view>
-    <view class="tab {{filter === 'disabled' ? 'tab--active' : ''}}" data-filter="disabled" bindtap="onFilterSwitch">
-      已禁用
-    </view>
+    <view class="tab {{filter === 'active' ? 'tab--active' : ''}}" data-filter="active" bindtap="onFilterSwitch">进行中</view>
+    <view class="tab {{filter === 'disabled' ? 'tab--active' : ''}}" data-filter="disabled" bindtap="onFilterSwitch">已禁用</view>
   </view>
 
   <empty-state wx:if="{{!loading && filter === 'active' && highTasks.length === 0 && midTasks.length === 0 && lowTasks.length === 0}}"
     text="暂无任务，去添加一个吧" showBtn="{{true}}" btnText="添加任务" bind:action="onAdd" />
-
   <empty-state wx:if="{{!loading && filter === 'disabled' && disabledTasks.length === 0}}"
     text="没有已禁用的任务" />
 
   <!-- 按优先级分组 -->
   <view wx:if="{{filter === 'active'}}">
-    <view wx:if="{{highTasks.length > 0}}" class="section">
-      <text class="section-title"><text class="pri-dot pri-dot--high">◆</text> 高优先级</text>
-      <view wx:for="{{highTasks}}" wx:key="_id" class="task-card"
-            data-id="{{item._id}}" data-enabled="{{item.enabled}}"
+    <view wx:for="{{sections}}" wx:key="level" class="section">
+      <text class="section-title"><text class="pri-dot {{item.dotClass}}">◆</text> {{item.label}}</text>
+      <view wx:for="{{item.tasks}}" wx:key="_id" class="task-card"
+            data-id="{{item._id}}" data-enabled="{{true}}"
             bindtap="onEdit" bindlongpress="onLongPress">
-        <view class="task-info">
+        <text class="pri-dot {{item.dotClass}}">◆</text>
+        <view class="task-body">
           <text class="task-title text-ellipsis">{{item.title}}</text>
-          <view class="task-meta flex-row">
-            <text wx:if="{{item.estimatedMinutes}}" class="task-meta-item">⏱ {{item.estimatedMinutes}}分钟</text>
-            <text wx:if="{{item.deadline}}" class="task-meta-item">📅 {{item.deadline}}</text>
-            <text wx:if="{{item.repeatRule.type !== 'none'}}" class="task-meta-item">
-              🔄 {{item.repeatRule.type === 'daily' ? '每天' : '每周' + item.repeatRule.daysOfWeek.length + '天'}}
-            </text>
-            <text wx:if="{{item.postponeCount >= 3}}" class="task-meta-item task-warn">⚠ 推迟{{item.postponeCount}}次</text>
-          </view>
-        </view>
-        <text class="task-arrow">›</text>
-      </view>
-    </view>
-
-    <view wx:if="{{midTasks.length > 0}}" class="section">
-      <text class="section-title"><text class="pri-dot pri-dot--mid">◆</text> 中优先级</text>
-      <view wx:for="{{midTasks}}" wx:key="_id" class="task-card"
-            data-id="{{item._id}}" data-enabled="{{item.enabled}}"
-            bindtap="onEdit" bindlongpress="onLongPress">
-        <view class="task-info">
-          <text class="task-title text-ellipsis">{{item.title}}</text>
-          <view class="task-meta flex-row">
-            <text wx:if="{{item.estimatedMinutes}}" class="task-meta-item">⏱ {{item.estimatedMinutes}}分钟</text>
-            <text wx:if="{{item.repeatRule.type !== 'none'}}" class="task-meta-item">🔄 重复</text>
-            <text wx:if="{{item.postponeCount >= 3}}" class="task-meta-item task-warn">⚠ 推迟{{item.postponeCount}}次</text>
-          </view>
-        </view>
-        <text class="task-arrow">›</text>
-      </view>
-    </view>
-
-    <view wx:if="{{lowTasks.length > 0}}" class="section">
-      <text class="section-title"><text class="pri-dot pri-dot--low">◆</text> 低优先级</text>
-      <view wx:for="{{lowTasks}}" wx:key="_id" class="task-card"
-            data-id="{{item._id}}" data-enabled="{{item.enabled}}"
-            bindtap="onEdit" bindlongpress="onLongPress">
-        <view class="task-info">
-          <text class="task-title text-ellipsis">{{item.title}}</text>
-          <view class="task-meta flex-row">
-            <text wx:if="{{item.postponeCount >= 3}}" class="task-meta-item task-warn">⚠ 推迟{{item.postponeCount}}次</text>
-          </view>
+          <text wx:if="{{item.tagLine}}" class="task-tagline">{{item.tagLine}}</text>
         </view>
         <text class="task-arrow">›</text>
       </view>
@@ -76,10 +33,8 @@
     <view wx:for="{{disabledTasks}}" wx:key="_id" class="task-card task-card--disabled"
           data-id="{{item._id}}" data-enabled="{{false}}"
           bindtap="onEdit" bindlongpress="onLongPress">
-      <view class="task-info">
-        <text class="task-title text-ellipsis">{{item.title}}</text>
-        <text class="task-disabled-tag">已禁用</text>
-      </view>
+      <text class="task-title text-ellipsis">{{item.title}}</text>
+      <text class="task-disabled-tag">已禁用</text>
       <text class="task-arrow">›</text>
     </view>
   </view>
