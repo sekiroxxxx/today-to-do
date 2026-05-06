@@ -79,7 +79,7 @@ exports.main = async (event, context) => {
       // _openid 字段：微信云开发要求手动写入，用于权限校验
       // 虽然云函数有全部权限，但为了数据一致性，写入 _openid
       _openid: openid,
-      nickname: '',
+      nickname: '冒险者',
       avatar: '',
       persona: '',             // 用户画像（v1.1 启用）
       preferences: {

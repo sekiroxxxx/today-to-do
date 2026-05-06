@@ -4,8 +4,7 @@
   <view class="user-card">
     <view class="user-avatar">{{userInfo ? (userInfo.nickname || '👤') : '👤'}}</view>
     <view class="user-info">
-      <text class="user-name">{{userInfo && userInfo.nickname ? userInfo.nickname : '用户'}}</text>
-      <text class="user-id">{{userInfo ? userInfo._openid : ''}}</text>
+      <text class="user-name">{{userInfo && userInfo.nickname ? userInfo.nickname : '冒险者'}}</text>
     </view>
   </view>
 
