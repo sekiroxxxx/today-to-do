@@ -70,12 +70,12 @@
         <!-- 评分区 -->
         <view class="job-scores">
           <view class="score-item">
-            <star-rating value="{{item.attractionScore}}" readonly="{{true}}" size="sm" />
             <text class="score-text">想投程度</text>
+            <star-rating value="{{item.attractionScore}}" readonly="{{true}}" size="sm" />
           </view>
           <view class="score-item">
-            <star-rating value="{{item.preparednessScore}}" readonly="{{true}}" size="sm" />
             <text class="score-text">准备程度</text>
+            <star-rating value="{{item.preparednessScore}}" readonly="{{true}}" size="sm" />
           </view>
         </view>
         <!-- 推进按钮 -->
