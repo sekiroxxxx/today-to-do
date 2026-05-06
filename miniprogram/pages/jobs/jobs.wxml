@@ -56,27 +56,36 @@
       data-id="{{item._id}}"
       bindtap="onJobDetail"
     >
-      <!-- 左：信息 -->
-      <view class="job-info">
-        <view class="flex-row">
-          <status-tag status="{{item.status}}" />
-          <text class="job-title text-ellipsis">{{item.company}}</text>
-        </view>
-        <text class="job-position text-ellipsis">{{item.position}}</text>
-        <view class="job-scores flex-row">
-          <text class="job-score-label">吸引力</text>
-          <star-rating value="{{item.attractionScore}}" readonly="{{true}}" size="sm" />
-          <text class="job-score-label" style="margin-left:12px">准备度</text>
-          <star-rating value="{{item.preparednessScore}}" readonly="{{true}}" size="sm" />
-        </view>
+      <!-- 第一行：公司名 + 状态标签 -->
+      <view class="job-row1">
+        <text class="job-company text-ellipsis">{{item.company}}</text>
+        <status-tag status="{{item.status}}" />
       </view>
-      <!-- 右：快速推进按钮 -->
-      <view class="job-advance" wx:if="{{item.status !== 'Offer' && item.status !== '已拒绝'}}"
-            data-id="{{item._id}}" data-status="{{item.status}}" catchtap="onQuickAdvance">
-        <text class="advance-icon">
-          {{item.status === '待投递' ? '📤' : item.status === '已投递' ? '💬' : '🎉'}}
-        </text>
-        <text class="advance-text">{{item.status === '待投递' ? '投了' : item.status === '已投递' ? '面试' : 'Offer'}}</text>
+
+      <!-- 第二行：岗位名 -->
+      <text class="job-position text-ellipsis">{{item.position}}</text>
+
+      <!-- 第三行：双评分 + 快速推进 -->
+      <view class="job-row3">
+        <!-- 评分区 -->
+        <view class="job-scores">
+          <view class="score-item">
+            <star-rating value="{{item.attractionScore}}" readonly="{{true}}" size="sm" />
+            <text class="score-text">想投程度</text>
+          </view>
+          <view class="score-item">
+            <star-rating value="{{item.preparednessScore}}" readonly="{{true}}" size="sm" />
+            <text class="score-text">准备程度</text>
+          </view>
+        </view>
+        <!-- 推进按钮 -->
+        <view class="job-advance" wx:if="{{item.status !== 'Offer' && item.status !== '已拒绝'}}"
+              data-id="{{item._id}}" data-status="{{item.status}}" catchtap="onQuickAdvance">
+          <text class="advance-icon">
+            {{item.status === '待投递' ? '📤' : item.status === '已投递' ? '💬' : '🎉'}}
+          </text>
+          <text class="advance-text">{{item.status === '待投递' ? '投了' : item.status === '已投递' ? '面试' : 'Offer'}}</text>
+        </view>
       </view>
     </view>
   </view>

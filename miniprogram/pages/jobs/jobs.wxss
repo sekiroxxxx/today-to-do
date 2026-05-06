@@ -32,22 +32,36 @@
 .job-list { display: flex; flex-direction: column; gap: var(--spacing-sm); }
 .job-card {
   background: #fff; border-radius: var(--radius-md); padding: var(--spacing-md);
-  box-shadow: var(--shadow-card); display: flex; align-items: center;
+  box-shadow: var(--shadow-card);
 }
-.job-info { flex: 1; min-width: 0; }
-.job-title { font-size: var(--font-body); font-weight: 600; margin-left: var(--spacing-xs); }
-.job-position { font-size: var(--font-caption); color: var(--color-text-secondary); margin: 4px 0 6px; }
-.job-scores { gap: 6px; }
-.job-score-label { font-size: var(--font-tag); color: var(--color-text-hint); }
+
+/* 第一行：公司名 + 状态标签（两端对齐） */
+.job-row1 {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 4px;
+}
+.job-company { font-size: 16px; font-weight: 700; flex: 1; min-width: 0; }
+
+/* 第二行：岗位名 */
+.job-position {
+  font-size: var(--font-caption); color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* 第三行：评分 + 推进按钮 */
+.job-row3 { display: flex; align-items: flex-end; justify-content: space-between; }
+.job-scores { display: flex; gap: var(--spacing-lg); }
+.score-item { display: flex; align-items: center; gap: 4px; }
+.score-text { font-size: var(--font-tag); color: var(--color-text-hint); }
 
 /* 快速推进 */
 .job-advance {
   display: flex; flex-direction: column; align-items: center;
-  padding: var(--spacing-xs) var(--spacing-sm); margin-left: var(--spacing-sm);
-  border-left: 1px solid var(--color-border); min-width: 56px;
+  padding: 2px var(--spacing-sm); border-left: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
-.advance-icon { font-size: 22px; }
-.advance-text { font-size: var(--font-tag); color: var(--color-text-hint); margin-top: 2px; }
+.advance-icon { font-size: 20px; }
+.advance-text { font-size: var(--font-tag); color: var(--color-text-hint); }
 
 /* 悬浮按钮 */
 .fab {
