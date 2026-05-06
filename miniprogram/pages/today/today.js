@@ -75,19 +75,18 @@ Page({
 
   onPostpone(e) {
     const { id, type } = e.detail
-    // 先本地移除，再异步处理
+    // 直接从本地数组移除（action-card 已调过 postponeAction API）
     const actions = this.data.actions.filter(a => a._id !== id)
     this.setData({ actions, empty: actions.length === 0 })
 
-    api.postponeAction(id, type).then(res => {
-      if (res.needRegenerate) {
-        // 需要补入备选，重新请求完整列表
-        api.generateDailyActions(true).then(genRes => {
-          this.setData({ actions: genRes.actions || [] })
-          app.globalData.dirty.today = false
-        })
-      }
-      app.markDirty(['mine'])
-    })
+    // 跳过今天：需要补入备选 action，重新生成
+    if (type === 'skip') {
+      api.generateDailyActions(true).then(genRes => {
+        this.setData({ actions: genRes.actions || [] })
+        app.globalData.dirty.today = false
+      })
+    }
+    // 稍后提醒：不补入，当前列表少一条即可
+    app.markDirty(['mine'])
   }
 })
