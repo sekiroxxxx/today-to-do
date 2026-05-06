@@ -1,6 +1,7 @@
 // 行动卡片组件 — 今日首页的核心展示单元
 const api = require('../../utils/api')
 const app = getApp()
+const phrases = require('../../utils/phrases')
 
 Component({
   /**
@@ -47,7 +48,7 @@ Component({
           this.askStatusUpdate(res.jobInfo)
         } else {
           // 自定义任务：直接完成
-          wx.showToast({ title: '已完成', icon: 'success', duration: 1500 })
+          wx.showToast({ title: phrases.pick(phrases.COMPLETE), icon: 'success', duration: 1500 })
           this.animateAndRemove()
         }
       })
@@ -63,7 +64,7 @@ Component({
       const option = statusMap[jobInfo.status]
       if (!option) {
         // 已是终态，直接完成
-        wx.showToast({ title: '已完成', icon: 'success', duration: 1500 })
+        wx.showToast({ title: phrases.pick(phrases.COMPLETE), icon: 'success', duration: 1500 })
         this.animateAndRemove()
         return
       }
@@ -86,7 +87,7 @@ Component({
             })
           } else {
             // 用户拒绝：仅完成 action，不变更状态
-            wx.showToast({ title: '已完成', icon: 'success', duration: 1500 })
+            wx.showToast({ title: phrases.pick(phrases.COMPLETE), icon: 'success', duration: 1500 })
             this.animateAndRemove()
           }
         }
@@ -114,7 +115,9 @@ Component({
           return
         }
 
-        const msg = postponeType === 'later' ? '已推迟，稍后提醒' : '已跳过，明天再见'
+        const msg = postponeType === 'later'
+          ? phrases.pick(phrases.POSTPONE_LATER)
+          : phrases.pick(phrases.POSTPONE_SKIP)
         wx.showToast({ title: msg, icon: 'none', duration: 1500 })
 
         // 触发父页面事件，传递需要重新生成

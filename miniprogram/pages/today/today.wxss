@@ -2,3 +2,12 @@
 .date-header { margin-bottom: var(--spacing-md); }
 .date-text { font-size: var(--font-title); font-weight: 600; margin-right: var(--spacing-sm); }
 .date-sub { font-size: var(--font-caption); color: var(--color-text-hint); }
+
+/* 庆祝态 */
+.celebration {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px var(--spacing-lg); text-align: center;
+}
+.celebration-icon { font-size: 56px; margin-bottom: var(--spacing-md); }
+.celebration-text { font-size: var(--font-title); font-weight: 600; color: var(--color-text); }
+.celebration-sub { font-size: var(--font-caption); color: var(--color-text-hint); margin-top: var(--spacing-xs); }

@@ -1,26 +1,25 @@
 const api = require('../../utils/api')
 const app = getApp()
+const phrases = require('../../utils/phrases')
 
 Page({
   data: {
     actions: [],
     loading: true,
-    empty: false,
-    todayDate: ''
+    empty: false,              // 从未生成过清单（引导态）
+    allDone: false,            // 生成过但全部完成了（庆祝态）
+    todayDate: '',
+    sessionPostponeCount: 0,   // 本次 session 连续推迟次数
+    showPostponeHint: false    // ≥3 次推迟后显示提示
   },
 
   onShow() {
-    // 缓存干净就跳过，脏了才重新请求
     if (!app.globalData.dirty.today) return
 
     const hasData = this.data.actions.length > 0
     this.loadTodayActions(!hasData)
   },
 
-  /**
-   * 加载今日清单
-   * @param {boolean} showLoading - 首次加载显示骨架屏，切Tab静默刷新
-   */
   loadTodayActions(showLoading = false) {
     if (showLoading) {
       this.setData({ loading: true })
@@ -29,14 +28,19 @@ Page({
     api.getTodayActions().then(res => {
       if (res.actions && res.actions.length > 0) {
         this.setData({
-          actions: res.actions, empty: false,
-          todayDate: res.date, loading: false
+          actions: res.actions, empty: false, allDone: false,
+          todayDate: res.date, loading: false,
+          sessionPostponeCount: 0, showPostponeHint: false
         })
       } else {
+        // 今日没查到待处理记录 → 生成或确认是否全部完成
         return api.generateDailyActions().then(genRes => {
+          const hasActions = genRes.actions && genRes.actions.length > 0
+          // 生成过但返回空 → 全部完成了；没生成过 → 空状态引导
           this.setData({
             actions: genRes.actions || [],
-            empty: !genRes.actions || genRes.actions.length === 0,
+            empty: !hasActions,
+            allDone: !hasActions && genRes.generated !== undefined,
             todayDate: genRes.date,
             loading: false
           })
@@ -54,10 +58,14 @@ Page({
   onPullDownRefresh() {
     wx.showNavigationBarLoading()
     api.generateDailyActions(true).then(res => {
+      const hasActions = res.actions && res.actions.length > 0
       this.setData({
         actions: res.actions || [],
-        empty: !res.actions || res.actions.length === 0,
-        todayDate: res.date
+        empty: !hasActions,
+        allDone: !hasActions,
+        todayDate: res.date,
+        sessionPostponeCount: 0,
+        showPostponeHint: false
       })
       app.globalData.dirty.today = false
       wx.hideNavigationBarLoading()
@@ -66,27 +74,30 @@ Page({
   },
 
   onComplete(e) {
-    // 直接从本地数组移除已完成卡片，不重新请求（避免页面整体重渲染）
     const { id } = e.detail
     const actions = this.data.actions.filter(a => a._id !== id)
-    this.setData({ actions, empty: actions.length === 0 })
+    const allDone = actions.length === 0 && !this.data.empty
+    this.setData({ actions, empty: actions.length === 0 && !allDone, allDone })
     app.markDirty(['today', 'mine'])
   },
 
   onPostpone(e) {
     const { id, type } = e.detail
-    // 直接从本地数组移除（action-card 已调过 postponeAction API）
     const actions = this.data.actions.filter(a => a._id !== id)
-    this.setData({ actions, empty: actions.length === 0 })
+    const sessionPostponeCount = this.data.sessionPostponeCount + 1
+    const showPostponeHint = sessionPostponeCount >= 3 && actions.length === 0
 
-    // 跳过今天：需要补入备选 action，重新生成
+    this.setData({ actions, empty: actions.length === 0, sessionPostponeCount, showPostponeHint })
+
     if (type === 'skip') {
       api.generateDailyActions(true).then(genRes => {
-        this.setData({ actions: genRes.actions || [] })
+        this.setData({
+          actions: genRes.actions || [],
+          empty: !genRes.actions || genRes.actions.length === 0
+        })
         app.globalData.dirty.today = false
       })
     }
-    // 稍后提醒：不补入，当前列表少一条即可
     app.markDirty(['mine'])
   }
 })

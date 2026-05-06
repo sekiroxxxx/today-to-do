@@ -3,9 +3,21 @@
   <!-- 骨架屏：加载中 -->
   <skeleton wx:if="{{loading}}" count="{{3}}" />
 
-  <!-- 空状态：无任务 -->
-  <empty-state wx:elif="{{empty}}" text="今日无任务，去添加一个目标吧"
+  <!-- 庆祝态：全部完成 -->
+  <view wx:elif="{{allDone && !showPostponeHint}}" class="celebration">
+    <text class="celebration-icon">🎉</text>
+    <text class="celebration-text">今日委托全部完成</text>
+    <text class="celebration-sub">干得好！</text>
+  </view>
+
+  <!-- 引导态：从未生成过 -->
+  <empty-state wx:elif="{{empty && !showPostponeHint}}" text="今日无任务，去添加一个目标吧"
                showBtn="{{true}}" btnText="去添加任务" bind:action="onGoToTasks"/>
+
+  <!-- 频繁推迟提示 -->
+  <empty-state wx:elif="{{showPostponeHint}}"
+    text="今天的委托不太对？去委托页调整优先级或添加新任务吧"
+    showBtn="{{true}}" btnText="去调整任务" bind:action="onGoToTasks"/>
 
   <!-- 行动卡片列表 -->
   <view wx:else class="action-list">

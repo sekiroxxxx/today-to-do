@@ -35,6 +35,11 @@
     </view>
   </view>
 
+  <!-- 鼓励文案 -->
+  <view wx:if="{{statsFormatted && statsFormatted.moodText}}" style="text-align:center; padding: var(--spacing-md); font-size: var(--font-body); color: var(--color-text-secondary)">
+    {{statsFormatted.moodText}}
+  </view>
+
   <!-- 投递漏斗概览 -->
   <view class="card" wx:if="{{funnel}}">
     <text class="card-title">求职漏斗</text>

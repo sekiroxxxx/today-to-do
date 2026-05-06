@@ -1,6 +1,7 @@
 // 我的页面
 const app = getApp()
 const api = require('../../utils/api')
+const phrases = require('../../utils/phrases')
 
 Page({
   data: {
@@ -58,11 +59,14 @@ Page({
 
   // 格式化统计数据（WXML 不能调 .toFixed()，提前算好）
   formatStats(summary) {
+    const rate = summary.completionRate
+    const item = phrases.ENCOURAGEMENT.find(e => rate >= e.min) || phrases.ENCOURAGEMENT[phrases.ENCOURAGEMENT.length - 1]
     return {
       completed: summary.completed,
       postponed: summary.postponed,
       total: summary.total,
-      completionRate: Math.round(summary.completionRate * 100)
+      completionRate: Math.round(rate * 100),
+      moodText: item.text
     }
   },
 
