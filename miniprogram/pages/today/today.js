@@ -62,13 +62,20 @@ Page({
 
   onPullDownRefresh() {
     wx.showNavigationBarLoading()
-    api.generateDailyActions(true).then(res => {
+
+    const refresh = app.globalData.dirty.today
+      // 数据有变更 → 强制重新生成
+      ? api.generateDailyActions(true)
+      // 无变更 → 只读缓存，避免排序抖动
+      : api.getTodayActions().then(res => ({ actions: res.actions || [] }))
+
+    refresh.then(res => {
       const filtered = this.filterDismissed(res.actions || [])
       this.setData({
         actions: filtered,
         empty: filtered.length === 0,
         allDone: filtered.length === 0,
-        todayDate: res.date,
+        todayDate: res.date || this.data.todayDate,
         sessionPostponeCount: 0,
         showPostponeHint: false
       })
