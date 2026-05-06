@@ -14,17 +14,22 @@ Component({
   properties: {
     action: {
       type: Object,
-      value: {}
+      value: {},
+      observer: function (val) {
+        if (val && val.normalizedScore !== undefined) {
+          const r = phrases.getRating(val.normalizedScore)
+          this.setData({ rating: r })
+        }
+      }
     }
   },
 
   data: {
-    // 动画状态
-    completing: false,   // 完成动画进行中
-    postponing: false,   // 推迟动画进行中
-    removed: false,      // 卡片已移除
-    // 推迟弹窗
-    showPostponeSheet: false
+    completing: false,
+    postponing: false,
+    removed: false,
+    showPostponeSheet: false,
+    rating: null     // { label, bg, color } — 由 action observer 计算
   },
 
   methods: {

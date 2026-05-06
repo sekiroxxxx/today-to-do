@@ -13,7 +13,7 @@
     "backgroundColor": "#F5F5F5",
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#FFFFFF",
-    "navigationBarTitleText": "今日行动清单",
+    "navigationBarTitleText": "刷日常",
     "navigationBarTextStyle": "black"
   },
   "tabBar": {
@@ -22,10 +22,10 @@
     "backgroundColor": "#FFFFFF",
     "borderStyle": "black",
     "list": [
-      { "pagePath": "pages/today/today", "text": "今日" },
-      { "pagePath": "pages/jobs/jobs", "text": "求职" },
-      { "pagePath": "pages/tasks/tasks", "text": "任务" },
-      { "pagePath": "pages/mine/mine", "text": "我的" }
+      { "pagePath": "pages/today/today", "text": "日常" },
+      { "pagePath": "pages/jobs/jobs", "text": "悬赏" },
+      { "pagePath": "pages/tasks/tasks", "text": "委托" },
+      { "pagePath": "pages/mine/mine", "text": "状态" }
     ]
   },
   "sitemapLocation": "sitemap.json",

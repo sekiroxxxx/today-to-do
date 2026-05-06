@@ -9,10 +9,7 @@
     />
     <view wx:else class="tag tag--custom">自定义</view>
     <text class="card-title text-ellipsis">{{action.title}}</text>
-    <text wx:if="{{action.normalizedScore >= 80}}" class="badge badge--s">S</text>
-    <text wx:elif="{{action.normalizedScore >= 55}}" class="badge badge--a">A</text>
-    <text wx:elif="{{action.normalizedScore >= 25}}" class="badge badge--b">B</text>
-    <text wx:else class="badge badge--c">C</text>
+    <text wx:if="{{rating}}" class="badge" style="background:{{rating.bg}};color:{{rating.color}}">{{rating.label}}</text>
   </view>
 
   <!-- 描述 -->

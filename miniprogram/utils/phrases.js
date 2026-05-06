@@ -42,8 +42,35 @@ const ENCOURAGEMENT = [
   { min: -1,   text: '本周还没有行动记录' }
 ]
 
-// 频繁推迟（同一个 today session 内 ≥ 3 次）
+// 频繁推迟
 const FREQUENT_POSTPONE = '今天的委托不太对？去委托页调整优先级或添加新任务吧'
+
+// 评级配置（阈值、标签、颜色）— action-card 组件引用
+const RATING_TIERS = [
+  { min: 80, label: 'S', bg: '#FFF1F0', color: '#CF1322' },
+  { min: 55, label: 'A', bg: '#FFF2E0', color: '#D46B08' },
+  { min: 25, label: 'B', bg: '#F9F0FF', color: '#722ED1' },
+  { min: 0,  label: 'C', bg: '#E6FFFB', color: '#08979C' }
+]
+
+// Tab 名称（文档约定值，json 里同步改）
+const TAB_NAMES = {
+  today: '日常',
+  jobs: '悬赏',
+  tasks: '委托',
+  mine: '状态'
+}
+
+// 默认昵称
+const DEFAULT_NICKNAME = '冒险者'
+
+/** 根据分数查评级 */
+function getRating(score) {
+  for (const tier of RATING_TIERS) {
+    if (score >= tier.min) return tier
+  }
+  return RATING_TIERS[RATING_TIERS.length - 1]
+}
 
 /** 从数组中随机取一个 */
 function pick(arr) {
@@ -56,5 +83,9 @@ module.exports = {
   POSTPONE_SKIP,
   ENCOURAGEMENT,
   FREQUENT_POSTPONE,
+  RATING_TIERS,
+  TAB_NAMES,
+  DEFAULT_NICKNAME,
+  getRating,
   pick
 }

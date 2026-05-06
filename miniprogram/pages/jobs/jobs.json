@@ -5,5 +5,5 @@
     "empty-state": "/components/empty-state/empty-state"
   },
   "enablePullDownRefresh": true,
-  "navigationBarTitleText": "求职管理"
+  "navigationBarTitleText": "悬赏"
 }

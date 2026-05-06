@@ -5,5 +5,5 @@
     "skeleton": "/components/skeleton/skeleton"
   },
   "enablePullDownRefresh": true,
-  "navigationBarTitleText": "今日行动"
+  "navigationBarTitleText": "日常"
 }

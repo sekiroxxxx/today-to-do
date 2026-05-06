@@ -14,7 +14,7 @@
 .card-header { display: flex; align-items: center; margin-bottom: var(--spacing-sm); }
 .card-title { font-size: var(--font-body); font-weight: 600; margin-left: var(--spacing-xs); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* S/A/B/C 评级徽章 */
+/* 评级徽章 — 颜色由 JS 层 rating.bg / rating.color 动态决定 */
 .badge {
   font-size: 14px;
   font-weight: 700;
@@ -23,10 +23,6 @@
   margin-left: var(--spacing-xs);
   flex-shrink: 0;
 }
-.badge--s { background: #FFF1F0; color: #CF1322; }
-.badge--a { background: #FFF2E0; color: #D46B08; }
-.badge--b { background: #F9F0FF; color: #722ED1; }
-.badge--c { background: #E6FFFB; color: #08979C; }
 
 /* 标签 */
 .tag { font-size: var(--font-tag); padding: 2px 10px; border-radius: var(--radius-round); }
