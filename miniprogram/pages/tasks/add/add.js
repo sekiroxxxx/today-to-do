@@ -7,6 +7,7 @@ const SUBMIT_GAP = 2000
 
 Page({
   data: {
+    loadingData: false,    // 编辑模式下加载数据时遮罩
     isEdit: false,
     taskId: '',
     form: {
@@ -36,7 +37,9 @@ Page({
   onLoad(options) {
     this.setData({ today: getDateString(new Date()) })
     if (options.id) {
-      this.setData({ isEdit: true, taskId: options.id })
+      // 先设标题和加载态，避免空白表单闪一下
+      wx.setNavigationBarTitle({ title: '编辑任务' })
+      this.setData({ loadingData: true, isEdit: true, taskId: options.id })
       this.loadTask(options.id)
     }
   },
@@ -57,8 +60,8 @@ Page({
           }
         })
         this.syncWeekdayActive(this.data.form.repeatDays)
-        wx.setNavigationBarTitle({ title: '编辑任务' })
       }
+      this.setData({ loadingData: false })
     })
   },
 

@@ -1,5 +1,11 @@
 <!-- 添加/编辑任务 -->
 <view class="page">
+  <!-- 编辑模式加载遮罩 -->
+  <view wx:if="{{loadingData}}" class="loading-mask">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view wx:if="{{!loadingData}}">
   <view class="form-card">
     <!-- 标题 -->
     <view class="form-item">
@@ -72,4 +78,5 @@
   <button class="submit-btn" bindtap="onSubmit" disabled="{{saving}}">
     {{saving ? '保存中...' : (isEdit ? '保存修改' : '添加任务')}}
   </button>
+  </view>
 </view>

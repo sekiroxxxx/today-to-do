@@ -30,33 +30,30 @@ Page({
       this.setData({ loading: true })
     }
 
-    api.getTodayActions().then(res => {
-      if (res.actions && res.actions.length > 0) {
-        const filtered = this.filterDismissed(res.actions)
-        this.setData({
-          actions: filtered, empty: false, allDone: false,
-          todayGenerated: true,
-          todayDate: res.date, loading: false,
-          sessionPostponeCount: 0, showPostponeHint: false
+    // 脏标记为 true → 强制重新生成，确保禁用/删除的源任务被算法排除
+    const fetch = app.globalData.dirty.today
+      ? api.generateDailyActions(true)
+      : api.getTodayActions().then(res => {
+          if (res.actions && res.actions.length > 0) return res
+          return api.generateDailyActions().then(genRes => ({ actions: genRes.actions || [], date: genRes.date, generated: true }))
         })
-      } else {
-        return api.generateDailyActions().then(genRes => {
-          const filtered = this.filterDismissed(genRes.actions || [])
-          const generated = genRes.generated !== undefined
-          this.setData({
-            actions: filtered,
-            empty: filtered.length === 0 && !generated,
-            allDone: filtered.length === 0 && generated,
-            todayGenerated: generated || this.data.todayGenerated,
-            todayDate: genRes.date,
-            loading: false
-          })
-        })
-      }
+
+    fetch.then(res => {
+      const filtered = this.filterDismissed(res.actions || [])
+      const hasActions = filtered.length > 0
+      const generated = res.generated !== undefined && res.generated !== false
+      this.setData({
+        actions: filtered,
+        empty: !hasActions && !generated,
+        allDone: !hasActions && generated,
+        todayGenerated: generated || this.data.todayGenerated,
+        todayDate: res.date,
+        loading: false,
+        sessionPostponeCount: 0,
+        showPostponeHint: false
+      })
     }).finally(() => {
       app.globalData.dirty.today = false
-      // B 修复：不再清空 dismissedSourceIds
-      // 黑名单贯穿整个 session，仅在用户主动下拉刷新时清空
     })
   },
 

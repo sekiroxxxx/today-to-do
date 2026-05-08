@@ -1,4 +1,6 @@
 .page { padding: var(--spacing-md); min-height: 100vh; }
+.loading-mask { display: flex; align-items: center; justify-content: center; height: 100vh; }
+.loading-text { font-size: var(--font-body); color: var(--color-text-hint); }
 
 .form-card { background: #fff; border-radius: var(--radius-md); padding: var(--spacing-md); box-shadow: var(--shadow-card); }
 .form-item { margin-bottom: var(--spacing-md); }
