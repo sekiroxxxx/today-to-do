@@ -59,10 +59,21 @@ App({
     }
     return wx.cloud.callFunction({ name: 'login', data: {} })
       .then(res => {
-        if (res.result.user) {
+        if (res.result && res.result.user) {
           this.globalData.userInfo = res.result.user
+          // 存本地缓存，断网时兜底
+          wx.setStorageSync('userInfo', res.result.user)
         }
         return this.globalData.userInfo
+      })
+      .catch(() => {
+        // 断网兜底：读缓存 → 缓存也没有就返回最小可用对象
+        const cached = wx.getStorageSync('userInfo')
+        if (cached) {
+          this.globalData.userInfo = cached
+          return cached
+        }
+        return { _id: '', _openid: '', nickname: '冒险者', persona: '', preferences: { dailyLimit: 5 } }
       })
   }
 })
