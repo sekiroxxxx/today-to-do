@@ -15,6 +15,11 @@ App({
       traceUser: true  // 在云函数日志中记录用户访问
     })
 
+    // ========== 网络状态监听 ==========
+    wx.onNetworkStatusChange(res => {
+      this.globalData.isOffline = !res.isConnected
+    })
+
     // ========== 全局数据 ==========
     this.globalData = {
       userInfo: null,           // 当前用户信息（login 后填充）

@@ -141,13 +141,14 @@ Page({
       : api.addTask(data)
 
     action.then(res => {
-      this.setData({ saving: false })
       if (res.success) {
         getApp().markDirty(['tasks', 'today', 'mine'])
         wx.showToast({ title: this.data.isEdit ? '已更新' : '已添加', icon: 'success' })
         setTimeout(() => wx.navigateBack(), 800)
+        // saving 保持 true，按钮 disabled 直到跳转完成
       } else {
         wx.showToast({ title: res.errMsg || '操作失败', icon: 'none' })
+        this.setData({ saving: false })
       }
     }).catch(() => {
       this.setData({ saving: false })

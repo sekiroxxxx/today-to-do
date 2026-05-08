@@ -13,7 +13,7 @@
 .section-title { font-size: var(--font-body); font-weight: 600; margin-bottom: var(--spacing-sm); display: block; }
 .pri-dot { font-size: 14px; }
 .pri-dot--high { color: #CF1322; }   /* S 红 */
-.pri-dot--mid { color: #D46B08; }    /* A 橙 */
+.pri-dot--mid { color: #D48A00; }    /* A 金 */
 .pri-dot--low { color: #722ED1; }    /* B 紫 */
 
 /* 任务卡片 — 极简两行 */

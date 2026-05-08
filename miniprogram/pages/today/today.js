@@ -5,6 +5,7 @@ const phrases = require('../../utils/phrases')
 // Session 级"已处理"黑名单：记录本次 session 内完成或推迟的 sourceId
 // 用户下拉刷新时清空（主动刷新 = 接受全量重新评估）
 let dismissedSourceIds = []
+let isRefreshing = false   // 防止下拉刷新并发
 
 Page({
   data: {
@@ -15,10 +16,12 @@ Page({
     todayGenerated: false,     // 今日是否已生成过清单（区分新用户 vs 全部完成）
     todayDate: '',
     sessionPostponeCount: 0,
-    showPostponeHint: false
+    showPostponeHint: false,
+    isOffline: false
   },
 
   onShow() {
+    this.setData({ isOffline: app.globalData.isOffline || false })
     if (!app.globalData.dirty.today) return
 
     const hasData = this.data.actions.length > 0
@@ -62,6 +65,12 @@ Page({
   },
 
   onPullDownRefresh() {
+    // 防止快速多次下拉刷新并发执行
+    if (isRefreshing) {
+      wx.stopPullDownRefresh()
+      return
+    }
+    isRefreshing = true
     wx.showNavigationBarLoading()
 
     const refresh = app.globalData.dirty.today
@@ -80,9 +89,10 @@ Page({
         showPostponeHint: false
       })
       app.globalData.dirty.today = false
-      dismissedSourceIds = []   // B 修复：用户主动刷新 → 清空黑名单
+      dismissedSourceIds = []
       wx.hideNavigationBarLoading()
       wx.stopPullDownRefresh()
+      isRefreshing = false
     })
   },
 

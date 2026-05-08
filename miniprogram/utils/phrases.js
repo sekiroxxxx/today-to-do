@@ -48,7 +48,7 @@ const FREQUENT_POSTPONE = '今天的委托不太对？去委托页调整优先�
 // 评级配置（阈值、标签、颜色）— action-card 组件引用
 const RATING_TIERS = [
   { min: 80, label: 'S', bg: '#FFF1F0', color: '#CF1322' },
-  { min: 55, label: 'A', bg: '#FFF2E0', color: '#D46B08' },
+  { min: 55, label: 'A', bg: '#FFFBE6', color: '#D48A00' },
   { min: 25, label: 'B', bg: '#F9F0FF', color: '#722ED1' },
   { min: 0,  label: 'C', bg: '#E6FFFB', color: '#08979C' }
 ]

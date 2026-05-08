@@ -1,5 +1,8 @@
 <!-- 今日首页 -->
 <view class="page">
+  <!-- 离线提示 -->
+  <view wx:if="{{isOffline}}" class="offline-banner">当前离线，显示最近数据</view>
+
   <!-- 骨架屏：加载中 -->
   <skeleton wx:if="{{loading}}" count="{{3}}" />
 

@@ -1,4 +1,5 @@
 .page { padding: var(--spacing-md); min-height: 100vh; }
+.offline-banner { background: #FFF1F0; color: #CF1322; text-align: center; padding: 8px; font-size: var(--font-caption); margin-bottom: var(--spacing-sm); border-radius: var(--radius-sm); }
 .date-header { margin-bottom: var(--spacing-md); }
 .date-text { font-size: var(--font-title); font-weight: 600; margin-right: var(--spacing-sm); }
 .date-sub { font-size: var(--font-caption); color: var(--color-text-hint); }

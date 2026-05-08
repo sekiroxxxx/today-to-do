@@ -21,6 +21,11 @@
       <text class="funnel-num funnel-num--highlight">{{funnel.offer}}</text>
       <text class="funnel-label">Offer</text>
     </view>
+    <text class="funnel-arrow">→</text>
+    <view class="funnel-item">
+      <text class="funnel-num funnel-num--reject">{{funnel.rejected}}</text>
+      <text class="funnel-label">已拒</text>
+    </view>
   </view>
 
   <!-- ===== 搜索 + 筛选 ===== -->
