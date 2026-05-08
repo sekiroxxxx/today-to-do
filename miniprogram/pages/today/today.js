@@ -3,8 +3,7 @@ const app = getApp()
 const phrases = require('../../utils/phrases')
 
 // Session 级"已处理"黑名单：记录本次 session 内完成或推迟的 sourceId
-// 下拉刷新 / skip 重新生成时，过滤掉这些已处理的候选项
-// 小程序关闭后自动清空，下次进入重新评估
+// 用户下拉刷新时清空（主动刷新 = 接受全量重新评估）
 let dismissedSourceIds = []
 
 Page({
@@ -13,6 +12,7 @@ Page({
     loading: true,
     empty: false,
     allDone: false,
+    todayGenerated: false,     // 今日是否已生成过清单（区分新用户 vs 全部完成）
     todayDate: '',
     sessionPostponeCount: 0,
     showPostponeHint: false
@@ -34,17 +34,20 @@ Page({
       if (res.actions && res.actions.length > 0) {
         const filtered = this.filterDismissed(res.actions)
         this.setData({
-          actions: filtered, empty: filtered.length === 0, allDone: false,
+          actions: filtered, empty: false, allDone: false,
+          todayGenerated: true,
           todayDate: res.date, loading: false,
           sessionPostponeCount: 0, showPostponeHint: false
         })
       } else {
         return api.generateDailyActions().then(genRes => {
           const filtered = this.filterDismissed(genRes.actions || [])
+          const generated = genRes.generated !== undefined
           this.setData({
             actions: filtered,
-            empty: filtered.length === 0,
-            allDone: filtered.length === 0 && genRes.generated !== undefined,
+            empty: filtered.length === 0 && !generated,
+            allDone: filtered.length === 0 && generated,
+            todayGenerated: generated || this.data.todayGenerated,
             todayDate: genRes.date,
             loading: false
           })
@@ -52,7 +55,8 @@ Page({
       }
     }).finally(() => {
       app.globalData.dirty.today = false
-      dismissedSourceIds = []
+      // B 修复：不再清空 dismissedSourceIds
+      // 黑名单贯穿整个 session，仅在用户主动下拉刷新时清空
     })
   },
 
@@ -64,9 +68,7 @@ Page({
     wx.showNavigationBarLoading()
 
     const refresh = app.globalData.dirty.today
-      // 数据有变更 → 强制重新生成
       ? api.generateDailyActions(true)
-      // 无变更 → 只读缓存，避免排序抖动
       : api.getTodayActions().then(res => ({ actions: res.actions || [] }))
 
     refresh.then(res => {
@@ -75,11 +77,13 @@ Page({
         actions: filtered,
         empty: filtered.length === 0,
         allDone: filtered.length === 0,
+        todayGenerated: true,
         todayDate: res.date || this.data.todayDate,
         sessionPostponeCount: 0,
         showPostponeHint: false
       })
       app.globalData.dirty.today = false
+      dismissedSourceIds = []   // B 修复：用户主动刷新 → 清空黑名单
       wx.hideNavigationBarLoading()
       wx.stopPullDownRefresh()
     })
@@ -87,22 +91,19 @@ Page({
 
   onComplete(e) {
     const { id } = e.detail
-    // 记录已处理的 sourceId
     const done = this.data.actions.find(a => a._id === id)
     if (done && done.sourceId) {
       dismissedSourceIds.push(done.sourceId)
     }
 
     const actions = this.data.actions.filter(a => a._id !== id)
-    const allDone = actions.length === 0 && !this.data.empty
+    const allDone = actions.length === 0 && this.data.todayGenerated
     this.setData({ actions, empty: actions.length === 0 && !allDone, allDone })
     app.markDirty(['today', 'mine'])
   },
 
   onPostpone(e) {
     const { id, type } = e.detail
-
-    // 记录已处理的 sourceId
     const postponed = this.data.actions.find(a => a._id === id)
     if (postponed && postponed.sourceId) {
       dismissedSourceIds.push(postponed.sourceId)
@@ -124,7 +125,6 @@ Page({
     app.markDirty(['mine'])
   },
 
-  // 过滤掉 session 内已处理过的 sourceId
   filterDismissed(actions) {
     if (dismissedSourceIds.length === 0) return actions
     return actions.filter(a => !dismissedSourceIds.includes(a.sourceId))

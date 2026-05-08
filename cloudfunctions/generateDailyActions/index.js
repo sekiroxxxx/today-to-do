@@ -39,18 +39,17 @@ exports.main = async (event, context) => {
   const todayDate = getDateString(new Date())  // "2026-05-05"
 
   try {
-    // 今天已完成的源任务 ID（重新生成时需要排除）
-    let completedSourceIds = []
+    // 今天已处理（完成/推迟）的源任务 ID，重新生成时不覆盖这些
+    let retainedSourceIds = []
 
     // ========== 第1步：检查是否已有今日清单（缓存逻辑） ==========
-    // 如果今天已经生成过，且前端没有要求强制重新生成，直接返回
     if (!event.forceRegenerate) {
       const existingResult = await db.collection('daily_actions')
         .where({
           _openid: openid,
           date: todayDate
         })
-        .orderBy('normalizedScore', 'desc')  // 按推荐分降序
+        .orderBy('normalizedScore', 'desc')
         .get()
 
       if (existingResult.data.length > 0) {
@@ -64,19 +63,23 @@ exports.main = async (event, context) => {
         }
       }
     } else {
-      // 强制重新生成：先保留今天已完成的源任务 ID，再删除旧记录
+      // 强制重新生成：保留已完成/已推迟的记录（不当幽灵删掉），只清理未处理的
       const todayRecords = await db.collection('daily_actions')
         .where({ _openid: openid, date: todayDate })
         .get()
-      // 收集今天已完成的源任务（完成后不可再生成）
-      completedSourceIds = todayRecords.data
-        .filter(a => a.completed)
+
+      // 已处理（完成/推迟）的记录 → 保留，后续插入时跳过同名 sourceId
+      retainedSourceIds = todayRecords.data
+        .filter(a => a.completed || a.postponed)
         .map(a => a.sourceId)
 
-      await db.collection('daily_actions')
-        .where({ _openid: openid, date: todayDate })
-        .remove()
-      console.log('强制重新生成，已清除今日旧记录:', openid, '已完成源任务:', completedSourceIds.length)
+      // 只删除未处理的记录（waiting 状态）
+      const toDelete = todayRecords.data.filter(a => !a.completed && !a.postponed)
+      for (const record of toDelete) {
+        await db.collection('daily_actions').doc(record._id).remove()
+      }
+
+      console.log('强制重新生成 — 保留已完成/推迟:', retainedSourceIds.length, '删除未处理:', toDelete.length)
     }
 
     // ========== 第2步：获取用户偏好 ==========
@@ -125,15 +128,16 @@ exports.main = async (event, context) => {
       tasks: tasksResult.data,
       recentActions: recentResult.data,
       dailyLimit: dailyLimit,
-      excludeSourceIds: completedSourceIds || []
+      excludeSourceIds: retainedSourceIds || []
     })
 
     console.log(`算法生成完成: ${result.actions.length} 条, 多样性修正: ${result.diversityApplied}`)
 
     // ========== 第6步：将结果写入 daily_actions 集合 ==========
-    // 每条 action 是一条独立记录，方便后续单独完成/推迟操作
     const now = db.serverDate()
-    const insertPromises = result.actions.map(action => {
+    // 过滤：跳过已保留的 sourceId（已完成/推迟过的源任务不再插入新卡）
+    const newActions = result.actions.filter(a => !retainedSourceIds.includes(a.sourceId))
+    const insertPromises = newActions.map(action => {
       return db.collection('daily_actions').add({
         data: {
           _openid: openid,

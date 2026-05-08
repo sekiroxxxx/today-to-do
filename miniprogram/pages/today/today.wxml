@@ -3,8 +3,8 @@
   <!-- 骨架屏：加载中 -->
   <skeleton wx:if="{{loading}}" count="{{3}}" />
 
-  <!-- 庆祝态：全部完成 -->
-  <view wx:elif="{{allDone && !showPostponeHint}}" class="celebration">
+  <!-- 庆祝态：今日已生成且全部完成 -->
+  <view wx:elif="{{todayGenerated && allDone && !showPostponeHint}}" class="celebration">
     <text class="celebration-icon">🎉</text>
     <text class="celebration-text">今日委托全部完成</text>
     <text class="celebration-sub">干得好！</text>
