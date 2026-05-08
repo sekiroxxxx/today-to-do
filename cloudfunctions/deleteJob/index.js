@@ -42,7 +42,12 @@ exports.main = async (event, context) => {
     }
 
     // ========== 第3步：执行删除 ==========
-    // .doc() 用 _id 定位单条记录，.remove() 删除它
+    // 先清理 daily_actions 中引用该岗位的幽灵卡片
+    await db.collection('daily_actions')
+      .where({ sourceId: event.jobId })
+      .remove()
+
+    // 再删源记录
     await db.collection('job_applications')
       .doc(event.jobId)
       .remove()

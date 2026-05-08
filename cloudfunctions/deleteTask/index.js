@@ -34,6 +34,12 @@ exports.main = async (event, context) => {
     }
 
     // ========== 执行删除 ==========
+    // 先清理 daily_actions 中引用该任务的幽灵卡片
+    await db.collection('daily_actions')
+      .where({ sourceId: event.taskId })
+      .remove()
+
+    // 再删源记录
     await db.collection('custom_tasks').doc(event.taskId).remove()
 
     console.log('任务删除成功:', openid, event.taskId)
