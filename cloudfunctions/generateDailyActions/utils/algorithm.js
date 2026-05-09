@@ -211,12 +211,16 @@ function calcTaskScore(task, today) {
  */
 function normalizeScores(scores) {
   if (scores.length === 0) return []
-  if (scores.length === 1) return [50]  // 只有一条时给中间分
+  if (scores.length === 1) return [50]
+
+  // ≤3 个候选项时 Min-Max 归一化会导致极端拉伸，跳过归一化，直接 clamp
+  if (scores.length <= 3) {
+    return scores.map(s => Math.max(0, Math.min(100, s)))
+  }
 
   const min = Math.min(...scores)
   const max = Math.max(...scores)
 
-  // 如果所有分数都一样，全部给 50
   if (max === min) return scores.map(() => 50)
 
   return scores.map(s => ((s - min) / (max - min)) * 100)
