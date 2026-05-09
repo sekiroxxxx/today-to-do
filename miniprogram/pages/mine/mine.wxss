@@ -7,7 +7,13 @@
   border-radius: var(--radius-md); padding: var(--spacing-lg);
   color: #fff; margin-bottom: var(--spacing-md);
 }
-.user-avatar { font-size: 40px; }
+.user-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--color-primary); color: #fff;
+  font-size: 20px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
 .user-name { font-size: var(--font-title); font-weight: 600; display: block; }
 .user-id { font-size: var(--font-tag); opacity: 0.7; }
 
