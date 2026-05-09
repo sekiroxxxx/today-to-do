@@ -3,5 +3,5 @@
     "empty-state": "/components/empty-state/empty-state",
     "action-sheet": "/components/action-sheet/action-sheet"
   },
-  "navigationBarTitleText": "委托"
+  "navigationBarTitleText": "任务管理"
 }

@@ -56,9 +56,9 @@ const RATING_TIERS = [
 // Tab 名称（文档约定值，json 里同步改）
 const TAB_NAMES = {
   today: '日常',
-  jobs: '悬赏',
-  tasks: '委托',
-  mine: '状态'
+  jobs: '求职',
+  tasks: '任务',
+  mine: '我的'
 }
 
 // 默认昵称
