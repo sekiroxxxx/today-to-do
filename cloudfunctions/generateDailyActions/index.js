@@ -159,9 +159,9 @@ exports.main = async (event, context) => {
     // 并行写入所有 action 记录
     await Promise.all(insertPromises)
 
-    // ========== 第7步：读取刚写入的记录（获取 _id）并返回 ==========
+    // ========== 第7步：读取待处理记录（排除已完成/推迟）并返回 ==========
     const finalResult = await db.collection('daily_actions')
-      .where({ _openid: openid, date: todayDate })
+      .where({ _openid: openid, date: todayDate, completed: false, postponed: false })
       .orderBy('normalizedScore', 'desc')
       .get()
 
