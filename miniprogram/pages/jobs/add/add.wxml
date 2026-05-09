@@ -42,7 +42,7 @@
       <text class="form-label">吸引力评分</text>
       <view class="score-row">
         <star-rating value="{{form.attractionScore}}" size="lg" bind:change="onAttractionChange" />
-        <text class="score-hint">{{form.attractionScore === 1 ? '随便试试' : form.attractionScore === 3 ? '比较想去' : form.attractionScore === 5 ? '梦寐以求' : ''}}</text>
+        <text class="score-hint">{{form.attractionScore === 1 ? '随便试试' : form.attractionScore === 2 ? '可以了解' : form.attractionScore === 3 ? '比较想去' : form.attractionScore === 4 ? '很感兴趣' : form.attractionScore === 5 ? '梦寐以求' : ''}}</text>
       </view>
     </view>
 
@@ -51,7 +51,7 @@
       <text class="form-label">准备度评分</text>
       <view class="score-row">
         <star-rating value="{{form.preparednessScore}}" size="lg" bind:change="onPreparednessChange" />
-        <text class="score-hint">{{form.preparednessScore === 1 ? '刚收藏' : form.preparednessScore === 3 ? '简历已适配' : form.preparednessScore === 5 ? '内推已就绪' : ''}}</text>
+        <text class="score-hint">{{form.preparednessScore === 1 ? '刚收藏' : form.preparednessScore === 2 ? '初步了解' : form.preparednessScore === 3 ? '简历已适配' : form.preparednessScore === 4 ? '针对准备' : form.preparednessScore === 5 ? '内推已就绪' : ''}}</text>
       </view>
     </view>
   </view>

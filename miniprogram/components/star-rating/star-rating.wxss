@@ -5,4 +5,3 @@
 .stars--sm .star { font-size: 16px; }
 .stars--md .star { font-size: 24px; }
 .stars--lg .star { font-size: 32px; }
-.star-desc { font-size: var(--font-tag); color: var(--color-text-hint); margin-left: var(--spacing-xs); }
