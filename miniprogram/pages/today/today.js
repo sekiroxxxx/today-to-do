@@ -48,7 +48,9 @@ Page({
       this.setData({
         actions: filtered,
         empty: !hasActions && !generated,
-        allDone: !hasActions && generated,
+        // 只有之前已有过任务 + 现在全清空了才算"全部完成"
+        // 新用户首次生成 → todayGenerated 为 false → 不庆祝
+        allDone: !hasActions && this.data.todayGenerated,
         todayGenerated: generated || this.data.todayGenerated,
         todayDate: res.date,
         loading: false,
