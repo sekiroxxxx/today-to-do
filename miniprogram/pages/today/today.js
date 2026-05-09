@@ -134,8 +134,14 @@ Page({
     app.markDirty(['mine'])
   },
 
+  // 双重过滤：黑名单 sourceId + 已完成/推迟标记（客户端兜底）
   filterDismissed(actions) {
-    if (dismissedSourceIds.length === 0) return actions
-    return actions.filter(a => !dismissedSourceIds.includes(a.sourceId))
+    return actions.filter(a => {
+      // 1. 云函数层未正确过滤的已完成/推迟记录
+      if (a.completed || a.postponed) return false
+      // 2. session 黑名单
+      if (dismissedSourceIds.length > 0 && dismissedSourceIds.includes(a.sourceId)) return false
+      return true
+    })
   }
 })
