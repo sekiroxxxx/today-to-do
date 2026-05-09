@@ -9,7 +9,8 @@ Page({
     currentRange: 'week',
     stats: null,
     funnel: null,
-    statsFormatted: null    // WXML 不能调 .toFixed()，提前在 JS 里格式化
+    statsFormatted: null,
+    avatarText: '冒'        // WXML 不能取 [0]，首字在 JS 算好
   },
 
   onShow() {
@@ -19,9 +20,9 @@ Page({
   },
 
   loadData() {
-    // 获取用户信息
     app.getUserInfo().then(user => {
-      this.setData({ userInfo: user })
+      const nickname = (user && user.nickname) || '冒险者'
+      this.setData({ userInfo: user, avatarText: nickname[0] })
     })
 
     // 获取统计数据

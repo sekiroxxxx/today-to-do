@@ -2,7 +2,7 @@
 <view class="page">
   <!-- 用户信息 -->
   <view class="user-card">
-    <view class="user-avatar">{{(userInfo && userInfo.nickname ? userInfo.nickname : '冒险者')[0]}}</view>
+    <view class="user-avatar">{{avatarText}}</view>
     <view class="user-info">
       <text class="user-name">{{userInfo && userInfo.nickname ? userInfo.nickname : '冒险者'}}</text>
     </view>
