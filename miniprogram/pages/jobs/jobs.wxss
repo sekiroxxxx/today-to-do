@@ -10,7 +10,6 @@
 .funnel-item { text-align: center; flex: 1; }
 .funnel-num { font-size: 28px; font-weight: 700; display: block; }
 .funnel-num--highlight { color: var(--color-primary); }
-.funnel-num--reject { color: #999; }
 .funnel-label { font-size: var(--font-caption); color: var(--color-text-hint); margin-top: 4px; }
 .funnel-arrow { color: var(--color-text-hint); font-size: var(--font-title); }
 
