@@ -42,6 +42,11 @@ module.exports = {
     return call('login')
   },
 
+  /** 更新偏好 → { success } */
+  updatePreference(data) {
+    return call('updatePreference', data)
+  },
+
   // ==================== 求职岗位 ====================
 
   /** 添加岗位 → { success, job } */

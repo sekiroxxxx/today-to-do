@@ -10,7 +10,8 @@ Page({
     stats: null,
     funnel: null,
     statsFormatted: null,
-    avatarText: '冒'        // WXML 不能取 [0]，首字在 JS 算好
+    avatarText: '冒',
+    dailyLimit: 5           // 每日清单条数上限
   },
 
   onShow() {
@@ -22,7 +23,8 @@ Page({
   loadData() {
     app.getUserInfo().then(user => {
       const nickname = (user && user.nickname) || '冒险者'
-      this.setData({ userInfo: user, avatarText: nickname[0] })
+      const dailyLimit = (user && user.preferences && user.preferences.dailyLimit) || 5
+      this.setData({ userInfo: user, avatarText: nickname[0], dailyLimit })
     })
 
     // 获取统计数据
@@ -51,11 +53,15 @@ Page({
 
   // ========== 调整每日清单数量 ==========
   onDailyLimitChange(e) {
-    // 此功能后续可扩展为写入 users 集合的 preferences.dailyLimit
     const limit = e.detail.value
-    wx.showToast({ title: `每日清单上限：${limit} 条`, icon: 'none' })
-    // TODO: 调用云函数更新用户偏好
-    // api.updatePreference({ dailyLimit: limit })
+    api.updatePreference({ dailyLimit: limit }).then(res => {
+      if (res.success) {
+        wx.showToast({ title: `每日上限已设为 ${limit} 条`, icon: 'success' })
+        app.markDirty(['today'])
+      } else {
+        wx.showToast({ title: res.errMsg || '设置失败', icon: 'none' })
+      }
+    })
   },
 
   // 格式化统计数据（WXML 不能调 .toFixed()，提前算好）
