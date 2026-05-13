@@ -349,6 +349,8 @@ function generateDailyList(options) {
       attractionScore: job.attractionScore,
       preparednessScore: job.preparednessScore,
       priority: null,
+      nextActionDate: job.nextActionDate,
+      createdAt: job.createdAt,
       rawScore: calcJobScore(job, today)
     }))
 
@@ -376,6 +378,7 @@ function generateDailyList(options) {
     note: task.note,
     estimatedMinutes: task.estimatedMinutes,
     repeatRule: task.repeatRule,
+    createdAt: task.createdAt,
     rawScore: calcTaskScore(task, today)
   }))
 
@@ -389,9 +392,35 @@ function generateDailyList(options) {
   scoredJobs.forEach((item, i) => { item.normalizedScore = normalizedJobScores[i] })
   scoredTasks.forEach((item, i) => { item.normalizedScore = normalizedTaskScores[i] })
 
-  // ---- Step 4: 混合排序 ----
+  // ---- Step 4: 混合排序（三层平局规则） ----
   const allCandidates = [...scoredJobs, ...scoredTasks]
-    .sort((a, b) => b.normalizedScore - a.normalizedScore)
+    .sort((a, b) => {
+      // 主排序：归一化分数降序
+      const scoreDiff = b.normalizedScore - a.normalizedScore
+      if (scoreDiff !== 0) return scoreDiff
+
+      // 平局 1：求职优先于自定义
+      if (a.sourceType !== b.sourceType) {
+        return a.sourceType === 'job' ? -1 : 1
+      }
+
+      // 平局 2：二级指标
+      //   求职 → nextActionDate 升序（越近越先）
+      //   自定义 → priority 升序（1=高 > 2=中 > 3=低）
+      if (a.sourceType === 'job' && a.nextActionDate && b.nextActionDate) {
+        return new Date(a.nextActionDate) - new Date(b.nextActionDate)
+      }
+      if (a.sourceType === 'custom' && a.priority !== b.priority) {
+        return a.priority - b.priority
+      }
+
+      // 平局 3：创建时间升序（越早创建越优先）
+      if (a.createdAt && b.createdAt) {
+        return new Date(a.createdAt) - new Date(b.createdAt)
+      }
+
+      return 0
+    })
 
   // ---- Step 5: 取 Top N ----
   let selected = allCandidates.slice(0, dailyLimit)
