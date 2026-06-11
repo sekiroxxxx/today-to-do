@@ -17,50 +17,54 @@ Page({
   onShow() {
     var userModules = (app.globalData.userInfo && app.globalData.userInfo.modules) || ['jobseeker', 'custom']
     var enabled = phrases.MODULES.filter(function (m) { return userModules.indexOf(m.key) > -1 })
-    this.setData({ modules: enabled })
 
-    // 恢复上次选择的模块（Tab 切换保持状态）
+    // 确定当前模块：上次选中的 > 已持久化的 > 第一个启用的
     var savedModule = wx.getStorageSync('progressModule')
+    var activeModule = this.data.currentModule
     if (savedModule && enabled.filter(function (m) { return m.key === savedModule }).length > 0) {
-      this.setData({ currentModule: savedModule })
+      activeModule = savedModule
     }
-    if (!this.data.currentModuleInfo) {
-      this.setData({ currentModuleInfo: enabled[0] || null })
+    if (enabled.filter(function (m) { return m.key === activeModule }).length === 0) {
+      activeModule = enabled.length > 0 ? enabled[0].key : 'jobseeker'
     }
+
+    var currentModuleInfo = phrases.MODULES.find(function (m) { return m.key === activeModule }) || enabled[0]
+    this.setData({ modules: enabled, currentModule: activeModule, currentModuleInfo: currentModuleInfo })
+
     if (!app.globalData.dirty.progress) return
-    this.loadData()
+    this.loadData(activeModule)
   },
 
-  loadData() {
-    const mod = phrases.MODULES.find(m => m.key === this.data.currentModule)
+  loadData(moduleKey) {
+    var key = moduleKey || this.data.currentModule
+    var mod = phrases.MODULES.find(function (m) { return m.key === key })
     if (mod) wx.setNavigationBarTitle({ title: mod.name })
 
     app.globalData.dirty.progress = false
 
-    // 更新当前模块信息
-    const currentModuleInfo = phrases.MODULES.find(m => m.key === this.data.currentModule)
-    this.setData({ currentModuleInfo })
+    this.setData({ currentModuleInfo: contextModuleInfo })
 
     // 获取该模块的今日任务，求职加评级 badge
-    api.getTodayActions().then(res => {
-      const tasks = (res.actions || []).filter(a => a.module === this.data.currentModule)
-        .map(a => {
+    var ctx = this
+    api.getTodayActions().then(function (res) {
+      var tasks = (res.actions || []).filter(function (a) { return a.module === key })
+        .map(function (a) {
           if (a.sourceType === 'job' && a.normalizedScore != null) {
-            const tier = phrases.RATING_TIERS.find(t => a.normalizedScore >= t.min) || phrases.RATING_TIERS[phrases.RATING_TIERS.length - 1]
+            var tier = phrases.RATING_TIERS.filter(function (t) { return a.normalizedScore >= t.min })[0] || phrases.RATING_TIERS[phrases.RATING_TIERS.length - 1]
             a.badge = tier
           }
           return a
         })
-      this.setData({ tasks: tasks, isLoading: false })
+      ctx.setData({ tasks: tasks, isLoading: false })
     })
 
     // 求职模块额外获取漏斗
-    if (this.data.currentModule === 'jobseeker') {
-      api.getStats('week').then(res => {
-        if (res.funnel) this.setData({ funnel: res.funnel })
+    if (key === 'jobseeker') {
+      api.getStats('week').then(function (res) {
+        if (res.funnel) ctx.setData({ funnel: res.funnel })
       })
     } else {
-      this.setData({ funnel: null })
+      ctx.setData({ funnel: null })
     }
   },
 
