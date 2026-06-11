@@ -6,7 +6,7 @@ Page({
   data: {
     checking: true,
     starting: false,
-    allModules: phrases.MODULES.map(function (m) {
+    allModules: (phrases.MODULES || []).map(function (m) {
       return Object.assign({}, m, { checked: ['jobseeker', 'custom'].indexOf(m.key) > -1 })
     }),
     selected: ['jobseeker', 'custom']

@@ -13,7 +13,7 @@ Page({
     avatarText: '冒',
     dailyLimit: 5,
     userModules: ['jobseeker', 'custom'],
-    allModules: phrases.MODULES          // WXML 渲染用
+    allModules: phrases.MODULES || []    // WXML 渲染用
   },
 
   onShow() {
