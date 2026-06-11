@@ -122,10 +122,38 @@ Page({
     const target = this.findAction(id)
     if (!target) return
 
-    // 调云函数标记完成
-    api.completeAction(id).then(() => {
-      this.removeAction(id)
-      app.markDirty(['today', 'progress', 'mine'])
+    var ctx = this
+    api.completeAction(id).then(function (res) {
+      // 求职任务：完成 action 后询问是否推进岗位状态
+      if (res.sourceType === 'job' && res.jobInfo) {
+        var statusMap = {
+          '待投递': { next: '已投递', label: '已投递简历' },
+          '已投递': { next: '面试中', label: '进入面试' },
+          '面试中': { next: 'Offer',  label: '拿到 Offer' }
+        }
+        var option = statusMap[res.jobInfo.status]
+        if (option) {
+          wx.showModal({
+            title: '同步更新状态？',
+            content: '将「' + res.jobInfo.company + ' - ' + res.jobInfo.position + '」的状态更新为「' + option.label + '」？',
+            confirmText: '是',
+            cancelText: '否',
+            success: function (modalRes) {
+              if (modalRes.confirm) {
+                api.updateJobStatus({ jobId: res.jobInfo._id, newStatus: option.next })
+              }
+              ctx.removeAction(id)
+              app.markDirty(['today', 'progress', 'mine'])
+            }
+          })
+        } else {
+          ctx.removeAction(id)
+          app.markDirty(['today', 'progress', 'mine'])
+        }
+      } else {
+        ctx.removeAction(id)
+        app.markDirty(['today', 'progress', 'mine'])
+      }
     })
   },
 

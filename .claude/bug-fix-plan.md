@@ -4,46 +4,6 @@
 
 ---
 
-## 方案二：allModules 变量报错（先修这个） ✅ 已完成
-
-**关联 Bug**：我的页面功能模块开关报错 `allModules is not defined`
-
-**根因**：`mine.js` 的 `data.allModules` 未初始化，或 `phrases.MODULES` 导入失败
-
-**修复**：
-1. `pages/mine/mine.js` — 确认 `const phrases = require('../../utils/phrases')` 路径正确
-2. `data` 中 `allModules` 确保初始化：`allModules: phrases.MODULES || []`
-3. 如果 `phrases.MODULES` 不存在，补全 `phrases.js` 的导出
-
-**验收**：打开"我的"页面 → 功能模块区域正常显示各模块开关，点击不报错
-
----
-
-## 方案一：脏标记传播断裂 ✅ 已完成
-
-**关联 Bug**：
-- 日常-切 Tab 后日常页重新生成
-- 日常-全部完成后切 Tab，不显示的自定义任务突然出现
-- 推进-完成后漏斗消失又生成
-- 推进-完成日常后漏斗数据没更新
-- 我的-模块开关不影响其他 Tab
-
-**根因**：`app.js` 的 `dirty` 对象可能缺少 `progress` key。`markDirty` 调了但 key 不在白名单内静默失败。`onModuleToggle` 没调 `markDirty`。
-
-**修复**：
-1. `app.js` — `globalData.dirty` 确认包含 `progress: true`
-2. `pages/today/today.js` — `onComplete` 和 `onPostpone` 均调 `app.markDirty(['today', 'progress', 'mine'])`
-3. `pages/progress/progress.js` — `onShow` 读 `app.globalData.dirty.progress`，脏时才拉数据，成功后置 `false`
-4. `pages/mine/mine.js` — `onModuleToggle` 成功后调 `app.markDirty(['today', 'progress'])`
-
-**验收**：
-1. 日常页完成一条求职任务 → 切到推进 Tab → 漏斗数据已更新
-2. 日常页完成最后一条 → 切到推进 Tab → 今日任务列表为空
-3. 我的页关闭求职模块 → 切回日常页下拉刷新 → 求职模块不再出现
-4. 我的页开关模块后 → 推进页模块切换弹窗里对应模块消失/出现
-
----
-
 ## 方案三：完成操作无用户反馈
 
 **关联 Bug**：

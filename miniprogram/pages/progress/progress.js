@@ -67,10 +67,36 @@ Page({
   // ========== 任务操作 ==========
   onComplete(e) {
     const id = e.currentTarget.dataset.id
-    api.completeAction(id).then(() => {
+    var ctx = this
+    api.completeAction(id).then(function (res) {
       wx.showToast({ title: phrases.pick(phrases.COMPLETE), icon: 'success' })
-      app.markDirty(['today', 'mine'])
-      this.loadData()
+      // 求职任务：询问是否推进状态
+      if (res.sourceType === 'job' && res.jobInfo) {
+        var statusMap = {
+          '待投递': { next: '已投递', label: '已投递简历' },
+          '已投递': { next: '面试中', label: '进入面试' },
+          '面试中': { next: 'Offer',  label: '拿到 Offer' }
+        }
+        var option = statusMap[res.jobInfo.status]
+        if (option) {
+          wx.showModal({
+            title: '同步更新状态？',
+            content: '将「' + res.jobInfo.company + ' - ' + res.jobInfo.position + '」的状态更新为「' + option.label + '」？',
+            confirmText: '是',
+            cancelText: '否',
+            success: function (modalRes) {
+              if (modalRes.confirm) {
+                api.updateJobStatus({ jobId: res.jobInfo._id, newStatus: option.next })
+              }
+              app.markDirty(['today', 'progress', 'mine'])
+              ctx.loadData()
+            }
+          })
+          return
+        }
+      }
+      app.markDirty(['today', 'progress', 'mine'])
+      ctx.loadData()
     })
   },
 
