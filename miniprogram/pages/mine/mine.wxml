@@ -68,7 +68,7 @@
     <text class="card-title">功能模块</text>
     <view wx:for="{{allModules}}" wx:key="key" class="setting-item flex-between">
       <text>{{item.icon}} {{item.name}}</text>
-      <switch checked="{{userModules.indexOf(item.key) > -1}}" data-key="{{item.key}}" bindchange="onModuleToggle" color="#D97706"/>
+      <switch checked="{{item.checked}}" data-key="{{item.key}}" bindchange="onModuleToggle" color="#D97706"/>
     </view>
   </view>
 

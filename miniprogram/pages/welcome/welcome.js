@@ -6,8 +6,8 @@ Page({
   data: {
     checking: true,
     starting: false,
-    allModules: phrases.MODULES,
-    selected: ['jobseeker', 'custom']  // 默认勾选
+    allModules: phrases.MODULES.map(m => ({ ...m, checked: ['jobseeker', 'custom'].includes(m.key) })),
+    selected: ['jobseeker', 'custom']
   },
 
   onShow() {
@@ -27,7 +27,8 @@ Page({
     const idx = selected.indexOf(key)
     if (idx > -1) selected.splice(idx, 1)
     else selected.push(key)
-    this.setData({ selected })
+    const allModules = phrases.MODULES.map(m => ({ ...m, checked: selected.includes(m.key) }))
+    this.setData({ selected, allModules })
   },
 
   // ========== 开始 ==========

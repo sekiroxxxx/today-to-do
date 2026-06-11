@@ -10,9 +10,9 @@
     <text class="select-title">选择你的日常模块</text>
     <view wx:for="{{allModules}}" wx:key="key" class="check-item"
       data-key="{{item.key}}" bindtap="onModuleCheck">
-      <view class="checkbox {{selected.indexOf(item.key) > -1 ? 'checkbox--checked' : ''}}"
-        style="{{selected.indexOf(item.key) > -1 ? 'background:' + item.color + ';border-color:' + item.color : ''}}">
-        <text wx:if="{{selected.indexOf(item.key) > -1}}">✓</text>
+      <view class="checkbox {{item.checked ? 'checkbox--checked' : ''}}"
+        style="{{item.checked ? 'background:' + item.color + ';border-color:' + item.color : ''}}">
+        <text wx:if="{{item.checked}}">✓</text>
       </view>
       <text class="check-label">{{item.icon}} {{item.name}}</text>
     </view>

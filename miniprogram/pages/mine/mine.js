@@ -27,7 +27,9 @@ Page({
       const nickname = (user && user.nickname) || '冒险者'
       const dailyLimit = (user && user.preferences && user.preferences.dailyLimit) || 5
       const userModules = (user && user.modules) || ['jobseeker', 'custom']
-      this.setData({ userInfo: user, avatarText: nickname[0], dailyLimit, userModules })
+      // 预计算勾选态（WXML 不支持 .indexOf()）
+      const allModules = phrases.MODULES.map(m => ({ ...m, checked: userModules.includes(m.key) }))
+      this.setData({ userInfo: user, avatarText: nickname[0], dailyLimit, userModules, allModules })
     })
 
     // 获取统计数据
@@ -115,7 +117,8 @@ Page({
     const user = this.data.userInfo
     if (user && user._id) {
       db.collection('users').doc(user._id).update({ data: { modules } }).then(() => {
-        this.setData({ userModules: modules })
+        const allModules = phrases.MODULES.map(m => ({ ...m, checked: modules.includes(m.key) }))
+        this.setData({ userModules: modules, allModules })
         app.markDirty(['today'])
       })
     }
