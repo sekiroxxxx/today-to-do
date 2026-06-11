@@ -6,13 +6,6 @@
   <!-- 骨架屏 -->
   <skeleton wx:if="{{loading}}" count="{{3}}" />
 
-  <!-- 庆祝态 -->
-  <view wx:elif="{{todayGenerated && allDone}}" class="celebration">
-    <text class="celebration-icon">🎉</text>
-    <text class="celebration-text">今日委托全部完成</text>
-    <text class="celebration-sub">干得好！</text>
-  </view>
-
   <!-- 引导态 -->
   <empty-state wx:elif="{{empty}}" text="还没有日常任务，去创建一个吧"
     showBtn="{{true}}" btnText="去创建" bind:action="onGoToCreate"/>
