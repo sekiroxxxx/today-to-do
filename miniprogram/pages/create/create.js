@@ -154,17 +154,21 @@ Page({
           module: currentModule
         })
 
-    action.then(res => {
+    var ctx = this
+    action.then(function (res) {
       if (res.success) {
-        getApp().markDirty(['tasks', 'today', 'jobs', 'mine'])
+        getApp().markDirty(['tasks', 'today', 'progress', 'jobs', 'mine'])
         wx.showToast({ title: '已添加', icon: 'success', duration: 1000 })
-        setTimeout(function () { wx.navigateBack() }, 1000)
+        setTimeout(function () {
+          ctx.setData({ saving: false })
+          wx.switchTab({ url: '/pages/today/today' })
+        }, 1000)
       } else {
         wx.showToast({ title: res.errMsg || '操作失败', icon: 'none' })
-        this.setData({ saving: false })
+        ctx.setData({ saving: false })
       }
-    }).catch(() => {
-      this.setData({ saving: false })
+    }).catch(function () {
+      ctx.setData({ saving: false })
     })
   }
 })
