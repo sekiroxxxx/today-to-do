@@ -1,14 +1,39 @@
 .page { padding: var(--spacing-md); min-height: 100vh; }
 .offline-banner { background: #FFF1F0; color: #CF1322; text-align: center; padding: 8px; font-size: var(--font-caption); margin-bottom: var(--spacing-sm); border-radius: var(--radius-sm); }
-.date-header { margin-bottom: var(--spacing-md); }
-.date-text { font-size: var(--font-title); font-weight: 600; margin-right: var(--spacing-sm); }
-.date-sub { font-size: var(--font-caption); color: var(--color-text-hint); }
+.date-header { margin-bottom: var(--spacing-sm); }
+.date-text { font-size: var(--font-title); font-weight: 600; color: var(--color-text); }
 
 /* 庆祝态 */
-.celebration {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 60px var(--spacing-lg); text-align: center;
-}
-.celebration-icon { font-size: 56px; margin-bottom: var(--spacing-md); }
-.celebration-text { font-size: var(--font-title); font-weight: 600; color: var(--color-text); }
-.celebration-sub { font-size: var(--font-caption); color: var(--color-text-hint); margin-top: var(--spacing-xs); }
+.celebration { display: flex; flex-direction: column; align-items: center; padding: 60px 0; }
+.celebration-icon { font-size: 48px; margin-bottom: 12px; }
+.celebration-text { font-size: 16px; font-weight: 600; color: var(--color-text); }
+.celebration-sub { font-size: var(--font-caption); color: var(--color-text-hint); margin-top: 4px; }
+
+/* 模块折叠卡 */
+.module { margin-bottom: var(--spacing-sm); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border); background: var(--color-white); }
+.module-header { display: flex; align-items: center; gap: 10px; padding: 14px var(--spacing-md); }
+.module-icon { font-size: 16px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; }
+.module-label { flex: 1; font-size: 14px; font-weight: 600; color: var(--color-text); }
+.module-count { font-size: var(--font-tag); color: var(--color-text-hint); min-width: 18px; text-align: center; }
+.module-toggle { font-size: 10px; color: #D0C4A5; transition: transform 0.3s; }
+
+/* 任务卡片 */
+.module-body { border-top: 1px solid #F5EDE0; }
+.task-row { padding: 12px var(--spacing-md); display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px solid var(--color-border); }
+.task-row:last-child { border-bottom: none; }
+
+/* 评级 */
+.task-rank { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+.rank-s { background: #FEF3E5; color: #D97706; border: 1px solid #F0D5A0; }
+.rank-a { background: #F5F0E8; color: #8B7355; border: 1px solid #D5C5B0; }
+.rank-b { background: #F0EAF5; color: #8B7355; border: 1px solid #C8B8D8; }
+.rank-c { background: #F0F0F0; color: #B8A590; border: 1px solid #E0D8D0; }
+
+.task-info { flex: 1; min-width: 0; }
+.task-name { font-size: 14px; color: var(--color-text); font-weight: 500; display: block; line-height: 1.4; }
+.task-hint { font-size: var(--font-tag); color: var(--color-text-hint); margin-top: 2px; display: block; }
+
+/* 按钮 */
+.task-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.btn-done { font-size: 12px; padding: 4px 14px; border-radius: 6px; background: var(--color-text); color: var(--color-bg); border: none; line-height: 1.6; }
+.btn-skip { font-size: 12px; padding: 4px 14px; border-radius: 6px; background: transparent; color: var(--color-text-hint); border: none; line-height: 1.6; }

@@ -2,38 +2,30 @@ const api = require('../../utils/api')
 const app = getApp()
 const phrases = require('../../utils/phrases')
 
-// Session 级"已处理"黑名单：记录本次 session 内完成或推迟的 sourceId
-// 用户下拉刷新时清空（主动刷新 = 接受全量重新评估）
 let dismissedSourceIds = []
-let isRefreshing = false   // 防止下拉刷新并发
+let isRefreshing = false
 
 Page({
   data: {
-    actions: [],
+    modules: [],               // [{ key, icon, name, color, actions, open, count }]
     loading: true,
     empty: false,
     allDone: false,
-    todayGenerated: false,     // 今日是否已生成过清单（区分新用户 vs 全部完成）
+    todayGenerated: false,
     todayDate: '',
-    sessionPostponeCount: 0,
-    showPostponeHint: false,
     isOffline: false
   },
 
   onShow() {
     this.setData({ isOffline: app.globalData.isOffline || false })
     if (!app.globalData.dirty.today) return
-
-    const hasData = this.data.actions.length > 0
+    const hasData = this.data.modules.length > 0
     this.loadTodayActions(!hasData)
   },
 
   loadTodayActions(showLoading = false) {
-    if (showLoading) {
-      this.setData({ loading: true })
-    }
+    if (showLoading) this.setData({ loading: true })
 
-    // 脏标记为 true → 强制重新生成，确保禁用/删除的源任务被算法排除
     const fetch = app.globalData.dirty.today
       ? api.generateDailyActions(true)
       : api.getTodayActions().then(res => {
@@ -43,35 +35,50 @@ Page({
 
     fetch.then(res => {
       const filtered = this.filterDismissed(res.actions || [])
-      const hasActions = filtered.length > 0
+      const modules = this.buildModules(filtered)
+      const hasActions = modules.length > 0
       const generated = res.generated !== undefined && res.generated !== false
+
       this.setData({
-        actions: filtered,
-        empty: !hasActions,
-        // 只有之前已有过任务 + 现在全清空了才算"全部完成"
-        // 新用户首次生成 → todayGenerated 为 false → 不庆祝
+        modules,
+        empty: !hasActions && !generated,
         allDone: !hasActions && this.data.todayGenerated,
         todayGenerated: generated || this.data.todayGenerated,
         todayDate: res.date,
-        loading: false,
-        sessionPostponeCount: 0,
-        showPostponeHint: false
+        loading: false
       })
-    }).finally(() => {
-      app.globalData.dirty.today = false
-    })
+    }).finally(() => { app.globalData.dirty.today = false })
   },
 
-  onGoToTasks() {
-    wx.switchTab({ url: '/pages/tasks/tasks' })
+  // 按 module 分组
+  buildModules(actions) {
+    const map = {}
+    actions.forEach(a => {
+      const m = a.module || (a.sourceType === 'job' ? 'jobseeker' : 'custom')
+      if (!map[m]) map[m] = []
+      map[m].push(a)
+    })
+
+    return phrases.MODULES
+      .filter(mod => map[mod.key] && map[mod.key].length > 0)
+      .map(mod => ({
+        ...mod,
+        actions: map[mod.key],
+        open: true,
+        count: map[mod.key].length
+      }))
+  },
+
+  onModuleToggle(e) {
+    const key = e.currentTarget.dataset.key
+    const modules = this.data.modules.map(m =>
+      m.key === key ? { ...m, open: !m.open } : m
+    )
+    this.setData({ modules })
   },
 
   onPullDownRefresh() {
-    // 防止快速多次下拉刷新并发执行
-    if (isRefreshing) {
-      wx.stopPullDownRefresh()
-      return
-    }
+    if (isRefreshing) { wx.stopPullDownRefresh(); return }
     isRefreshing = true
     wx.showNavigationBarLoading()
 
@@ -81,14 +88,13 @@ Page({
 
     refresh.then(res => {
       const filtered = this.filterDismissed(res.actions || [])
+      const modules = this.buildModules(filtered)
       this.setData({
-        actions: filtered,
-        empty: filtered.length === 0,
-        allDone: filtered.length === 0,
+        modules,
+        empty: modules.length === 0,
+        allDone: modules.length === 0,
         todayGenerated: true,
-        todayDate: res.date || this.data.todayDate,
-        sessionPostponeCount: 0,
-        showPostponeHint: false
+        todayDate: res.date || this.data.todayDate
       })
       app.globalData.dirty.today = false
       dismissedSourceIds = []
@@ -99,47 +105,66 @@ Page({
   },
 
   onComplete(e) {
-    const { id } = e.detail
-    const done = this.data.actions.find(a => a._id === id)
-    if (done && done.sourceId) {
-      dismissedSourceIds.push(done.sourceId)
-    }
+    const id = e.currentTarget.dataset.id
+    const target = this.findAction(id)
+    if (!target) return
 
-    const actions = this.data.actions.filter(a => a._id !== id)
-    const allDone = actions.length === 0 && this.data.todayGenerated
-    this.setData({ actions, empty: actions.length === 0 && !allDone, allDone })
-    app.markDirty(['today', 'mine'])
+    // 调云函数标记完成
+    api.completeAction(id).then(() => {
+      this.removeAction(id)
+      app.markDirty(['today', 'mine'])
+    })
   },
 
   onPostpone(e) {
-    const { id, type } = e.detail
-    const postponed = this.data.actions.find(a => a._id === id)
-    if (postponed && postponed.sourceId) {
-      dismissedSourceIds.push(postponed.sourceId)
-    }
+    const id = e.currentTarget.dataset.id
+    const type = e.currentTarget.dataset.type || 'skip'
+    const target = this.findAction(id)
+    if (!target) return
 
-    const actions = this.data.actions.filter(a => a._id !== id)
-    const sessionPostponeCount = this.data.sessionPostponeCount + 1
-    const showPostponeHint = sessionPostponeCount >= 3 && actions.length === 0
+    // 调云函数标记推迟
+    api.postponeAction(id, type).then(() => {
+      this.removeAction(id)
 
-    this.setData({ actions, empty: actions.length === 0, sessionPostponeCount, showPostponeHint })
-
-    if (type === 'skip') {
-      api.generateDailyActions(true).then(genRes => {
-        const fresh = this.filterDismissed(genRes.actions || [])
-        this.setData({ actions: fresh, empty: fresh.length === 0 })
-        app.globalData.dirty.today = false
-      })
-    }
-    app.markDirty(['mine'])
+      if (type === 'skip') {
+        api.generateDailyActions(true).then(genRes => {
+          const filtered = this.filterDismissed(genRes.actions || [])
+          this.setData({ modules: this.buildModules(filtered) })
+          app.globalData.dirty.today = false
+        })
+      }
+      app.markDirty(['mine'])
+    })
   },
 
-  // 双重过滤：黑名单 sourceId + 已完成/推迟标记（客户端兜底）
+  // 从模块列表中移除一张卡片
+  removeAction(actionId) {
+    const target = this.findAction(actionId)
+    if (target && target.sourceId) dismissedSourceIds.push(target.sourceId)
+
+    const modules = this.data.modules.map(m => ({
+      ...m,
+      actions: m.actions.filter(a => a._id !== actionId),
+      count: m.actions.filter(a => a._id !== actionId).length
+    })).filter(m => m.count > 0)
+
+    const allDone = modules.length === 0 && this.data.todayGenerated
+    this.setData({ modules, empty: modules.length === 0 && !allDone, allDone })
+  },
+
+  findAction(id) {
+    for (const m of this.data.modules) {
+      const a = m.actions.find(a => a._id === id)
+      if (a) return a
+    }
+    return null
+  },
+
+  onGoToCreate() { wx.switchTab({ url: '/pages/create/create' }) },
+
   filterDismissed(actions) {
     return actions.filter(a => {
-      // 1. 云函数层未正确过滤的已完成/推迟记录
       if (a.completed || a.postponed) return false
-      // 2. session 黑名单
       if (dismissedSourceIds.length > 0 && dismissedSourceIds.includes(a.sourceId)) return false
       return true
     })

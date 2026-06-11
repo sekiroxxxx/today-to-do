@@ -1,24 +1,24 @@
 /* ============================================
-   今日行动清单 — 全局样式变量
+   刷日常 v1.1 — 暖色系全局样式
    ============================================ */
 
 page {
-  --color-primary: #1677FF;
-  --color-primary-light: #E6F4FF;
-  --color-success: #52C41A;
-  --color-warning: #FAAD14;
-  --color-danger: #FF4D4F;
-  --color-text: #1A1A1A;
-  --color-text-secondary: #666666;
-  --color-text-hint: #999999;
-  --color-border: #E8E8E8;
-  --color-bg: #F5F5F5;
+  --color-primary: #D97706;
+  --color-primary-light: #FFFBF5;
+  --color-success: #65A30D;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+  --color-text: #3C2415;
+  --color-text-secondary: #8B7355;
+  --color-text-hint: #B8A590;
+  --color-border: #EDE8DF;
+  --color-bg: #FBFAF7;
   --color-white: #FFFFFF;
-  --color-tag-pending: #1677FF;
-  --color-tag-applied: #FAAD14;
-  --color-tag-interview: #52C41A;
-  --color-tag-offer: #722ED1;
-  --color-tag-rejected: #999999;
+  --color-tag-pending: #D97706;
+  --color-tag-applied: #CA8A04;
+  --color-tag-interview: #65A30D;
+  --color-tag-offer: #7C3AED;
+  --color-tag-rejected: #B8A590;
 
   --font-title: 18px;
   --font-body: 15px;

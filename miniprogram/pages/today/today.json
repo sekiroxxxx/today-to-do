@@ -1,6 +1,5 @@
 {
   "usingComponents": {
-    "action-card": "/components/action-card/action-card",
     "empty-state": "/components/empty-state/empty-state",
     "skeleton": "/components/skeleton/skeleton"
   },

@@ -1,39 +1,62 @@
-<!-- 今日首页 -->
+<!-- 日常 Tab v1.1 -->
 <view class="page">
-  <!-- 离线提示 -->
+  <!-- 离线 -->
   <view wx:if="{{isOffline}}" class="offline-banner">当前离线，显示最近数据</view>
 
-  <!-- 骨架屏：加载中 -->
+  <!-- 骨架屏 -->
   <skeleton wx:if="{{loading}}" count="{{3}}" />
 
-  <!-- 庆祝态：今日已生成且全部完成 -->
-  <view wx:elif="{{todayGenerated && allDone && !showPostponeHint}}" class="celebration">
+  <!-- 庆祝态 -->
+  <view wx:elif="{{todayGenerated && allDone}}" class="celebration">
     <text class="celebration-icon">🎉</text>
     <text class="celebration-text">今日委托全部完成</text>
     <text class="celebration-sub">干得好！</text>
   </view>
 
-  <!-- 引导态：从未生成过 -->
-  <empty-state wx:elif="{{empty && !showPostponeHint}}" text="今日无任务，去添加一个目标吧"
-               showBtn="{{true}}" btnText="去添加任务" bind:action="onGoToTasks"/>
+  <!-- 引导态 -->
+  <empty-state wx:elif="{{empty}}" text="还没有日常任务，去创建一个吧"
+    showBtn="{{true}}" btnText="去创建" bind:action="onGoToCreate"/>
 
-  <!-- 频繁推迟提示 -->
-  <empty-state wx:elif="{{showPostponeHint}}"
-    text="今天的委托不太对？去委托页调整优先级或添加新任务吧"
-    showBtn="{{true}}" btnText="去调整任务" bind:action="onGoToTasks"/>
-
-  <!-- 行动卡片列表 -->
-  <view wx:else class="action-list">
+  <!-- 模块列表 -->
+  <view wx:else class="module-list">
     <view class="date-header">
       <text class="date-text">{{todayDate}}</text>
-      <text class="date-sub">今日 {{actions.length}} 项行动</text>
     </view>
-    <action-card
-      wx:for="{{actions}}"
-      wx:key="_id"
-      action="{{item}}"
-      bind:complete="onComplete"
-      bind:postpone="onPostpone"
-    />
+
+    <view wx:for="{{modules}}" wx:key="key"
+      class="module module--{{item.key}} {{item.open ? 'open' : 'closed'}}">
+      <!-- 模块头部 -->
+      <view class="module-header" data-key="{{item.key}}" bindtap="onModuleToggle">
+        <text class="module-icon" style="background:{{item.color}}15">{{item.icon}}</text>
+        <text class="module-label">{{item.name}}</text>
+        <text class="module-count">{{item.count}}</text>
+        <text class="module-toggle">{{item.open ? '▾' : '▸'}}</text>
+      </view>
+
+      <!-- 折叠内容 -->
+      <view wx:if="{{item.open}}" class="module-body">
+        <view wx:for="{{item.actions}}" wx:key="_id" class="task-row">
+          <!-- 求职任务：保留评级 -->
+          <block wx:if="{{item.sourceType === 'job'}}">
+            <view wx:if="{{item.normalizedScore >= 80}}" class="task-rank rank-s">S</view>
+            <view wx:elif="{{item.normalizedScore >= 55}}" class="task-rank rank-a">A</view>
+            <view wx:elif="{{item.normalizedScore >= 25}}" class="task-rank rank-b">B</view>
+            <view wx:else class="task-rank rank-c">C</view>
+          </block>
+          <!-- 自定义任务 -->
+          <view wx:else class="task-rank rank-c">◆</view>
+
+          <view class="task-info">
+            <text class="task-name">{{item.title}}</text>
+            <text wx:if="{{item.description}}" class="task-hint">{{item.description}}</text>
+          </view>
+
+          <view class="task-actions">
+            <button class="btn-done" data-id="{{item._id}}" bindtap="onComplete">完成</button>
+            <button class="btn-skip" data-id="{{item._id}}" data-type="skip" bindtap="onPostpone">跳过</button>
+          </view>
+        </view>
+      </view>
+    </view>
   </view>
 </view>
