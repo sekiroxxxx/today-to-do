@@ -4,7 +4,7 @@
   <view class="user-card">
     <view class="user-avatar">{{avatarText}}</view>
     <view class="user-info">
-      <text class="user-name">{{userInfo && userInfo.nickname ? userInfo.nickname : '冒险者'}}</text>
+      <text class="user-name" bindtap="onEditNickname">{{userInfo && userInfo.nickname ? userInfo.nickname : '冒险者'}} ✎</text>
     </view>
   </view>
 
@@ -60,6 +60,15 @@
       <text>每日清单上限</text>
       <slider min="3" max="5" value="{{dailyLimit}}" show-value block-size="18"
               activeColor="#1677FF" bindchange="onDailyLimitChange" style="width:50%" />
+    </view>
+  </view>
+
+  <!-- 模块开关 -->
+  <view class="card">
+    <text class="card-title">功能模块</text>
+    <view wx:for="{{allModules}}" wx:key="key" class="setting-item flex-between">
+      <text>{{item.icon}} {{item.name}}</text>
+      <switch checked="{{userModules.indexOf(item.key) > -1}}" data-key="{{item.key}}" bindchange="onModuleToggle" color="#D97706"/>
     </view>
   </view>
 

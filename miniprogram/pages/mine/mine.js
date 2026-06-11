@@ -11,7 +11,9 @@ Page({
     funnel: null,
     statsFormatted: null,
     avatarText: '冒',
-    dailyLimit: 5           // 每日清单条数上限
+    dailyLimit: 5,
+    userModules: ['jobseeker', 'custom'],
+    allModules: phrases.MODULES          // WXML 渲染用
   },
 
   onShow() {
@@ -24,7 +26,8 @@ Page({
     app.getUserInfo().then(user => {
       const nickname = (user && user.nickname) || '冒险者'
       const dailyLimit = (user && user.preferences && user.preferences.dailyLimit) || 5
-      this.setData({ userInfo: user, avatarText: nickname[0], dailyLimit })
+      const userModules = (user && user.modules) || ['jobseeker', 'custom']
+      this.setData({ userInfo: user, avatarText: nickname[0], dailyLimit, userModules })
     })
 
     // 获取统计数据
@@ -74,6 +77,47 @@ Page({
       total: summary.total,
       completionRate: Math.round(rate * 100),
       moodText: item.text
+    }
+  },
+
+  // ========== 昵称编辑 ==========
+  onEditNickname() {
+    wx.showModal({
+      title: '修改昵称',
+      editable: true,
+      placeholderText: '输入新昵称',
+      success: (res) => {
+        if (res.confirm && res.content && res.content.trim()) {
+          const nickname = res.content.trim()
+          const db = wx.cloud.database()
+          const user = this.data.userInfo
+          if (user && user._id) {
+            db.collection('users').doc(user._id).update({ data: { nickname } }).then(() => {
+              app.globalData.userInfo.nickname = nickname
+              this.setData({ 'userInfo.nickname': nickname, avatarText: nickname[0] })
+              wx.showToast({ title: '昵称已更新', icon: 'success' })
+            })
+          }
+        }
+      }
+    })
+  },
+
+  // ========== 模块开关 ==========
+  onModuleToggle(e) {
+    const key = e.currentTarget.dataset.key
+    const modules = [...this.data.userModules]
+    const idx = modules.indexOf(key)
+    if (idx > -1) modules.splice(idx, 1)
+    else modules.push(key)
+
+    const db = wx.cloud.database()
+    const user = this.data.userInfo
+    if (user && user._id) {
+      db.collection('users').doc(user._id).update({ data: { modules } }).then(() => {
+        this.setData({ userModules: modules })
+        app.markDirty(['today'])
+      })
     }
   },
 

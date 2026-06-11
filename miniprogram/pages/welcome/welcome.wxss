@@ -1,30 +1,18 @@
-.page {
-  height: 100vh; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  background: linear-gradient(160deg, #F0F5FF 0%, #FFFFFF 40%, #F5F0FF 100%);
-}
+.page { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(160deg, #FFFBF5 0%, #FBFAF7 40%, #F5F0E8 100%); }
 
-/* 主体 */
-.hero { display: flex; flex-direction: column; align-items: center; }
-.hero-icon { font-size: 72px; margin-bottom: var(--spacing-lg); }
-.logo { font-size: 32px; font-weight: 800; color: var(--color-text); letter-spacing: 2px; }
-.slogan {
-  font-size: var(--font-caption); color: var(--color-text-hint);
-  margin-top: var(--spacing-sm);
-}
+.hero { display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; }
+.hero-icon { font-size: 56px; margin-bottom: var(--spacing-md); }
+.logo { font-size: 28px; font-weight: 800; color: var(--color-text); letter-spacing: 2px; }
+.slogan { font-size: var(--font-caption); color: var(--color-text-hint); margin-top: var(--spacing-xs); }
 
-/* 按钮区 */
+.module-select { width: 260px; margin-bottom: 40px; }
+.select-title { font-size: var(--font-body); font-weight: 600; color: var(--color-text); display: block; margin-bottom: var(--spacing-md); text-align: center; }
+.check-item { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) 0; }
+.checkbox { width: 22px; height: 22px; border: 2px solid var(--color-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; transition: all 0.2s; }
+.checkbox--checked { border-color: var(--color-primary); }
+.check-label { font-size: var(--font-body); color: var(--color-text); }
+
 .actions { position: absolute; bottom: 80px; left: 40px; right: 40px; display: flex; flex-direction: column; align-items: center; }
-
-.btn-start {
-  width: 100%; background: var(--color-primary); color: #fff;
-  font-size: var(--font-title); font-weight: 600;
-  border-radius: var(--radius-round); padding: 14px 0;
-  box-shadow: 0 4px 16px rgba(22,119,255,0.4);
-}
+.btn-start { width: 100%; background: var(--color-primary); color: #fff; font-size: var(--font-title); font-weight: 600; border-radius: var(--radius-round); padding: 14px 0; }
 .btn-start[disabled] { opacity: 0.5; }
-
-.btn-skip {
-  margin-top: var(--spacing-lg); font-size: var(--font-caption);
-  color: var(--color-text-hint); padding: var(--spacing-xs);
-}
+.btn-skip { margin-top: var(--spacing-lg); font-size: var(--font-caption); color: var(--color-text-hint); }

@@ -1,0 +1,67 @@
+<!-- 推进 Tab v1.1 -->
+<view class="page">
+  <!-- 操作栏 -->
+  <view class="topbar">
+    <text class="back-btn" bindtap="onBack">← 日常</text>
+    <view class="module-label" bindtap="onModuleLabelTap">
+      <text>{{currentModuleInfo.icon}}</text>
+      <text class="module-name">{{currentModuleInfo.name}}</text>
+      <text class="dropdown">▾</text>
+    </view>
+    <text class="more-btn">⋯</text>
+  </view>
+
+  <!-- 数据概览：求职漏斗 -->
+  <view wx:if="{{funnel}}" class="data-bar">
+    <view class="funnel-row">
+      <view class="funnel-item">
+        <text class="funnel-num">{{funnel.pending}}</text>
+        <text class="funnel-label">待投</text>
+      </view>
+      <text class="funnel-arrow">→</text>
+      <view class="funnel-item">
+        <text class="funnel-num">{{funnel.applied}}</text>
+        <text class="funnel-label">已投</text>
+      </view>
+      <text class="funnel-arrow">→</text>
+      <view class="funnel-item">
+        <text class="funnel-num">{{funnel.interviewing}}</text>
+        <text class="funnel-label">面试</text>
+      </view>
+      <text class="funnel-arrow">→</text>
+      <view class="funnel-item">
+        <text class="funnel-num funnel-highlight">{{funnel.offer}}</text>
+        <text class="funnel-label">Offer</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 今日任务 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">今日任务</text>
+      <text class="section-add" bindtap="onAddTask">+ 添加</text>
+    </view>
+    <view wx:if="{{tasks.length === 0}}" class="empty-hint">今天还没有任务</view>
+    <view wx:for="{{tasks}}" wx:key="_id" class="task-card">
+      <view class="task-card-row1">
+        <text class="task-card-name">{{item.title}}</text>
+      </view>
+      <text wx:if="{{item.description}}" class="task-card-desc">{{item.description}}</text>
+      <view class="task-card-actions">
+        <button class="btn-done" data-id="{{item._id}}" bindtap="onComplete">完成</button>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 模块切换弹窗 -->
+<view wx:if="{{showSheet}}" class="sheet-mask" bindtap="closeSheet"></view>
+<view class="sheet {{showSheet ? 'sheet--show' : ''}}">
+  <view class="sheet-title">切换模块</view>
+  <view wx:for="{{modules}}" wx:key="key" class="sheet-item" data-key="{{item.key}}" bindtap="onModuleSelect">
+    <text>{{item.icon}} {{item.name}}</text>
+    <text wx:if="{{item.key === currentModule}}" style="color:var(--color-primary)">✓</text>
+  </view>
+  <view class="sheet-cancel" bindtap="closeSheet">取消</view>
+</view>

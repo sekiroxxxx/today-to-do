@@ -1,0 +1,75 @@
+// 推进 Tab v1.1 — 模块工作区
+const api = require('../../utils/api')
+const phrases = require('../../utils/phrases')
+const app = getApp()
+
+Page({
+  data: {
+    modules: phrases.MODULES,
+    currentModule: 'jobseeker',
+    currentModuleInfo: phrases.MODULES[0],
+    tasks: [],
+    funnel: null,      // 求职漏斗
+    showSheet: false
+  },
+
+  onShow() {
+    this.loadData()
+  },
+
+  loadData() {
+    const mod = phrases.MODULES.find(m => m.key === this.data.currentModule)
+    if (mod) wx.setNavigationBarTitle({ title: mod.name })
+
+    // 更新当前模块信息
+    const currentModuleInfo = phrases.MODULES.find(m => m.key === this.data.currentModule)
+    this.setData({ currentModuleInfo })
+
+    // 获取该模块的今日任务
+    api.getTodayActions().then(res => {
+      const tasks = (res.actions || []).filter(a => a.module === this.data.currentModule)
+      this.setData({ tasks })
+    })
+
+    // 求职模块额外获取漏斗
+    if (this.data.currentModule === 'jobseeker') {
+      api.getStats('week').then(res => {
+        if (res.funnel) this.setData({ funnel: res.funnel })
+      })
+    } else {
+      this.setData({ funnel: null })
+    }
+  },
+
+  // ========== 模块切换 ==========
+  onModuleLabelTap() {
+    this.setData({ showSheet: true })
+  },
+
+  onModuleSelect(e) {
+    const key = e.currentTarget.dataset.key
+    this.setData({ currentModule: key, showSheet: false })
+    this.loadData()
+  },
+
+  closeSheet() { this.setData({ showSheet: false }) },
+
+  // ========== 任务操作 ==========
+  onComplete(e) {
+    const id = e.currentTarget.dataset.id
+    api.completeAction(id).then(() => {
+      wx.showToast({ title: phrases.pick(phrases.COMPLETE), icon: 'success' })
+      app.markDirty(['today', 'mine'])
+      this.loadData()
+    })
+  },
+
+  // ========== 导航 ==========
+  onBack() {
+    wx.switchTab({ url: '/pages/today/today' })
+  },
+
+  onAddTask() {
+    wx.navigateTo({ url: '/pages/create/create' })
+  }
+})

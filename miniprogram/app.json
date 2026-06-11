@@ -3,6 +3,7 @@
     "pages/welcome/welcome",
     "pages/create/create",
     "pages/today/today",
+    "pages/progress/progress",
     "pages/jobs/jobs",
     "pages/jobs/add/add",
     "pages/jobs/detail/detail",
@@ -11,21 +12,21 @@
     "pages/mine/mine"
   ],
   "window": {
-    "backgroundColor": "#F5F5F5",
+    "backgroundColor": "#FBFAF7",
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#FFFFFF",
     "navigationBarTitleText": "刷日常",
     "navigationBarTextStyle": "black"
   },
   "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#1677FF",
+    "color": "#B8A590",
+    "selectedColor": "#D97706",
     "backgroundColor": "#FFFFFF",
     "borderStyle": "black",
     "list": [
       { "pagePath": "pages/today/today", "text": "日常" },
-      { "pagePath": "pages/jobs/jobs", "text": "求职" },
-      { "pagePath": "pages/tasks/tasks", "text": "任务" },
+      { "pagePath": "pages/progress/progress", "text": "推进" },
+      { "pagePath": "pages/create/create", "text": "创建" },
       { "pagePath": "pages/mine/mine", "text": "我的" }
     ]
   },

@@ -1,56 +1,69 @@
-// Welcome 欢迎页 — v1.0 新用户引导
+// Welcome v1.1 — 模块勾选
 const app = getApp()
+const phrases = require('../../utils/phrases')
 
 Page({
   data: {
     checking: true,
-    starting: false
+    starting: false,
+    allModules: phrases.MODULES,
+    selected: ['jobseeker', 'custom']  // 默认勾选
   },
 
   onShow() {
-    // 已登录且 persona 有值 → 老用户，直接跳过
     app.getUserInfo().then(user => {
       if (user && user._id && user.persona && user.persona.trim()) {
         wx.switchTab({ url: '/pages/today/today' })
       } else {
-        // persona 为空 → 新用户或未选画像，停在欢迎页
         this.setData({ checking: false })
       }
     })
   },
 
-  // ========== 点击"开始" ==========
+  // ========== 勾选模块 ==========
+  onModuleCheck(e) {
+    const key = e.currentTarget.dataset.key
+    let selected = [...this.data.selected]
+    const idx = selected.indexOf(key)
+    if (idx > -1) selected.splice(idx, 1)
+    else selected.push(key)
+    this.setData({ selected })
+  },
+
+  // ========== 开始 ==========
   onStart() {
+    if (this.data.selected.length === 0) {
+      return wx.showToast({ title: '请至少选择一个模块', icon: 'none' })
+    }
     this.setData({ starting: true })
 
-    // 1. 调 login 确保用户记录存在
     wx.cloud.callFunction({ name: 'login', data: {} })
       .then(res => {
         if (!res.result || !res.result.user) {
-          wx.showToast({ title: '网络异常，请重试', icon: 'none' })
+          wx.showToast({ title: '网络异常', icon: 'none' })
           this.setData({ starting: false })
           return
         }
-
         const user = res.result.user
         app.globalData.userInfo = user
-
-        // 2. 设置 persona 为默认画像（v1.0 固定 'daily'，v1.1 改为画像选择）
         const db = wx.cloud.database()
         return db.collection('users').doc(user._id).update({
-          data: { persona: 'daily' }
+          data: {
+            persona: 'daily',
+            modules: this.data.selected
+          }
         }).then(() => {
           app.globalData.userInfo.persona = 'daily'
+          app.globalData.userInfo.modules = this.data.selected
           wx.switchTab({ url: '/pages/today/today' })
         })
       })
       .catch(() => {
-        wx.showToast({ title: '网络异常，请重试', icon: 'none' })
+        wx.showToast({ title: '网络异常', icon: 'none' })
         this.setData({ starting: false })
       })
   },
 
-  // ========== 点击"不是第一次？" ==========
   onSkip() {
     wx.switchTab({ url: '/pages/today/today' })
   }
