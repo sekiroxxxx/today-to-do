@@ -3,7 +3,7 @@
 /* 用户卡片 */
 .user-card {
   display: flex; align-items: center; gap: var(--spacing-md);
-  background: linear-gradient(135deg, #1677FF, #69B1FF);
+  background: linear-gradient(135deg, #D97706, #E5A840);
   border-radius: var(--radius-md); padding: var(--spacing-lg);
   color: #fff; margin-bottom: var(--spacing-md);
 }

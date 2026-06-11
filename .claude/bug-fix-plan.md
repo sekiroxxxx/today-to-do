@@ -4,29 +4,6 @@
 
 ---
 
-## 方案四：跳转和交互补全
-
-**关联 Bug**：
-- 推进-添加按钮点不动
-- 创建-求职卡片点了没反应
-- 创建-不知道可以滑动查看更多模块
-
-**根因**：推进页的 `+` 按钮 `bindtap` 未绑定。创建页模块卡片没有点击事件。模块选择区横向溢出无提示。
-
-**修复**：
-1. `pages/progress/progress.wxml` — `+` 按钮绑定 `bindtap="onAdd"`
-2. `pages/progress/progress.js` — `onAdd` 实现：`navigateTo('/pages/create/create?module=' + currentModule)`
-3. `pages/create/create.js` — `onLoad` 读 `options.module`，有则默认选中对应模块
-4. `pages/create/create.wxml` — 每个模块选择卡片加 `bindtap="onModuleSelect"`
-5. 模块选择器用网格布局确保所有选项一屏可见，或加左右箭头提示
-
-**验收**：
-1. 推进页求职工作台点"添加" → 跳到创建页 → 默认选中"求职"
-2. 创建页点击"工作"卡片 → 表单切换为工作表单
-3. 创建页所有模块选项一屏内可见
-
----
-
 ## 方案五：主题色硬编码残留
 
 **关联 Bug**：我的-用户名卡片仍是蓝色
