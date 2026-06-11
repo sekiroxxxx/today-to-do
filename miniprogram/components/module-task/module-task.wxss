@@ -1,0 +1,23 @@
+.card {
+  background: #fff; border-radius: var(--radius-md);
+  padding: var(--spacing-md); margin-bottom: var(--spacing-sm);
+  box-shadow: var(--shadow-card);
+}
+.card--done { opacity: 0.6; }
+
+.card-header { display: flex; align-items: center; margin-bottom: 4px; }
+.card-title { font-size: var(--font-body); font-weight: 600; flex: 1; min-width: 0; }
+.done-mark { color: var(--color-success); font-size: 18px; font-weight: 700; margin-left: var(--spacing-xs); }
+
+.card-desc { font-size: var(--font-caption); color: var(--color-text-secondary); display: block; margin-bottom: var(--spacing-xs); }
+
+.badge-row { display: flex; gap: var(--spacing-xs); flex-wrap: wrap; margin-bottom: var(--spacing-xs); }
+.badge-item { font-size: var(--font-tag); padding: 2px 8px; border-radius: var(--radius-round); }
+
+.meta-row { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-bottom: var(--spacing-xs); }
+.meta-item { font-size: var(--font-tag); color: var(--color-text-hint); }
+
+.action-row { display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-sm); padding-top: var(--spacing-xs); border-top: 1px solid var(--color-border); }
+.complete-row { margin-top: var(--spacing-sm); padding-top: var(--spacing-xs); border-top: 1px solid var(--color-border); }
+.action-btn { flex: 1; padding: 8px 0; font-size: var(--font-caption); border-radius: var(--radius-round); background: var(--color-bg); color: var(--color-text-secondary); border: none; text-align: center; }
+.action-btn--primary { background: var(--color-primary); color: #fff; }
