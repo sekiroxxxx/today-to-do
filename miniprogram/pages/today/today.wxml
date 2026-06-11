@@ -19,23 +19,32 @@
 
   <!-- 模块列表 -->
   <view wx:else class="module-list">
+    <!-- 全局庆祝横幅 -->
+    <view wx:if="{{allModulesDone}}" class="all-done-banner">🎉 今日委托全部完成</view>
+
     <view class="date-header">
       <text class="date-text">{{todayDate}}</text>
     </view>
 
     <view wx:for="{{modules}}" wx:key="key"
-      class="module module--{{item.key}} {{item.open ? 'open' : 'closed'}}">
+      class="module {{item.allDone ? 'module--done' : ''}} {{item.open ? 'open' : 'closed'}}">
       <!-- 模块头部 -->
       <view class="module-header" data-key="{{item.key}}" bindtap="onModuleToggle">
         <text class="module-icon" style="background:{{item.color}}15">{{item.icon}}</text>
         <text class="module-label">{{item.name}}</text>
-        <text class="module-count">{{item.count}}</text>
+        <text wx:if="{{item.allDone}}" class="module-check">✓</text>
+        <text wx:else class="module-count">{{item.count}}</text>
         <text class="module-toggle">{{item.open ? '▾' : '▸'}}</text>
       </view>
 
       <!-- 折叠内容 -->
       <view wx:if="{{item.open}}" class="module-body">
-        <view wx:for="{{item.actions}}" wx:key="_id" class="task-row">
+        <!-- 已完成态 -->
+        <view wx:if="{{item.allDone}}" class="module-done-msg">
+          <text>今日{{item.name}}委托全部完成 🎉</text>
+        </view>
+        <!-- 任务列表 -->
+        <view wx:else wx:for="{{item.actions}}" wx:key="_id" class="task-row">
           <view class="task-info">
             <text class="task-name">{{item.title}}</text>
             <text wx:if="{{item.description}}" class="task-hint">{{item.description}}</text>

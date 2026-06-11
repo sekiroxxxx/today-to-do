@@ -15,6 +15,8 @@
 .module-icon { font-size: 16px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; }
 .module-label { flex: 1; font-size: 14px; font-weight: 600; color: var(--color-text); }
 .module-count { font-size: var(--font-tag); color: var(--color-text-hint); min-width: 18px; text-align: center; }
+.module-check { font-size: 14px; color: var(--color-success); font-weight: 700; min-width: 18px; text-align: center; }
+.module--done { opacity: 0.7; }
 .module-toggle { font-size: 10px; color: #D0C4A5; transition: transform 0.3s; }
 
 /* 任务卡片 */
@@ -32,6 +34,12 @@
 .task-info { flex: 1; min-width: 0; }
 .task-name { font-size: 14px; color: var(--color-text); font-weight: 500; display: block; line-height: 1.4; }
 .task-hint { font-size: var(--font-tag); color: var(--color-text-hint); margin-top: 2px; display: block; }
+
+/* 全局庆祝横幅 */
+.all-done-banner { text-align: center; padding: var(--spacing-sm); margin-bottom: var(--spacing-sm); background: #FFFBF5; border: 1px solid #EDE0CC; border-radius: var(--radius-sm); font-size: var(--font-body); color: var(--color-primary); }
+
+/* 模块完成文案 */
+.module-done-msg { text-align: center; padding: var(--spacing-lg); font-size: var(--font-caption); color: var(--color-text-hint); }
 
 /* 按钮 */
 .task-actions { display: flex; gap: 8px; flex-shrink: 0; }

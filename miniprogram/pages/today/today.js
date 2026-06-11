@@ -14,7 +14,8 @@ Page({
     allDone: false,
     todayGenerated: false,
     todayDate: '',
-    isOffline: false
+    isOffline: false,
+    allModulesDone: false
   },
 
   onShow() {
@@ -44,13 +45,16 @@ Page({
     fetch.then(res => {
       const filtered = this.filterDismissed(res.actions || [])
       const modules = this.buildModules(filtered)
-      const hasActions = modules.length > 0
+      const hasActions = modules.filter(function (m) { return !m.allDone }).length > 0
       const generated = res.generated !== undefined && res.generated !== false
+      // 所有模块都完成 → 全局庆祝横幅
+      var allModulesDone = generated && modules.length > 0 && !hasActions
 
       this.setData({
         modules,
         empty: !hasActions && !generated,
         allDone: !hasActions && this.data.todayGenerated,
+        allModulesDone: allModulesDone,
         todayGenerated: generated || this.data.todayGenerated,
         todayDate: res.date,
         loading: false
@@ -60,28 +64,38 @@ Page({
     }).finally(() => { app.globalData.dirty.today = false })
   },
 
-  // 按 module 分组，仅展示用户已启用的模块
+  // 按 module 分组，已完成模块也保留（allDone 标记）
   buildModules(actions) {
     var userModules = (app.globalData.userInfo && app.globalData.userInfo.modules) || ['jobseeker', 'custom']
     var map = {}
-    actions.forEach(a => {
+    actions.forEach(function (a) {
       var m = a.module || (a.sourceType === 'job' ? 'jobseeker' : 'custom')
       if (userModules.indexOf(m) === -1) return
       if (!map[m]) map[m] = []
       map[m].push(a)
     })
 
-    return phrases.MODULES
-      .filter(mod => map[mod.key] && map[mod.key].length > 0)
-      .map(mod => ({
-        icon: mod.icon,
-        name: mod.name,
-        color: mod.color,
-        key: mod.key,
-        actions: map[mod.key],
-        open: true,
-        count: map[mod.key].length
-      }))
+    var result = []
+    for (var i = 0; i < phrases.MODULES.length; i++) {
+      var mod = phrases.MODULES[i]
+      // 未激活的模块不显示
+      if (userModules.indexOf(mod.key) === -1) continue
+      var hasActions = map[mod.key] && map[mod.key].length > 0
+      // 有任务 或 今日已生成过（已完成态）才显示
+      if (hasActions || this.data.todayGenerated) {
+        result.push({
+          icon: mod.icon,
+          name: mod.name,
+          color: mod.color,
+          key: mod.key,
+          actions: map[mod.key] || [],
+          open: hasActions,     // 有任务默认展开，完成了默认折叠
+          count: hasActions ? map[mod.key].length : 0,
+          allDone: !hasActions && this.data.todayGenerated
+        })
+      }
+    }
+    return result
   },
 
   onModuleToggle(e) {
