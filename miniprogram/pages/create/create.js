@@ -157,8 +157,8 @@ Page({
     action.then(res => {
       if (res.success) {
         getApp().markDirty(['tasks', 'today', 'jobs', 'mine'])
-        wx.showToast({ title: '已添加', icon: 'success' })
-        setTimeout(() => wx.navigateBack(), 800)
+        wx.showToast({ title: '已添加', icon: 'success', duration: 1000 })
+        setTimeout(function () { wx.navigateBack() }, 1000)
       } else {
         wx.showToast({ title: res.errMsg || '操作失败', icon: 'none' })
         this.setData({ saving: false })

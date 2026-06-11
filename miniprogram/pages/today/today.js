@@ -126,6 +126,7 @@ Page({
 
     var ctx = this
     api.completeAction(id).then(function (res) {
+      wx.showToast({ title: phrases.pick(phrases.COMPLETE), icon: 'success', duration: 1200 })
       // 求职任务：完成 action 后询问是否推进岗位状态
       if (res.sourceType === 'job' && res.jobInfo) {
         var statusMap = {
