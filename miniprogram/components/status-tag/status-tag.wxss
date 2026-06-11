@@ -7,5 +7,5 @@
 .tag--applied  { background: #FFF7E6; color: #D48A00; }
 .tag--interview{ background: #F0FFF0; color: #389E0D; }
 .tag--offer    { background: #F9F0FF; color: #722ED1; }
-.tag--rejected { background: #F5F5F5; color: #999999; }
+.tag--closed { background: #F5F5F5; color: #999999; }
 .tag--custom   { background: #F0F0F0; color: #666666; }

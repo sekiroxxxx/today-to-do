@@ -25,9 +25,16 @@ Page({
     const currentModuleInfo = phrases.MODULES.find(m => m.key === this.data.currentModule)
     this.setData({ currentModuleInfo })
 
-    // 获取该模块的今日任务
+    // 获取该模块的今日任务，求职加评级 badge
     api.getTodayActions().then(res => {
       const tasks = (res.actions || []).filter(a => a.module === this.data.currentModule)
+        .map(a => {
+          if (a.sourceType === 'job' && a.normalizedScore != null) {
+            const tier = phrases.RATING_TIERS.find(t => a.normalizedScore >= t.min) || phrases.RATING_TIERS[phrases.RATING_TIERS.length - 1]
+            a.badge = tier
+          }
+          return a
+        })
       this.setData({ tasks })
     })
 

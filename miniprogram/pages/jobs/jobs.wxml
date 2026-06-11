@@ -38,8 +38,8 @@
               data-filter="面试中" bindtap="onFilterTap">面试中</view>
         <view class="filter-tag {{currentFilter === 'Offer' ? 'filter-tag--active' : ''}}"
               data-filter="Offer" bindtap="onFilterTap">Offer</view>
-        <view class="filter-tag {{currentFilter === '已拒绝' ? 'filter-tag--active' : ''}}"
-              data-filter="已拒绝" bindtap="onFilterTap">已拒绝</view>
+        <view class="filter-tag {{currentFilter === '已关闭' ? 'filter-tag--active' : ''}}"
+              data-filter="已关闭" bindtap="onFilterTap">已关闭</view>
       </view>
     </scroll-view>
   </view>
@@ -79,7 +79,7 @@
           </view>
         </view>
         <!-- 推进按钮 -->
-        <view class="job-advance" wx:if="{{item.status !== 'Offer' && item.status !== '已拒绝'}}"
+        <view class="job-advance" wx:if="{{item.status !== 'Offer' && item.status !== '已关闭'}}"
               data-id="{{item._id}}" data-status="{{item.status}}" catchtap="onQuickAdvance">
           <text class="advance-icon">
             {{item.status === '待投递' ? '📤' : item.status === '已投递' ? '💬' : '🎉'}}

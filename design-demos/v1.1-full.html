@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>刷日常 v1.1 原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#E8E3DB;display:flex;justify-content:center}
+.phone{width:375px;height:100vh;background:#FBFAF7;position:relative;overflow:hidden;display:flex;flex-direction:column}
+
+/* ========== NAV BAR ========== */
+.nav{background:#FBFAF7;padding:12px 20px 8px;border-bottom:1px solid #EDE8DF;display:flex;align-items:center;justify-content:space-between}
+.nav-title{font-family:'Georgia',serif;font-size:18px;color:#3C2415;font-weight:600}
+
+/* ========== TAB BODY ========== */
+.tab-body{flex:1;overflow-y:auto;padding-bottom:20px;display:none}
+.tab-body.active{display:block}
+
+/* ========== TAB1: 日常 ========== */
+.module{margin:12px 16px;border-radius:12px;overflow:hidden;transition:all .3s ease}
+.module-header{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;transition:all .25s}
+.module--jobseeker{background:#FFFBF5;border:1px solid #EDE0CC}
+.module--work{background:#FAFAF5;border:1px solid #E0E0D0}
+.module--custom{background:#FAFAFA;border:1px solid #E8E8E8}
+.module--inactive{opacity:.45}
+
+.module-icon{font-size:16px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#F5F0E5;flex-shrink:0}
+.module--work .module-icon{background:#F0F0E8}
+.module--custom .module-icon{background:#F0F0F0}
+.module-label{flex:1;font-size:14px;font-weight:600;color:#3C2415}
+.module-count{font-size:11px;color:#B8A590;font-weight:500;min-width:18px;text-align:center}
+.module-summary{font-size:12px;color:#C8BBA0;padding:0 16px 0 54px;margin-top:-8px;margin-bottom:10px;display:block}
+.module-toggle{font-size:10px;color:#D0C4A5;transition:transform .3s}
+.module-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.module.open .module-body{max-height:600px}
+.module.open .module-toggle{transform:rotate(180deg)}
+.module.closed .module-summary{display:block}
+
+/* 任务卡片 */
+.task-item{padding:12px 16px 12px 54px;border-top:1px solid #F5EDE0;display:flex;gap:10px}
+.task-rank{width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border-radius:4px;flex-shrink:0;margin-top:1px;font-family:'SF Mono',monospace}
+.rank-s{background:#FEF3E5;color:#D97706;border:1px solid #F0D5A0}
+.rank-a{background:#F5F0E8;color:#8B7355;border:1px solid #D5C5B0}
+.task-info{flex:1;min-width:0}
+.task-name{font-size:14px;color:#3C2415;font-weight:500;display:block;line-height:1.4}
+.task-hint{font-size:12px;color:#B8A590;margin-top:2px}
+.task-actions{display:flex;gap:8px;margin-top:8px}
+.btn{font-size:12px;padding:5px 14px;border-radius:6px;border:none;cursor:pointer;font-family:inherit;font-weight:500}
+.btn-done{background:#3C2415;color:#FFFBF5}
+.btn-enter{background:transparent;color:#D97706;border:1px solid #D97706}
+.btn-skip{background:transparent;color:#C8BBA0}
+
+/* 庆祝态 */
+.celebrate{padding:60px 20px;text-align:center;display:none}
+.celebrate.show{display:block}
+.celebrate-icon{font-size:48px;margin-bottom:12px}
+.celebrate-text{font-size:16px;color:#3C2415;font-weight:600}
+.celebrate-sub{font-size:13px;color:#B8A590;margin-top:4px}
+
+/* ========== TAB2: 执行台 ========== */
+/* 操作栏 */
+.exec-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #EDE8DF;background:#FBFAF7}
+.exec-back{font-size:13px;color:#8B7355;cursor:pointer}
+.exec-module-label{font-size:15px;font-weight:600;color:#3C2415;cursor:pointer;display:flex;align-items:center;gap:4px}
+.exec-dropdown{font-size:10px;color:#B8A590}
+.exec-more{font-size:18px;color:#8B7355;cursor:pointer;padding:0 4px;letter-spacing:2px}
+
+/* 数据概览 */
+.exec-data{padding:16px;display:flex;justify-content:center}
+.funnel-row{display:flex;align-items:center;gap:12px;background:#FFFBF5;border:1px solid #EDE0CC;border-radius:10px;padding:14px 20px}
+.funnel-item{text-align:center}
+.funnel-num{font-size:20px;font-weight:700;color:#3C2415}
+.funnel-highlight{color:#D97706}
+.funnel-label{font-size:10px;color:#B8A590;display:block}
+.funnel-arrow{color:#D0C4A5;font-size:12px}
+
+/* 今日任务 */
+.exec-tasks-header{display:flex;justify-content:space-between;align-items:center;padding:0 16px 8px}
+.exec-tasks-title{font-size:14px;font-weight:600;color:#3C2415}
+.exec-tasks-add{font-size:12px;color:#D97706;cursor:pointer}
+.exec-tasks{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.exec-task-card{
+  background:#fff;border:1px solid #EDE8DF;border-radius:10px;
+  padding:14px;transition:background .15s
+}
+.exec-task-row1{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.exec-task-name{font-size:14px;font-weight:500;color:#3C2415;flex:1}
+.exec-task-desc{font-size:12px;color:#B8A590;margin-bottom:10px}
+.exec-task-actions{display:flex;gap:8px}
+.btn-enter{font-size:12px;padding:5px 14px;border-radius:6px;border:1.5px solid #D97706;color:#D97706;background:transparent;cursor:pointer;font-family:inherit;font-weight:500}
+.btn-done-sm{font-size:12px;padding:5px 14px;border-radius:6px;border:none;background:#F5EDE0;color:#8B7355;cursor:pointer;font-family:inherit;font-weight:500}
+.btn-done-sm:active{background:#E8D8C0}
+
+/* 工具区 */
+.exec-tools{padding:16px;margin-top:8px}
+.exec-tools-title{font-size:13px;font-weight:600;color:#3C2415;display:block;margin-bottom:10px}
+.tools-grid{display:flex;gap:10px;flex-wrap:wrap}
+.tool-item{
+  flex:1;min-width:70px;max-width:110px;padding:16px 8px;background:#FAFAFA;
+  border:1px solid #EDE8DF;border-radius:10px;text-align:center;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  transition:all .15s
+}
+.tool-item:active{background:#F5EDE0}
+.tool-item--disabled{opacity:.4;cursor:not-allowed}
+.tool-icon{font-size:22px}
+.tool-name{font-size:11px;color:#8B7355;font-weight:500}
+.tool-soon{font-size:9px;color:#B8A590;background:#F0EDE5;padding:1px 6px;border-radius:8px}
+
+/* 模块切换弹窗 */
+.module-sheet-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(60,36,21,0.3);z-index:50}
+.module-sheet{
+  position:fixed;bottom:0;left:0;right:0;z-index:51;
+  background:#FBFAF7;border-radius:16px 16px 0 0;
+  padding:16px;max-width:375px;margin:0 auto;
+  transform:translateY(0);transition:transform .3s
+}
+.module-sheet-title{font-size:15px;font-weight:600;color:#3C2415;text-align:center;padding-bottom:12px;border-bottom:1px solid #EDE8DF;margin-bottom:8px}
+.module-sheet-item{display:flex;justify-content:space-between;align-items:center;padding:14px 0;font-size:14px;color:#3C2415;cursor:pointer}
+.module-sheet-item--active{color:#D97706;font-weight:600}
+.module-sheet-count{font-size:12px;color:#B8A590}
+.module-sheet-cancel{text-align:center;padding:12px 0;font-size:14px;color:#B8A590;border-top:1px solid #EDE8DF;margin-top:8px;cursor:pointer}
+
+/* ========== TAB3: 创建 ========== */
+.create-section{padding:16px}
+.create-label{font-size:13px;color:#8B7355;font-weight:600;display:block;margin-bottom:10px}
+.module-picker{display:flex;gap:10px;margin-bottom:20px}
+.picker-item{flex:1;padding:16px 10px;border-radius:12px;border:2px solid #EDE8DF;text-align:center;cursor:pointer;transition:all .2s;background:#fff}
+.picker-item.selected{border-color:#D97706;background:#FFFBF5}
+.picker-icon{font-size:22px;display:block;margin-bottom:6px}
+.picker-name{font-size:13px;font-weight:600;color:#3C2415}
+
+.form-area{display:none}
+.form-area.show{display:block}
+.form-field{margin-bottom:14px}
+.form-label{font-size:12px;color:#8B7355;display:block;margin-bottom:4px}
+.form-input{width:100%;padding:10px 12px;border:1px solid #EDE8DF;border-radius:8px;font-size:14px;font-family:inherit;background:#FBFAF7;color:#3C2415}
+.form-textarea{width:100%;padding:10px 12px;border:1px solid #EDE8DF;border-radius:8px;font-size:14px;font-family:inherit;background:#FBFAF7;color:#3C2415;height:70px;resize:none}
+.form-row{display:flex;gap:8px}
+.form-row-item{flex:1}
+.form-hint{font-size:11px;color:#B8A590;margin-top:4px}
+.score-row{display:flex;gap:4px;margin-top:4px}
+.score-star{width:32px;height:32px;border-radius:6px;border:1px solid #EDE8DF;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;background:#fff;transition:all .15s}
+.score-star.filled{background:#FEF3E5;border-color:#D97706}
+.priority-row{display:flex;gap:6px}
+.prio-opt{flex:1;padding:8px;text-align:center;border:1.5px solid #EDE8DF;border-radius:8px;font-size:13px;cursor:pointer;background:#fff}
+.prio-opt.selected{border-color:#D97706;background:#FFFBF5;font-weight:600;color:#D97706}
+.repeat-row{display:flex;gap:6px;margin-top:6px}
+.repeat-opt{flex:1;padding:6px;text-align:center;border:1.5px solid #EDE8DF;border-radius:8px;font-size:12px;cursor:pointer;background:#fff}
+.repeat-opt.selected{border-color:#D97706;background:#FFFBF5;color:#D97706}
+
+.submit-area{padding:12px 16px;background:#FBFAF7;border-top:1px solid #EDE8DF}
+.btn-submit{width:100%;padding:14px 0;border-radius:10px;border:none;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;background:#D97706;color:#fff}
+.btn-submit:disabled{opacity:.4}
+
+/* ========== TAB4: 我的 ========== */
+.mine-header{padding:20px;display:flex;align-items:center;gap:12px}
+.mine-avatar{width:44px;height:44px;border-radius:50%;background:#F5EDE0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#D97706}
+.mine-name{font-size:16px;font-weight:600;color:#3C2415}
+.mine-sub{font-size:12px;color:#B8A590;margin-top:2px}
+.mine-stats{display:flex;margin:0 16px;gap:10px}
+.stat-card{flex:1;background:#FFFBF5;border-radius:12px;padding:16px;text-align:center;border:1px solid #EDE0CC}
+.stat-num{font-size:24px;font-weight:700;color:#3C2415;display:block}
+.stat-label{font-size:11px;color:#B8A590;margin-top:2px}
+.mine-card{margin:12px 16px;background:#fff;border-radius:12px;border:1px solid #EDE8DF;padding:16px}
+.mine-card-title{font-size:13px;font-weight:600;color:#3C2415;margin-bottom:10px}
+.module-switch{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+.module-switch-label{font-size:14px;color:#3C2415}
+.switch{width:44px;height:26px;border-radius:13px;background:#EDE0CC;position:relative;transition:all .2s;cursor:pointer}
+.switch.on{background:#D97706}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:all .2s}
+.switch.on::after{left:21px}
+.menu-item{padding:10px 0;display:flex;justify-content:space-between;align-items:center;font-size:14px;color:#3C2415;cursor:pointer}
+.menu-item-arrow{color:#C8BBA0}
+
+/* ========== TAB BAR ========== */
+.tabbar{display:flex;background:#FBFAF7;border-top:1px solid #EDE8DF;padding:6px 0 10px}
+.tabbar-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:#C8BBA0;cursor:pointer;padding:4px 0;letter-spacing:.5px}
+.tabbar-item.active{color:#D97706}
+.tabbar-dot{width:4px;height:4px;border-radius:50%;margin-bottom:2px}
+.tabbar-item.active .tabbar-dot{background:#D97706}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="nav"><span class="nav-title" id="navTitle">刷日常</span></div>
+
+  <!-- ===== TAB1: 日常 ===== -->
+  <div class="tab-body active" id="tab1">
+    <!-- 求职模块 -->
+    <div class="module module--jobseeker open" id="m-job">
+      <div class="module-header" onclick="t('m-job')">
+        <span class="module-icon">🎯</span><span class="module-label">求职日常</span><span class="module-count">3</span><span class="module-toggle">▼</span>
+      </div>
+      <div class="module-body">
+        <!-- 复杂任务：进 Tab2 -->
+        <div class="task-item">
+          <span class="task-rank rank-s">S</span>
+          <div class="task-info">
+            <span class="task-name">投递简历</span>
+            <span class="task-hint">字节跳动 · 前端开发工程师</span>
+            <div class="task-actions">
+              <button class="btn btn-enter" onclick="goTab(2)">进入执行</button>
+              <button class="btn btn-skip">稍后</button>
+            </div>
+          </div>
+        </div>
+        <div class="task-item">
+          <span class="task-rank rank-a">A</span>
+          <div class="task-info">
+            <span class="task-name">跟进投递进度</span>
+            <span class="task-hint">腾讯 · 后端开发工程师</span>
+            <div class="task-actions">
+              <button class="btn btn-enter" onclick="goTab(2)">进入执行</button>
+              <button class="btn btn-skip">稍后</button>
+            </div>
+          </div>
+        </div>
+        <div class="task-item">
+          <span class="task-rank rank-s">S</span>
+          <div class="task-info">
+            <span class="task-name">准备面试</span>
+            <span class="task-hint">阿里巴巴 · 数据分析师</span>
+            <div class="task-actions">
+              <button class="btn btn-enter" onclick="goTab(2)">进入执行</button>
+              <button class="btn btn-skip">稍后</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 工作模块 -->
+    <div class="module module--work open" id="m-work">
+      <div class="module-header" onclick="t('m-work')">
+        <span class="module-icon">💼</span><span class="module-label">工作日常</span><span class="module-count">2</span><span class="module-toggle">▼</span>
+      </div>
+      <div class="module-body">
+        <!-- 简单任务：直接完成 -->
+        <div class="task-item">
+          <span class="task-rank rank-a">A</span>
+          <div class="task-info">
+            <span class="task-name">提交 Q2 报告</span>
+            <span class="task-hint">截止 18:00 · 需要数据汇总</span>
+            <div class="task-actions">
+              <button class="btn btn-done">完成</button>
+              <button class="btn btn-skip">稍后</button>
+            </div>
+          </div>
+        </div>
+        <div class="task-item">
+          <span class="task-rank rank-a">A</span>
+          <div class="task-info">
+            <span class="task-name">参加项目评审会</span>
+            <span class="task-hint">14:00 · 线上会议</span>
+            <div class="task-actions">
+              <button class="btn btn-done">完成</button>
+              <button class="btn btn-skip">稍后</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 自定义模块 -->
+    <div class="module module--custom open" id="m-custom">
+      <div class="module-header" onclick="t('m-custom')">
+        <span class="module-icon">📝</span><span class="module-label">自定义任务</span><span class="module-count">1</span><span class="module-toggle">▼</span>
+      </div>
+      <div class="module-body">
+        <div class="task-item">
+          <span class="task-rank rank-a">A</span>
+          <div class="task-info">
+            <span class="task-name">跑步 30 分钟</span>
+            <span class="task-hint">每天 · 健康习惯</span>
+            <div class="task-actions">
+              <button class="btn btn-done">完成</button>
+              <button class="btn btn-skip">稍后</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 庆祝态 -->
+    <div class="celebrate" id="celeb">
+      <div class="celebrate-icon">🎉</div>
+      <div class="celebrate-text">今日委托全部完成</div>
+      <div class="celebrate-sub">干得好，明天继续</div>
+    </div>
+  </div>
+
+  <!-- ===== TAB2: 执行台 ===== -->
+  <div class="tab-body" id="tab2">
+    <!-- 操作栏：返回主页 + 模块切换 + 更多操作 -->
+    <div class="exec-topbar">
+      <span class="exec-back" onclick="goTab(1)">← 回主页</span>
+      <span class="exec-module-label" onclick="showModuleSheet()">🎯 求职工作台 <span class="exec-dropdown">▾</span></span>
+      <span class="exec-more">⋯</span>
+    </div>
+
+    <!-- 数据概览（slot-data · 模块差异 · 无数据时隐藏） -->
+    <div class="exec-data">
+      <div class="funnel-row">
+        <div class="funnel-item"><span class="funnel-num">5</span><span class="funnel-label">待投</span></div>
+        <span class="funnel-arrow">→</span>
+        <div class="funnel-item"><span class="funnel-num">3</span><span class="funnel-label">已投</span></div>
+        <span class="funnel-arrow">→</span>
+        <div class="funnel-item"><span class="funnel-num">2</span><span class="funnel-label">面试</span></div>
+        <span class="funnel-arrow">→</span>
+        <div class="funnel-item"><span class="funnel-num funnel-highlight">1</span><span class="funnel-label">Offer</span></div>
+      </div>
+    </div>
+
+    <!-- 今日任务列表（通用 · 所有模块都有） -->
+    <div class="exec-tasks-header">
+      <span class="exec-tasks-title">📋 今日 3 项</span>
+      <span class="exec-tasks-add" onclick="goTab(3)">+ 添加</span>
+    </div>
+    <div class="exec-tasks">
+      <div class="exec-task-card">
+        <div class="exec-task-row1">
+          <span class="exec-task-name">投递简历</span>
+          <span class="task-badge badge-s">S</span>
+        </div>
+        <span class="exec-task-desc">字节跳动 · 前端开发工程师</span>
+        <div class="exec-task-actions">
+          <button class="btn btn-enter">进入投递工作区</button>
+          <button class="btn btn-done-sm">已投 ✓</button>
+        </div>
+      </div>
+      <div class="exec-task-card">
+        <div class="exec-task-row1">
+          <span class="exec-task-name">跟进投递进度</span>
+          <span class="task-badge badge-a">A</span>
+        </div>
+        <span class="exec-task-desc">腾讯 · 后端开发工程师</span>
+        <div class="exec-task-actions">
+          <button class="btn btn-enter">进入跟进工作区</button>
+          <button class="btn btn-done-sm">已跟进 ✓</button>
+        </div>
+      </div>
+      <div class="exec-task-card">
+        <div class="exec-task-row1">
+          <span class="exec-task-name">准备面试</span>
+          <span class="task-badge badge-s">S</span>
+        </div>
+        <span class="exec-task-desc">阿里巴巴 · 数据分析师</span>
+        <div class="exec-task-actions">
+          <button class="btn btn-enter">进入准备工作区</button>
+          <button class="btn btn-done-sm">已完成 ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 工具箱（slot-tools · 模块差异 · 无工具时整块隐藏） -->
+    <div class="exec-tools">
+      <span class="exec-tools-title">🔧 工具箱</span>
+      <div class="tools-grid">
+        <div class="tool-item">
+          <span class="tool-icon">🔗</span>
+          <span class="tool-name">投递链接</span>
+        </div>
+        <div class="tool-item">
+          <span class="tool-icon">📝</span>
+          <span class="tool-name">面经笔记</span>
+        </div>
+        <div class="tool-item">
+          <span class="tool-icon">💰</span>
+          <span class="tool-name">薪资比较</span>
+        </div>
+        <div class="tool-item tool-item--disabled">
+          <span class="tool-icon">📅</span>
+          <span class="tool-name">面试日程</span>
+          <span class="tool-soon">即将上线</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模块切换弹窗 -->
+    <div class="module-sheet-mask" id="moduleSheet" onclick="hideModuleSheet()" style="display:none"></div>
+    <div class="module-sheet" id="moduleSheetPanel" style="display:none">
+      <div class="module-sheet-title">切换工作区</div>
+      <div class="module-sheet-item module-sheet-item--active" onclick="switchModule('jobseeker')">
+        <span>🎯 求职</span><span class="module-sheet-count">3 项待处理</span>
+      </div>
+      <div class="module-sheet-item" onclick="switchModule('work')">
+        <span>💼 工作</span><span class="module-sheet-count">2 项待处理</span>
+      </div>
+      <div class="module-sheet-item" onclick="switchModule('custom')">
+        <span>📝 自定义</span><span class="module-sheet-count">1 项待处理</span>
+      </div>
+      <div class="module-sheet-cancel" onclick="hideModuleSheet()">取消</div>
+    </div>
+  </div>
+
+  <!-- ===== TAB3: 创建 ===== -->
+  <div class="tab-body" id="tab3">
+    <div class="create-section">
+      <span class="create-label">选择模块类型</span>
+      <div class="module-picker">
+        <div class="picker-item selected" id="pick-jobseeker" onclick="pickModule('jobseeker')">
+          <span class="picker-icon">🎯</span><span class="picker-name">求职</span>
+        </div>
+        <div class="picker-item" id="pick-work" onclick="pickModule('work')">
+          <span class="picker-icon">💼</span><span class="picker-name">工作</span>
+        </div>
+        <div class="picker-item" id="pick-custom" onclick="pickModule('custom')">
+          <span class="picker-icon">📝</span><span class="picker-name">日常</span>
+        </div>
+      </div>
+
+      <!-- 求职表单 -->
+      <div class="form-area show" id="form-jobseeker">
+        <div class="form-field"><span class="form-label">公司名称</span><input class="form-input" placeholder="如：字节跳动"></div>
+        <div class="form-field"><span class="form-label">岗位名称</span><input class="form-input" placeholder="如：前端开发工程师"></div>
+        <div class="form-field"><span class="form-label">薪资范围</span><input class="form-input" placeholder="如：25k-35k"></div>
+        <div class="form-field"><span class="form-label">投递链接</span><input class="form-input" placeholder="https://"></div>
+        <div class="form-row">
+          <div class="form-field form-row-item"><span class="form-label">吸引力 1-5</span>
+            <div class="score-row">
+              <span class="score-star" onclick="s(this)">1</span><span class="score-star" onclick="s(this)">2</span><span class="score-star filled" onclick="s(this)">3</span><span class="score-star" onclick="s(this)">4</span><span class="score-star" onclick="s(this)">5</span>
+            </div>
+          </div>
+          <div class="form-field form-row-item"><span class="form-label">准备度 1-5</span>
+            <div class="score-row">
+              <span class="score-star filled" onclick="s(this)">1</span><span class="score-star" onclick="s(this)">2</span><span class="score-star" onclick="s(this)">3</span><span class="score-star" onclick="s(this)">4</span><span class="score-star" onclick="s(this)">5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 日常表单 -->
+      <div class="form-area" id="form-custom">
+        <div class="form-field"><span class="form-label">任务标题</span><input class="form-input" placeholder="如：刷 LeetCode 三道题"></div>
+        <div class="form-field"><span class="form-label">备注</span><textarea class="form-textarea" placeholder="补充说明（选填）"></textarea></div>
+        <div class="form-field">
+          <span class="form-label">优先级</span>
+          <div class="priority-row">
+            <div class="prio-opt selected">高</div><div class="prio-opt">中</div><div class="prio-opt">低</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <span class="form-label">重复规则</span>
+          <div class="repeat-row">
+            <div class="repeat-opt selected">不重复</div><div class="repeat-opt">每天</div><div class="repeat-opt">每周</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 工作表单 -->
+      <div class="form-area" id="form-work">
+        <div class="form-field"><span class="form-label">任务标题</span><input class="form-input" placeholder="如：提交 Q2 报告"></div>
+        <div class="form-field"><span class="form-label">截止日期</span><input class="form-input" placeholder="选择日期" type="date"></div>
+        <div class="form-field"><span class="form-label">所属项目</span><input class="form-input" placeholder="如：产品迭代"></div>
+      </div>
+    </div>
+    <div class="submit-area">
+      <button class="btn-submit" onclick="submitTask()">创建并返回日常</button>
+    </div>
+  </div>
+
+  <!-- ===== TAB4: 我的 ===== -->
+  <div class="tab-body" id="tab4">
+    <div class="mine-header">
+      <div class="mine-avatar">冒</div>
+      <div>
+        <div class="mine-name">冒险者</div>
+        <div class="mine-sub">求职者 · 激活 3 个模块</div>
+      </div>
+    </div>
+
+    <div class="mine-stats">
+      <div class="stat-card"><span class="stat-num">12</span><span class="stat-label">本周完成</span></div>
+      <div class="stat-card"><span class="stat-num">4</span><span class="stat-label">本周推迟</span></div>
+      <div class="stat-card"><span class="stat-num">75%</span><span class="stat-label">完成率</span></div>
+    </div>
+
+    <div class="mine-card">
+      <span class="mine-card-title">模块管理</span>
+      <div class="module-switch"><span class="module-switch-label">🎯 求职日常</span><div class="switch on"></div></div>
+      <div class="module-switch"><span class="module-switch-label">💼 工作日常</span><div class="switch on"></div></div>
+      <div class="module-switch"><span class="module-switch-label">📝 自定义任务</span><div class="switch on"></div></div>
+      <div class="module-switch"><span class="module-switch-label">🎓 学业日常</span><div class="switch"></div></div>
+    </div>
+
+    <div class="mine-card">
+      <span class="mine-card-title">求职漏斗</span>
+      <div style="display:flex;justify-content:space-around;padding:8px 0">
+        <div style="text-align:center"><span style="font-size:22px;color:#D97706;font-weight:700">5</span><br><span style="font-size:11px;color:#B8A590">待投</span></div>
+        <span style="color:#D0C4A5">→</span>
+        <div style="text-align:center"><span style="font-size:22px;color:#8B7355;font-weight:700">3</span><br><span style="font-size:11px;color:#B8A590">已投</span></div>
+        <span style="color:#D0C4A5">→</span>
+        <div style="text-align:center"><span style="font-size:22px;color:#8B7355;font-weight:700">2</span><br><span style="font-size:11px;color:#B8A590">面试</span></div>
+        <span style="color:#D0C4A5">→</span>
+        <div style="text-align:center"><span style="font-size:22px;color:#6A5A3A;font-weight:700">1</span><br><span style="font-size:11px;color:#B8A590">Offer</span></div>
+      </div>
+    </div>
+
+    <div class="mine-card">
+      <div class="menu-item" onclick="alert('缓存已清除')">清除缓存 <span class="menu-item-arrow">›</span></div>
+      <div class="menu-item" style="margin-top:4px">关于刷日常 <span style="font-size:12px;color:#C8BBA0">v1.1</span> <span class="menu-item-arrow">›</span></div>
+    </div>
+  </div>
+
+  <!-- ===== TAB BAR ===== -->
+  <div class="tabbar">
+    <div class="tabbar-item active" id="tb1" onclick="goTab(1)">
+      <span class="tabbar-dot"></span>日常
+    </div>
+    <div class="tabbar-item" id="tb2" onclick="goTab(2)">
+      <span class="tabbar-dot"></span>执行
+    </div>
+    <div class="tabbar-item" id="tb3" onclick="goTab(3)">
+      <span class="tabbar-dot"></span>创建
+    </div>
+    <div class="tabbar-item" id="tb4" onclick="goTab(4)">
+      <span class="tabbar-dot"></span>我的
+    </div>
+  </div>
+</div>
+
+<script>
+function t(id){var e=document.getElementById(id);e.classList.contains('open')?e.classList.remove('open'):e.classList.add('open')}
+function goTab(n){
+  document.querySelectorAll('.tab-body').forEach(function(e){e.classList.remove('active')});
+  document.getElementById('tab'+n).classList.add('active');
+  document.querySelectorAll('.tabbar-item').forEach(function(e,i){e.classList.toggle('active',i+1===n)});
+  document.getElementById('navTitle').textContent=['','刷日常','执行中','新建任务','我的'][n];
+}
+function s(el){
+  var row=el.parentElement.querySelectorAll('.score-star');var clicked=Array.from(row).indexOf(el);
+  row.forEach(function(s,i){s.classList.toggle('filled',i<=clicked)});
+}
+function pickModule(type){
+  document.querySelectorAll('.picker-item').forEach(function(p){p.classList.remove('selected')});
+  document.getElementById('pick-'+type).classList.add('selected');
+  document.querySelectorAll('.form-area').forEach(function(f){f.classList.remove('show')});
+  var f=document.getElementById('form-'+type);if(f)f.classList.add('show');
+}
+function showModuleSheet(){document.getElementById('moduleSheet').style.display='block';document.getElementById('moduleSheetPanel').style.display='block'}
+function hideModuleSheet(){document.getElementById('moduleSheet').style.display='none';document.getElementById('moduleSheetPanel').style.display='none'}
+function switchModule(type){
+  hideModuleSheet();
+  var label='';var funnelHtml='';var tasksHtml='';var toolsHtml='';
+  if(type==='jobseeker'){
+    label='🎯 求职工作台 ▾';
+    funnelHtml='<div class="funnel-row"><div class="funnel-item"><span class="funnel-num">5</span><span class="funnel-label">待投</span></div><span class="funnel-arrow">→</span><div class="funnel-item"><span class="funnel-num">3</span><span class="funnel-label">已投</span></div><span class="funnel-arrow">→</span><div class="funnel-item"><span class="funnel-num">2</span><span class="funnel-label">面试</span></div><span class="funnel-arrow">→</span><div class="funnel-item"><span class="funnel-num funnel-highlight">1</span><span class="funnel-label">Offer</span></div></div>';
+    tasksHtml='<div class="exec-task-card"><div class="exec-task-row1"><span class="exec-task-name">投递简历</span><span class="task-badge badge-s">S</span></div><span class="exec-task-desc">字节跳动 · 前端开发工程师</span><div class="exec-task-actions"><button class="btn btn-enter">进入投递工作区</button><button class="btn btn-done-sm">已投 ✓</button></div></div><div class="exec-task-card"><div class="exec-task-row1"><span class="exec-task-name">跟进投递进度</span><span class="task-badge badge-a">A</span></div><span class="exec-task-desc">腾讯 · 后端开发工程师</span><div class="exec-task-actions"><button class="btn btn-enter">进入跟进工作区</button><button class="btn btn-done-sm">已跟进 ✓</button></div></div><div class="exec-task-card"><div class="exec-task-row1"><span class="exec-task-name">准备面试</span><span class="task-badge badge-s">S</span></div><span class="exec-task-desc">阿里巴巴 · 数据分析师</span><div class="exec-task-actions"><button class="btn btn-enter">进入准备工作区</button><button class="btn btn-done-sm">已完成 ✓</button></div></div>';
+    toolsHtml='<span class="exec-tools-title">🔧 工具箱</span><div class="tools-grid"><div class="tool-item"><span class="tool-icon">🔗</span><span class="tool-name">投递链接</span></div><div class="tool-item"><span class="tool-icon">📝</span><span class="tool-name">面经笔记</span></div><div class="tool-item"><span class="tool-icon">💰</span><span class="tool-name">薪资比较</span></div><div class="tool-item tool-item--disabled"><span class="tool-icon">📅</span><span class="tool-name">面试日程</span><span class="tool-soon">即将上线</span></div></div>';
+  }else if(type==='work'){
+    label='💼 工作工作台 ▾';
+    funnelHtml='<div class="exec-data" style="justify-content:center"><div style="display:flex;gap:20px;text-align:center"><div><span style="font-size:20px;font-weight:700;color:#3C2415">4</span><br><span style="font-size:10px;color:#B8A590">本周完成</span></div><div><span style="font-size:20px;font-weight:700;color:#3C2415">2</span><br><span style="font-size:10px;color:#B8A590">进行中</span></div><div><span style="font-size:20px;font-weight:700;color:#D97706">1</span><br><span style="font-size:10px;color:#B8A590">今日到期</span></div></div></div>';
+    tasksHtml='<div class="exec-task-card"><div class="exec-task-row1"><span class="exec-task-name">提交 Q2 报告</span></div><span class="exec-task-desc">截止 18:00 · 需要数据汇总</span><div class="exec-task-actions"><button class="btn btn-done-sm">已完成 ✓</button></div></div><div class="exec-task-card"><div class="exec-task-row1"><span class="exec-task-name">参加项目评审会</span></div><span class="exec-task-desc">14:00 · 线上会议</span><div class="exec-task-actions"><button class="btn btn-done-sm">已完成 ✓</button></div></div>';
+    toolsHtml='';
+  }else if(type==='custom'){
+    label='📝 自定义任务台 ▾';
+    funnelHtml='';
+    tasksHtml='<div class="exec-task-card"><div class="exec-task-row1"><span class="exec-task-name">跑步 30 分钟</span></div><span class="exec-task-desc">每天 · 健康习惯</span><div class="exec-task-actions"><button class="btn btn-done-sm">已完成 ✓</button></div></div>';
+    toolsHtml='';
+  }
+  document.querySelector('.exec-module-label').innerHTML=label;
+  document.querySelector('.exec-data').innerHTML=funnelHtml;
+  document.querySelector('.exec-tasks').innerHTML=tasksHtml;
+  document.querySelector('.exec-tools').innerHTML=toolsHtml;
+}
+function submitTask(){alert('任务已创建！');goTab(1)}
+</script>
+</body>
+</html>

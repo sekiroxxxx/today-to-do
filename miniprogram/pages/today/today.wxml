@@ -36,25 +36,11 @@
       <!-- 折叠内容 -->
       <view wx:if="{{item.open}}" class="module-body">
         <view wx:for="{{item.actions}}" wx:key="_id" class="task-row">
-          <!-- 求职任务：保留评级 -->
-          <block wx:if="{{item.sourceType === 'job'}}">
-            <view wx:if="{{item.normalizedScore >= 80}}" class="task-rank rank-s">S</view>
-            <view wx:elif="{{item.normalizedScore >= 55}}" class="task-rank rank-a">A</view>
-            <view wx:elif="{{item.normalizedScore >= 25}}" class="task-rank rank-b">B</view>
-            <view wx:else class="task-rank rank-c">C</view>
-          </block>
-          <!-- 自定义任务 -->
-          <view wx:else class="task-rank rank-c">◆</view>
-
           <view class="task-info">
             <text class="task-name">{{item.title}}</text>
             <text wx:if="{{item.description}}" class="task-hint">{{item.description}}</text>
           </view>
-
-          <view class="task-actions">
-            <button class="btn-done" data-id="{{item._id}}" bindtap="onComplete">完成</button>
-            <button class="btn-skip" data-id="{{item._id}}" data-type="skip" bindtap="onPostpone">跳过</button>
-          </view>
+          <button class="btn-done" data-id="{{item._id}}" bindtap="onComplete">完成</button>
         </view>
       </view>
     </view>

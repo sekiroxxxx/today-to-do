@@ -45,6 +45,7 @@
     <view wx:if="{{tasks.length === 0}}" class="empty-hint">今天还没有任务</view>
     <view wx:for="{{tasks}}" wx:key="_id" class="task-card">
       <view class="task-card-row1">
+        <view wx:if="{{item.badge}}" class="task-rank" style="background:{{item.badge.bg}};color:{{item.badge.color}}">{{item.badge.label}}</view>
         <text class="task-card-name">{{item.title}}</text>
       </view>
       <text wx:if="{{item.description}}" class="task-card-desc">{{item.description}}</text>

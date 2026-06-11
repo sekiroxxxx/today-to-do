@@ -1,6 +1,7 @@
 const api = require('../../utils/api')
 const app = getApp()
 const phrases = require('../../utils/phrases')
+const algorithm = require('../../utils/algorithm')
 
 let dismissedSourceIds = []
 let isRefreshing = false
@@ -18,6 +19,13 @@ Page({
 
   onShow() {
     this.setData({ isOffline: app.globalData.isOffline || false })
+
+    // 读本地缓存（断网兜底）
+    const cache = wx.getStorageSync('dailyCache')
+    if (!this.data.modules.length && cache && cache.date === getDateString(new Date())) {
+      this.setData({ modules: cache.modules, todayDate: cache.date, loading: false })
+    }
+
     if (!app.globalData.dirty.today) return
     const hasData = this.data.modules.length > 0
     this.loadTodayActions(!hasData)
@@ -47,6 +55,8 @@ Page({
         todayDate: res.date,
         loading: false
       })
+      // 写缓存
+      wx.setStorageSync('dailyCache', { date: res.date, modules })
     }).finally(() => { app.globalData.dirty.today = false })
   },
 
@@ -161,6 +171,19 @@ Page({
   },
 
   onGoToCreate() { wx.switchTab({ url: '/pages/create/create' }) },
+
+  // L4.5: 本地跑算法即时渲染，避免等云函数
+  runLocalAlgorithm() {
+    return Promise.all([api.getJobList(), api.getTaskList()]).then(([jobRes, taskRes]) => {
+      const jobs = (jobRes.jobs || []).filter(j => j.status !== 'Offer' && j.status !== '已关闭')
+      const tasks = (taskRes.tasks || []).filter(t => t.enabled)
+      const result = algorithm.generateDailyList({ jobs, tasks, dailyLimit: 5 })
+      return result.actions.map(a => ({
+        ...a,
+        module: a.sourceType === 'job' ? 'jobseeker' : ((tasks.find(t => t._id === a.sourceId) || {}).module || 'custom')
+      }))
+    })
+  },
 
   filterDismissed(actions) {
     return actions.filter(a => {
