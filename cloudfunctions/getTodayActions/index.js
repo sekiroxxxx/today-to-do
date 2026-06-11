@@ -45,11 +45,17 @@ exports.main = async (event, context) => {
       .orderBy('normalizedScore', 'desc')
       .get()
 
-    console.log(`今日清单查询: ${openid}, ${result.data.length} 条`)
+    // 旧数据兼容：无 module 字段 → 根据 sourceType 映射兜底
+    const actions = result.data.map(a => ({
+      ...a,
+      module: a.module || (a.sourceType === 'job' ? 'jobseeker' : 'custom')
+    }))
+
+    console.log(`今日清单查询: ${openid}, ${actions.length} 条`)
 
     return {
       success: true,
-      actions: result.data,
+      actions: actions,
       date: todayDate
     }
 
