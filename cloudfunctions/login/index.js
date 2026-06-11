@@ -82,6 +82,7 @@ exports.main = async (event, context) => {
       nickname: '冒险者',
       avatar: '',
       persona: '',             // 用户画像（v1.1 启用）
+      modules: ['jobseeker', 'custom'],  // 默认开启的模块
       preferences: {
         dailyLimit: 5,
         pushEnabled: false
