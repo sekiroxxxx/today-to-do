@@ -135,15 +135,26 @@ exports.main = async (event, context) => {
 
     // ========== 第6步：将结果写入 daily_actions 集合 ==========
     const now = db.serverDate()
-    // 过滤：跳过已保留的 sourceId（已完成/推迟过的源任务不再插入新卡）
+
+    // 构建 sourceId → module 映射（自定义任务的模块来源）
+    const taskModuleMap = {}
+    tasksResult.data.forEach(t => { taskModuleMap[t._id] = t.module || 'custom' })
+
+    // 过滤：跳过已保留的 sourceId
     const newActions = result.actions.filter(a => !retainedSourceIds.includes(a.sourceId))
     const insertPromises = newActions.map(action => {
+      // 求职 → 'jobseeker'，自定义 → 从源任务取 module，兜底 'custom'
+      const module = action.sourceType === 'job'
+        ? 'jobseeker'
+        : (taskModuleMap[action.sourceId] || 'custom')
+
       return db.collection('daily_actions').add({
         data: {
           _openid: openid,
           date: todayDate,
           sourceType: action.sourceType,
           sourceId: action.sourceId,
+          module: module,
           title: action.title,
           description: action.description,
           normalizedScore: action.normalizedScore,
