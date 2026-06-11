@@ -34,12 +34,27 @@ Page({
   },
 
   onLoad() {
+    this.refreshModules()
+    this.setData({ today: getDateString(new Date()) })
+    var defaultModule = this.data.modules.length > 0 ? this.data.modules[0].key : 'custom'
+    this.switchModule(defaultModule)
+  },
+
+  onShow() {
+    this.refreshModules()
+  },
+
+  refreshModules() {
     var app = getApp()
     var userModules = (app.globalData.userInfo && app.globalData.userInfo.modules) || ['jobseeker', 'custom']
     var enabled = phrases.MODULES.filter(function (m) { return userModules.indexOf(m.key) > -1 })
-    var defaultModule = enabled.length > 0 ? enabled[0].key : 'custom'
-    this.setData({ today: getDateString(new Date()), modules: enabled })
-    this.switchModule(defaultModule)
+    // 如果当前选中的模块已不在启用列表中，切换到第一个
+    var current = this.data.currentModule
+    var stillEnabled = enabled.filter(function (m) { return m.key === current })
+    if (stillEnabled.length === 0 && enabled.length > 0) {
+      current = enabled[0].key
+    }
+    this.setData({ modules: enabled, currentModule: current })
   },
 
   // ========== 模块切换 ==========
