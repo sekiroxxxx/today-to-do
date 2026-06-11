@@ -125,7 +125,6 @@ Page({
             return Object.assign({}, m, { checked: modules.indexOf(m.key) > -1 })
           })
         })
-        this.setData({ userModules: modules, allModules })
         app.markDirty(['today'])
       })
     }
