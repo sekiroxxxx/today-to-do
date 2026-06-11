@@ -9,8 +9,9 @@ Page({
     currentModule: 'jobseeker',
     currentModuleInfo: null,
     tasks: [],
-    funnel: null,      // 求职漏斗
-    showSheet: false
+    funnel: null,
+    showSheet: false,
+    isLoading: false
   },
 
   onShow() {
@@ -44,7 +45,7 @@ Page({
           }
           return a
         })
-      this.setData({ tasks })
+      this.setData({ tasks: tasks, isLoading: false })
     })
 
     // 求职模块额外获取漏斗
@@ -64,7 +65,8 @@ Page({
 
   onModuleSelect(e) {
     const key = e.currentTarget.dataset.key
-    this.setData({ currentModule: key, showSheet: false })
+    // 切模块时保持旧数据不消失，新数据返回后替换
+    this.setData({ currentModule: key, showSheet: false, isLoading: true })
     this.loadData()
   },
 
