@@ -72,7 +72,10 @@ Page({
     return phrases.MODULES
       .filter(mod => map[mod.key] && map[mod.key].length > 0)
       .map(mod => ({
-        ...mod,
+        icon: mod.icon,
+        name: mod.name,
+        color: mod.color,
+        key: mod.key,
         actions: map[mod.key],
         open: true,
         count: map[mod.key].length
@@ -82,7 +85,7 @@ Page({
   onModuleToggle(e) {
     const key = e.currentTarget.dataset.key
     const modules = this.data.modules.map(m =>
-      m.key === key ? { ...m, open: !m.open } : m
+      m.key === key ? Object.assign({}, m, { open: !m.open }) : m
     )
     this.setData({ modules })
   },
@@ -153,8 +156,8 @@ Page({
     if (target && target.sourceId) dismissedSourceIds.push(target.sourceId)
 
     const modules = this.data.modules.map(m => ({
-      ...m,
-      actions: m.actions.filter(a => a._id !== actionId),
+      icon: m.icon, name: m.name, color: m.color, key: m.key, open: m.open,
+      actions: m.actions.filter(function (a) { return a._id !== actionId }),
       count: m.actions.filter(a => a._id !== actionId).length
     })).filter(m => m.count > 0)
 
@@ -179,8 +182,14 @@ Page({
       const tasks = (taskRes.tasks || []).filter(t => t.enabled)
       const result = algorithm.generateDailyList({ jobs, tasks, dailyLimit: 5 })
       return result.actions.map(a => ({
-        ...a,
-        module: a.sourceType === 'job' ? 'jobseeker' : ((tasks.find(t => t._id === a.sourceId) || {}).module || 'custom')
+        sourceType: a.sourceType,
+        sourceId: a.sourceId,
+        title: a.title,
+        description: a.description,
+        normalizedScore: a.normalizedScore,
+        rawScore: a.rawScore,
+        createdAt: a.createdAt,
+        module: a.sourceType === 'job' ? 'jobseeker' : ((tasks.find(function (t) { return t._id === a.sourceId }) || {}).module || 'custom')
       }))
     })
   },

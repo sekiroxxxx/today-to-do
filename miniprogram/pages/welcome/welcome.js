@@ -6,7 +6,9 @@ Page({
   data: {
     checking: true,
     starting: false,
-    allModules: phrases.MODULES.map(m => ({ ...m, checked: ['jobseeker', 'custom'].includes(m.key) })),
+    allModules: phrases.MODULES.map(function (m) {
+      return Object.assign({}, m, { checked: ['jobseeker', 'custom'].indexOf(m.key) > -1 })
+    }),
     selected: ['jobseeker', 'custom']
   },
 
@@ -23,11 +25,13 @@ Page({
   // ========== 勾选模块 ==========
   onModuleCheck(e) {
     const key = e.currentTarget.dataset.key
-    let selected = [...this.data.selected]
+    var selected = this.data.selected.slice()
     const idx = selected.indexOf(key)
     if (idx > -1) selected.splice(idx, 1)
     else selected.push(key)
-    const allModules = phrases.MODULES.map(m => ({ ...m, checked: selected.includes(m.key) }))
+    var allModules = phrases.MODULES.map(function (m) {
+      return Object.assign({}, m, { checked: selected.indexOf(m.key) > -1 })
+    })
     this.setData({ selected, allModules })
   },
 

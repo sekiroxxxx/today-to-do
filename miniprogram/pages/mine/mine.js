@@ -28,7 +28,9 @@ Page({
       const dailyLimit = (user && user.preferences && user.preferences.dailyLimit) || 5
       const userModules = (user && user.modules) || ['jobseeker', 'custom']
       // 预计算勾选态（WXML 不支持 .indexOf()）
-      const allModules = phrases.MODULES.map(m => ({ ...m, checked: userModules.includes(m.key) }))
+      const allModules = phrases.MODULES.map(function (m) {
+        return Object.assign({}, m, { checked: userModules.indexOf(m.key) > -1 })
+      })
       this.setData({ userInfo: user, avatarText: nickname[0], dailyLimit, userModules, allModules })
     })
 
@@ -108,7 +110,7 @@ Page({
   // ========== 模块开关 ==========
   onModuleToggle(e) {
     const key = e.currentTarget.dataset.key
-    const modules = [...this.data.userModules]
+    var modules = this.data.userModules.slice()
     const idx = modules.indexOf(key)
     if (idx > -1) modules.splice(idx, 1)
     else modules.push(key)
@@ -117,7 +119,12 @@ Page({
     const user = this.data.userInfo
     if (user && user._id) {
       db.collection('users').doc(user._id).update({ data: { modules } }).then(() => {
-        const allModules = phrases.MODULES.map(m => ({ ...m, checked: modules.includes(m.key) }))
+        this.setData({
+          userModules: modules,
+          allModules: phrases.MODULES.map(function (m) {
+            return Object.assign({}, m, { checked: modules.indexOf(m.key) > -1 })
+          })
+        })
         this.setData({ userModules: modules, allModules })
         app.markDirty(['today'])
       })

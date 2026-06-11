@@ -426,8 +426,6 @@ function generateDailyList(options) {
   let selected = allCandidates.slice(0, dailyLimit)
 
   // ---- Step 5.5: 新任务置顶（今天创建的强制进入 Top N） ----
-  const todayStart = new Date(today)
-  todayStart.setHours(0, 0, 0, 0)
   const newTasks = allCandidates.filter(c => {
     if (!c.createdAt) return false
     return new Date(c.createdAt) >= todayStart

@@ -81,7 +81,7 @@ Page({
 
   onWeekdayToggle(e) {
     const day = Number(e.currentTarget.dataset.day)
-    let days = [...this.data.form.repeatDays]
+    let days = this.data.form.repeatDays.slice()
     const idx = days.indexOf(day)
     if (idx > -1) {
       days.splice(idx, 1)
@@ -96,8 +96,9 @@ Page({
   // 同步 weekdays 的 active 状态（WXML 不能用 .indexOf()）
   syncWeekdayActive(days) {
     const weekdays = this.data.weekdays.map(w => ({
-      ...w,
-      active: days.includes(w.value)
+      value: w.value,
+      label: w.label,
+      active: days.indexOf(w.value) > -1
     }))
     this.setData({ weekdays })
   },

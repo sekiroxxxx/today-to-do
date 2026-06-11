@@ -45,7 +45,7 @@ Page({
     wx.setNavigationBarTitle({ title: `添加${mod.name}任务` })
     this.setData({
       currentModule: key,
-      form: { ...FORM_DEFAULTS[key] || FORM_DEFAULTS.custom }
+      form: Object.assign({}, FORM_DEFAULTS[key] || FORM_DEFAULTS.custom)
     })
   },
 
@@ -81,7 +81,7 @@ Page({
 
   onWeekdayToggle(e) {
     const day = Number(e.currentTarget.dataset.day)
-    let days = [...this.data.form.repeatDays]
+    var days = this.data.form.repeatDays.slice()
     const idx = days.indexOf(day)
     if (idx > -1) days.splice(idx, 1)
     else days.push(day)
@@ -91,7 +91,9 @@ Page({
   },
 
   syncWeekdayActive(days) {
-    const weekdays = this.data.weekdays.map(w => ({ ...w, active: days.includes(w.value) }))
+    var weekdays = this.data.weekdays.map(function (w) {
+      return Object.assign({}, w, { active: days.indexOf(w.value) > -1 })
+    })
     this.setData({ weekdays })
   },
 
