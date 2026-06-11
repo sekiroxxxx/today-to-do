@@ -18,6 +18,12 @@ Page({
     var userModules = (app.globalData.userInfo && app.globalData.userInfo.modules) || ['jobseeker', 'custom']
     var enabled = phrases.MODULES.filter(function (m) { return userModules.indexOf(m.key) > -1 })
     this.setData({ modules: enabled })
+
+    // 恢复上次选择的模块（Tab 切换保持状态）
+    var savedModule = wx.getStorageSync('progressModule')
+    if (savedModule && enabled.filter(function (m) { return m.key === savedModule }).length > 0) {
+      this.setData({ currentModule: savedModule })
+    }
     if (!this.data.currentModuleInfo) {
       this.setData({ currentModuleInfo: enabled[0] || null })
     }
@@ -65,7 +71,7 @@ Page({
 
   onModuleSelect(e) {
     const key = e.currentTarget.dataset.key
-    // 切模块时保持旧数据不消失，新数据返回后替换
+    wx.setStorageSync('progressModule', key)
     this.setData({ currentModule: key, showSheet: false, isLoading: true })
     this.loadData()
   },
