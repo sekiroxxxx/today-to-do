@@ -1,0 +1,120 @@
+<!-- 统一创建页 -->
+<view class="page">
+  <!-- 模块选择器 -->
+  <scroll-view class="module-bar" scroll-x enable-flex>
+    <view wx:for="{{modules}}" wx:key="key"
+      class="module-chip {{currentModule === item.key ? 'module-chip--active' : ''}}"
+      style="{{currentModule === item.key ? 'border-color:' + item.color : ''}}"
+      data-key="{{item.key}}" bindtap="onModuleTap">
+      <text>{{item.icon}} {{item.name}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 求职表单 ===== -->
+  <view wx:if="{{currentModule === 'jobseeker'}}" class="form-card">
+    <view class="form-item">
+      <text class="form-label">公司名称 <text class="required">*</text></text>
+      <input class="form-input" placeholder="如：字节跳动" value="{{form.company}}" data-field="company" bindinput="onInput"/>
+    </view>
+    <view class="form-item">
+      <text class="form-label">岗位名称 <text class="required">*</text></text>
+      <input class="form-input" placeholder="如：前端开发工程师" value="{{form.position}}" data-field="position" bindinput="onInput"/>
+    </view>
+    <view class="form-item">
+      <text class="form-label">薪资范围</text>
+      <input class="form-input" placeholder="如：20k-35k" value="{{form.salaryRange}}" data-field="salaryRange" bindinput="onInput"/>
+    </view>
+    <view class="form-item">
+      <text class="form-label">投递链接</text>
+      <input class="form-input" placeholder="如：https://zhaopin.xxx.com" value="{{form.applyLink}}" data-field="applyLink" bindinput="onInput"/>
+    </view>
+    <view class="form-item">
+      <text class="form-label">截止日期</text>
+      <picker mode="date" value="{{form.deadline}}" start="{{today}}" bindchange="onDeadlineChange">
+        <view class="form-input">{{form.deadline || '选择日期'}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="form-label">吸引力评分</text>
+      <star-rating value="{{form.attractionScore}}" size="lg" bind:change="onAttractionChange"/>
+      <text class="form-hint">{{form.attractionScore === 1 ? '随便试试' : form.attractionScore === 2 ? '可以了解' : form.attractionScore === 3 ? '比较想去' : form.attractionScore === 4 ? '很感兴趣' : '梦寐以求'}}</text>
+    </view>
+    <view class="form-item">
+      <text class="form-label">准备度评分</text>
+      <star-rating value="{{form.preparednessScore}}" size="lg" bind:change="onPreparednessChange"/>
+      <text class="form-hint">{{form.preparednessScore === 1 ? '刚收藏' : form.preparednessScore === 2 ? '初步了解' : form.preparednessScore === 3 ? '简历已适配' : form.preparednessScore === 4 ? '针对准备' : '内推已就绪'}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 通用任务表单（work/study/freelance/custom） ===== -->
+  <view wx:else class="form-card">
+    <view class="form-item">
+      <text class="form-label">任务标题 <text class="required">*</text></text>
+      <input class="form-input" placeholder="如：完成 Q2 报告" value="{{form.title}}" data-field="title" bindinput="onInput"/>
+    </view>
+
+    <!-- work 模块额外字段 -->
+    <block wx:if="{{currentModule === 'work'}}">
+      <view class="form-item">
+        <text class="form-label">所属项目</text>
+        <input class="form-input" placeholder="如：Q2 产品规划" value="{{form.project}}" data-field="project" bindinput="onInput"/>
+      </view>
+      <view class="form-item">
+        <text class="form-label">截止日期</text>
+        <picker mode="date" value="{{form.deadline}}" start="{{today}}" bindchange="onDeadlineChange">
+          <view class="form-input">{{form.deadline || '选择日期'}}</view>
+        </picker>
+      </view>
+    </block>
+
+    <!-- 非 work 模块的通用字段 -->
+    <block wx:else>
+      <view class="form-item">
+        <text class="form-label">备注</text>
+        <textarea class="form-textarea" placeholder="补充说明..." value="{{form.note}}" data-field="note" bindinput="onInput"/>
+      </view>
+    </block>
+
+    <!-- 优先级（所有模块通用） -->
+    <view class="form-item">
+      <text class="form-label">优先级</text>
+      <view class="priority-row">
+        <view class="priority-btn {{form.priority === 1 ? 'priority-btn--high' : ''}}" data-priority="1" bindtap="onPrioritySelect">高</view>
+        <view class="priority-btn {{form.priority === 2 ? 'priority-btn--mid' : ''}}" data-priority="2" bindtap="onPrioritySelect">中</view>
+        <view class="priority-btn {{form.priority === 3 ? 'priority-btn--low' : ''}}" data-priority="3" bindtap="onPrioritySelect">低</view>
+      </view>
+    </view>
+
+    <!-- 非 work 模块的扩展字段 -->
+    <block wx:if="{{currentModule !== 'work'}}">
+      <view class="form-item">
+        <text class="form-label">预计耗时（分钟）</text>
+        <input class="form-input" type="number" placeholder="如：60" value="{{form.estimatedMinutes}}" data-field="estimatedMinutes" bindinput="onInput"/>
+      </view>
+      <view class="form-item" wx:if="{{form.repeatType === 'none'}}">
+        <text class="form-label">截止日期</text>
+        <picker mode="date" value="{{form.deadline}}" start="{{today}}" bindchange="onDeadlineChange">
+          <view class="form-input">{{form.deadline || '选择日期'}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="form-label">重复规则</text>
+        <view class="repeat-options">
+          <view class="repeat-option {{form.repeatType === 'none' ? 'repeat-option--active' : ''}}" data-type="none" bindtap="onRepeatTypeSelect">不重复</view>
+          <view class="repeat-option {{form.repeatType === 'daily' ? 'repeat-option--active' : ''}}" data-type="daily" bindtap="onRepeatTypeSelect">每天</view>
+          <view class="repeat-option {{form.repeatType === 'weekly' ? 'repeat-option--active' : ''}}" data-type="weekly" bindtap="onRepeatTypeSelect">每周</view>
+        </view>
+        <view wx:if="{{form.repeatType === 'weekly'}}" class="weekday-row">
+          <view wx:for="{{weekdays}}" wx:key="value"
+            class="weekday-item {{item.active ? 'weekday-item--active' : ''}}"
+            data-day="{{item.value}}" bindtap="onWeekdayToggle">{{item.label}}</view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 提交 -->
+  <button class="submit-btn" bindtap="onSubmit" disabled="{{saving}}">
+    {{saving ? '保存中...' : '添加任务'}}
+  </button>
+</view>

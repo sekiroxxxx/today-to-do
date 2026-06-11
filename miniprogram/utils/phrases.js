@@ -53,6 +53,15 @@ const RATING_TIERS = [
   { min: 0,  label: 'C', bg: '#E6FFFB', color: '#08979C' }
 ]
 
+// 模块配置（v1.1）
+const MODULES = [
+  { key: 'jobseeker', icon: '🎯', name: '求职日常', color: '#CF1322' },
+  { key: 'work',      icon: '💼', name: '工作日常', color: '#D48A00' },
+  { key: 'study',     icon: '🎓', name: '学业日常', color: '#1677FF' },
+  { key: 'freelance', icon: '🚀', name: '自由职业', color: '#722ED1' },
+  { key: 'custom',    icon: '📝', name: '自定义任务', color: '#999999' }
+]
+
 // Tab 名称（文档约定值，json 里同步改）
 const TAB_NAMES = {
   today: '日常',
@@ -85,6 +94,7 @@ module.exports = {
   FREQUENT_POSTPONE,
   RATING_TIERS,
   TAB_NAMES,
+  MODULES,
   DEFAULT_NICKNAME,
   getRating,
   pick

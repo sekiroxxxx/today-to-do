@@ -7,4 +7,5 @@
     data-index="{{item}}"
     bindtap="onTap"
   >★</text>
+  <text wx:if="{{value > 0}}" class="star-desc">{{desc}}</text>
 </view>
