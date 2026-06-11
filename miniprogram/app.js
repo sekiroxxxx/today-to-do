@@ -26,7 +26,8 @@ App({
       // 缓存脏标记：true=数据已过期需重新请求，false=缓存有效
       // 用户做增删改操作后标记为 true，成功拉取数据后标记为 false
       dirty: {
-        today: true,            // 初始为 true，首次进入各 Tab 时会拉数据
+        today: true,
+        progress: true,
         jobs: true,
         tasks: true,
         mine: true

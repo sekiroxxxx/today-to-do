@@ -64,7 +64,7 @@ Page({
     api.updatePreference({ dailyLimit: limit }).then(res => {
       if (res.success) {
         wx.showToast({ title: `每日上限已设为 ${limit} 条`, icon: 'success' })
-        app.markDirty(['today'])
+        app.markDirty(['today', 'progress'])
       } else {
         wx.showToast({ title: res.errMsg || '设置失败', icon: 'none' })
       }
@@ -125,7 +125,7 @@ Page({
             return Object.assign({}, m, { checked: modules.indexOf(m.key) > -1 })
           })
         })
-        app.markDirty(['today'])
+        app.markDirty(['today', 'progress'])
       })
     }
   },

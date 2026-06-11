@@ -125,7 +125,7 @@ Page({
     // 调云函数标记完成
     api.completeAction(id).then(() => {
       this.removeAction(id)
-      app.markDirty(['today', 'mine'])
+      app.markDirty(['today', 'progress', 'mine'])
     })
   },
 

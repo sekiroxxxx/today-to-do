@@ -14,12 +14,15 @@ Page({
   },
 
   onShow() {
+    if (!app.globalData.dirty.progress) return
     this.loadData()
   },
 
   loadData() {
     const mod = phrases.MODULES.find(m => m.key === this.data.currentModule)
     if (mod) wx.setNavigationBarTitle({ title: mod.name })
+
+    app.globalData.dirty.progress = false
 
     // 更新当前模块信息
     const currentModuleInfo = phrases.MODULES.find(m => m.key === this.data.currentModule)
