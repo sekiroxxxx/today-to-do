@@ -122,39 +122,45 @@ exports.main = async (event, context) => {
       })
       .get()
 
-    // ========== 第5步：调用算法模块生成清单 ==========
-    const result = algorithm.generateDailyList({
+    // ========== 第5步：求职岗位跑算法排序 ==========
+    const jobActions = algorithm.generateDailyList({
       jobs: jobsResult.data,
-      tasks: tasksResult.data,
+      tasks: [],              // v1.1: 自定义任务不跑算法
       recentActions: recentResult.data,
       dailyLimit: dailyLimit,
       excludeSourceIds: retainedSourceIds || []
-    })
+    }).actions.map(a => ({ ...a, module: 'jobseeker' }))
 
-    console.log(`算法生成完成: ${result.actions.length} 条, 多样性修正: ${result.diversityApplied}`)
+    // ========== 第6步：自定义任务原样输出（按模块分组，不跑算法） ==========
+    const customActions = tasksResult.data
+      .filter(t => !retainedSourceIds.includes(t._id))
+      .sort((a, b) => a.priority - b.priority)  // 高优先级在前
+      .map(t => ({
+        sourceType: 'custom',
+        sourceId: t._id,
+        module: t.module || 'custom',
+        title: t.title,
+        description: t.note || '',
+        normalizedScore: null,   // 不参与算法评分
+        rawScore: null
+      }))
 
-    // ========== 第6步：将结果写入 daily_actions 集合 ==========
+    // ========== 第7步：合并（求职优先，自定义补位） ==========
+    // 先放求职（已排序），再放自定义，总数不超过 dailyLimit
+    const mergedActions = [...jobActions, ...customActions].slice(0, dailyLimit)
+
+    console.log(`生成完成: 求职 ${jobActions.length} 条, 自定义 ${customActions.length} 条, 合并 ${mergedActions.length} 条`)
+
+    // ========== 第8步：写入 daily_actions ==========
     const now = db.serverDate()
-
-    // 构建 sourceId → module 映射（自定义任务的模块来源）
-    const taskModuleMap = {}
-    tasksResult.data.forEach(t => { taskModuleMap[t._id] = t.module || 'custom' })
-
-    // 过滤：跳过已保留的 sourceId
-    const newActions = result.actions.filter(a => !retainedSourceIds.includes(a.sourceId))
-    const insertPromises = newActions.map(action => {
-      // 求职 → 'jobseeker'，自定义 → 从源任务取 module，兜底 'custom'
-      const module = action.sourceType === 'job'
-        ? 'jobseeker'
-        : (taskModuleMap[action.sourceId] || 'custom')
-
+    const insertPromises = mergedActions.map(action => {
       return db.collection('daily_actions').add({
         data: {
           _openid: openid,
           date: todayDate,
           sourceType: action.sourceType,
           sourceId: action.sourceId,
-          module: module,
+          module: action.module,
           title: action.title,
           description: action.description,
           normalizedScore: action.normalizedScore,
@@ -167,10 +173,9 @@ exports.main = async (event, context) => {
       })
     })
 
-    // 并行写入所有 action 记录
     await Promise.all(insertPromises)
 
-    // ========== 第7步：读取待处理记录（排除已完成/推迟）并返回 ==========
+    // ========== 第9步：读取待处理记录并返回 ==========
     const finalResult = await db.collection('daily_actions')
       .where({ _openid: openid, date: todayDate, completed: false, postponed: false })
       .orderBy('normalizedScore', 'desc')
@@ -182,7 +187,7 @@ exports.main = async (event, context) => {
       success: true,
       actions: finalResult.data,
       generated: true,
-      diversityApplied: result.diversityApplied,
+      diversityApplied: false,
       date: todayDate
     }
 
