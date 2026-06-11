@@ -44,18 +44,19 @@ Page({
 
     fetch.then(res => {
       const filtered = this.filterDismissed(res.actions || [])
-      const modules = this.buildModules(filtered)
-      const hasActions = modules.filter(function (m) { return !m.allDone }).length > 0
       const generated = res.generated !== undefined && res.generated !== false
-      // 所有模块都完成 → 全局庆祝横幅
-      var allModulesDone = generated && modules.length > 0 && !hasActions
+      const willBeGenerated = generated || this.data.todayGenerated
+      // 传入 willBeGenerated 是因为 setData 还没执行，buildModules 读不到最新的 todayGenerated
+      const modules = this.buildModules(filtered, willBeGenerated)
+      const hasActions = modules.filter(function (m) { return !m.allDone }).length > 0
+      var allModulesDone = willBeGenerated && modules.length > 0 && !hasActions
 
       this.setData({
         modules,
-        empty: !hasActions && !generated,
-        allDone: !hasActions && this.data.todayGenerated,
+        empty: !hasActions && !willBeGenerated,
+        allDone: !hasActions && willBeGenerated,
         allModulesDone: allModulesDone,
-        todayGenerated: generated || this.data.todayGenerated,
+        todayGenerated: willBeGenerated,
         todayDate: res.date,
         loading: false
       })
@@ -65,7 +66,8 @@ Page({
   },
 
   // 按 module 分组，已完成模块也保留（allDone 标记）
-  buildModules(actions) {
+  buildModules(actions, isGenerated) {
+    var generated = arguments.length > 1 ? isGenerated : this.data.todayGenerated
     var userModules = (app.globalData.userInfo && app.globalData.userInfo.modules) || ['jobseeker', 'custom']
     var map = {}
     actions.forEach(function (a) {
@@ -78,11 +80,9 @@ Page({
     var result = []
     for (var i = 0; i < phrases.MODULES.length; i++) {
       var mod = phrases.MODULES[i]
-      // 未激活的模块不显示
       if (userModules.indexOf(mod.key) === -1) continue
       var hasActions = map[mod.key] && map[mod.key].length > 0
-      // 有任务 或 今日已生成过（已完成态）才显示
-      if (hasActions || this.data.todayGenerated) {
+      if (hasActions || generated) {
         result.push({
           icon: mod.icon,
           name: mod.name,
@@ -91,7 +91,7 @@ Page({
           actions: map[mod.key] || [],
           open: hasActions,     // 有任务默认展开，完成了默认折叠
           count: hasActions ? map[mod.key].length : 0,
-          allDone: !hasActions && this.data.todayGenerated
+          allDone: !hasActions && generated
         })
       }
     }
@@ -195,19 +195,33 @@ Page({
     })
   },
 
-  // 从模块列表中移除一张卡片
+  // 从模块列表中移除一张卡片（模块完成后保留，显示 ✓）
   removeAction(actionId) {
     const target = this.findAction(actionId)
     if (target && target.sourceId) dismissedSourceIds.push(target.sourceId)
 
-    const modules = this.data.modules.map(m => ({
-      icon: m.icon, name: m.name, color: m.color, key: m.key, open: m.open,
-      actions: m.actions.filter(function (a) { return a._id !== actionId }),
-      count: m.actions.filter(a => a._id !== actionId).length
-    })).filter(m => m.count > 0)
+    var generated = this.data.todayGenerated
+    var ctx = this
+    var modules = this.data.modules.map(function (m) {
+      var remaining = m.actions.filter(function (a) { return a._id !== actionId })
+      var allDone = remaining.length === 0 && generated
+      return {
+        icon: m.icon, name: m.name, color: m.color, key: m.key,
+        open: allDone ? false : m.open,
+        actions: remaining,
+        count: remaining.length,
+        allDone: allDone
+      }
+    })
 
-    const allDone = modules.length === 0 && this.data.todayGenerated
-    this.setData({ modules, empty: modules.length === 0 && !allDone, allDone })
+    var hasActive = modules.filter(function (m) { return !m.allDone }).length > 0
+    var allModulesDone = generated && modules.length > 0 && !hasActive
+    this.setData({
+      modules: modules,
+      empty: modules.length === 0,
+      allDone: !hasActive && generated,
+      allModulesDone: allModulesDone
+    })
   },
 
   findAction(id) {
