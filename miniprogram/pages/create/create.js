@@ -166,7 +166,7 @@ Page({
         getApp().markDirty(['tasks', 'today', 'progress', 'jobs', 'mine'])
         wx.showToast({ title: '已添加', icon: 'success', duration: 1000 })
         setTimeout(function () {
-          ctx.setData({ saving: false })
+          ctx.setData({ saving: false, form: cloneForm(ctx.data.currentModule) })
           wx.switchTab({ url: '/pages/today/today' })
         }, 1000)
       } else {
