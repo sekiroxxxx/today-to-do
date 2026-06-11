@@ -44,13 +44,15 @@
           <text>今日{{item.name}}委托全部完成 🎉</text>
         </view>
         <!-- 任务列表 -->
-        <view wx:else wx:for="{{item.actions}}" wx:key="_id" class="task-row">
+        <block wx:else>
+        <view wx:for="{{item.actions}}" wx:key="_id" class="task-row">
           <view class="task-info">
             <text class="task-name">{{item.title}}</text>
             <text wx:if="{{item.description}}" class="task-hint">{{item.description}}</text>
           </view>
           <button class="btn-done" data-id="{{item._id}}" bindtap="onComplete">完成</button>
         </view>
+        </block>
       </view>
     </view>
   </view>
