@@ -179,6 +179,17 @@ Page({
   }
 })
 
+function cloneForm(key) {
+  var src = FORM_DEFAULTS[key] || FORM_DEFAULTS.custom
+  var copy = {}
+  var keys = Object.keys(src)
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i]
+    copy[k] = Array.isArray(src[k]) ? src[k].slice() : src[k]
+  }
+  return copy
+}
+
 function getDateString(date) {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
