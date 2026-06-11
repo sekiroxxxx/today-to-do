@@ -99,7 +99,8 @@ exports.main = async (event, context) => {
     // 基本信息
     title: event.title.trim(),
     note: (event.note || '').trim(),
-    priority: priority,          // 1高 / 2中 / 3低
+    priority: priority,
+    module: event.module || 'custom',  // v1.1 模块归属，默认自定义
     estimatedMinutes: estimatedMinutes,
     deadline: event.deadline || '',
 
