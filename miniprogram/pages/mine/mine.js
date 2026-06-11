@@ -119,6 +119,7 @@ Page({
     const user = this.data.userInfo
     if (user && user._id) {
       db.collection('users').doc(user._id).update({ data: { modules } }).then(() => {
+        app.globalData.userInfo.modules = modules
         this.setData({
           userModules: modules,
           allModules: phrases.MODULES.map(function (m) {
