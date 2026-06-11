@@ -42,7 +42,8 @@ Page({
 
     app.globalData.dirty.progress = false
 
-    this.setData({ currentModuleInfo: contextModuleInfo })
+    var info = phrases.MODULES.find(function (m) { return m.key === key })
+    this.setData({ currentModuleInfo: info })
 
     // 获取该模块的今日任务，求职加评级 badge
     var ctx = this
