@@ -112,6 +112,6 @@ Page({
   },
 
   onAddTask() {
-    wx.navigateTo({ url: '/pages/create/create' })
+    wx.navigateTo({ url: '/pages/create/create?module=' + this.data.currentModule })
   }
 })

@@ -1,14 +1,15 @@
 <!-- 统一创建页 -->
 <view class="page">
-  <!-- 模块选择器 -->
-  <scroll-view class="module-bar" scroll-x enable-flex>
+  <!-- 模块选择器 — 网格 -->
+  <view class="module-grid">
     <view wx:for="{{modules}}" wx:key="key"
-      class="module-chip {{currentModule === item.key ? 'module-chip--active' : ''}}"
+      class="module-card {{currentModule === item.key ? 'module-card--active' : ''}}"
       style="{{currentModule === item.key ? 'border-color:' + item.color : ''}}"
       data-key="{{item.key}}" bindtap="onModuleTap">
-      <text>{{item.icon}} {{item.name}}</text>
+      <text class="module-card-icon">{{item.icon}}</text>
+      <text class="module-card-name">{{item.name}}</text>
     </view>
-  </scroll-view>
+  </view>
 
   <!-- ===== 求职表单 ===== -->
   <view wx:if="{{currentModule === 'jobseeker'}}" class="form-card">

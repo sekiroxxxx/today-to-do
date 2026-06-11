@@ -33,10 +33,11 @@ Page({
     ]
   },
 
-  onLoad() {
+  onLoad(options) {
     this.refreshModules()
     this.setData({ today: getDateString(new Date()) })
-    var defaultModule = this.data.modules.length > 0 ? this.data.modules[0].key : 'custom'
+    // 推进页传入 ?module=xxx → 预选对应模块
+    var defaultModule = options && options.module ? options.module : (this.data.modules.length > 0 ? this.data.modules[0].key : 'custom')
     this.switchModule(defaultModule)
   },
 

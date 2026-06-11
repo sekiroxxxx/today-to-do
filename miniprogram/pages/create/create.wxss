@@ -1,9 +1,11 @@
 .page { padding: var(--spacing-md); padding-bottom: 80px; min-height: 100vh; }
 
-/* 模块选择器 */
-.module-bar { white-space: nowrap; margin-bottom: var(--spacing-md); padding: 2px 0; }
-.module-chip { display: inline-block; padding: 8px 16px; margin-right: var(--spacing-xs); border-radius: var(--radius-round); border: 2px solid transparent; background: #fff; font-size: var(--font-caption); }
-.module-chip--active { background: var(--color-primary-light); }
+/* 模块选择器 — 网格 */
+.module-grid { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+.module-card { flex: 1 1 calc(33% - var(--spacing-sm)); min-width: 80px; text-align: center; padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 2px solid transparent; background: #fff; }
+.module-card-icon { font-size: 20px; display: block; }
+.module-card-name { font-size: var(--font-tag); color: var(--color-text-secondary); display: block; margin-top: 4px; }
+.module-card--active { background: var(--color-primary-light); }
 
 /* 表单 */
 .form-card { background: #fff; border-radius: var(--radius-md); padding: var(--spacing-md); box-shadow: var(--shadow-card); margin-bottom: var(--spacing-md); }
