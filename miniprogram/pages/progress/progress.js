@@ -112,6 +112,7 @@ Page({
   },
 
   onAddTask() {
-    wx.navigateTo({ url: '/pages/create/create?module=' + this.data.currentModule })
+    wx.setStorageSync('createPreSelect', this.data.currentModule)
+    wx.switchTab({ url: '/pages/create/create' })
   }
 })

@@ -34,15 +34,20 @@ Page({
   },
 
   onLoad(options) {
-    this.refreshModules()
     this.setData({ today: getDateString(new Date()) })
-    // 推进页传入 ?module=xxx → 预选对应模块
-    var defaultModule = options && options.module ? options.module : (this.data.modules.length > 0 ? this.data.modules[0].key : 'custom')
+    this.refreshModules()
+    var defaultModule = this.data.modules.length > 0 ? this.data.modules[0].key : 'custom'
     this.switchModule(defaultModule)
   },
 
   onShow() {
     this.refreshModules()
+    // 推进页通过 storage 传入预选模块
+    var preSelect = wx.getStorageSync('createPreSelect')
+    if (preSelect) {
+      wx.removeStorageSync('createPreSelect')
+      this.switchModule(preSelect)
+    }
   },
 
   refreshModules() {
