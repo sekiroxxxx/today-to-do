@@ -5,15 +5,21 @@ const app = getApp()
 
 Page({
   data: {
-    modules: phrases.MODULES,
+    modules: [],
     currentModule: 'jobseeker',
-    currentModuleInfo: phrases.MODULES[0],
+    currentModuleInfo: null,
     tasks: [],
     funnel: null,      // 求职漏斗
     showSheet: false
   },
 
   onShow() {
+    var userModules = (app.globalData.userInfo && app.globalData.userInfo.modules) || ['jobseeker', 'custom']
+    var enabled = phrases.MODULES.filter(function (m) { return userModules.indexOf(m.key) > -1 })
+    this.setData({ modules: enabled })
+    if (!this.data.currentModuleInfo) {
+      this.setData({ currentModuleInfo: enabled[0] || null })
+    }
     if (!app.globalData.dirty.progress) return
     this.loadData()
   },

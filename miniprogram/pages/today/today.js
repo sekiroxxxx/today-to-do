@@ -60,11 +60,13 @@ Page({
     }).finally(() => { app.globalData.dirty.today = false })
   },
 
-  // 按 module 分组
+  // 按 module 分组，仅展示用户已启用的模块
   buildModules(actions) {
-    const map = {}
+    var userModules = (app.globalData.userInfo && app.globalData.userInfo.modules) || ['jobseeker', 'custom']
+    var map = {}
     actions.forEach(a => {
-      const m = a.module || (a.sourceType === 'job' ? 'jobseeker' : 'custom')
+      var m = a.module || (a.sourceType === 'job' ? 'jobseeker' : 'custom')
+      if (userModules.indexOf(m) === -1) return
       if (!map[m]) map[m] = []
       map[m].push(a)
     })

@@ -17,7 +17,7 @@ const FORM_DEFAULTS = {
 
 Page({
   data: {
-    modules: phrases.MODULES,
+    modules: [],
     currentModule: 'custom',
     today: '',
     form: {},
@@ -34,8 +34,12 @@ Page({
   },
 
   onLoad() {
-    this.setData({ today: getDateString(new Date()) })
-    this.switchModule('custom')
+    var app = getApp()
+    var userModules = (app.globalData.userInfo && app.globalData.userInfo.modules) || ['jobseeker', 'custom']
+    var enabled = phrases.MODULES.filter(function (m) { return userModules.indexOf(m.key) > -1 })
+    var defaultModule = enabled.length > 0 ? enabled[0].key : 'custom'
+    this.setData({ today: getDateString(new Date()), modules: enabled })
+    this.switchModule(defaultModule)
   },
 
   // ========== 模块切换 ==========
