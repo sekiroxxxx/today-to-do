@@ -4,25 +4,6 @@
 
 ---
 
-## 方案三：完成操作无用户反馈
-
-**关联 Bug**：
-- 日常-点完成，1-2s 后卡片消失，无 toast
-- 日常-自定义任务完成后无提示
-- 创建-提交后按钮变灰"保存中"，页面不跳转不提示
-
-**根因**：`module-task` 组件完成回调没 toast。创建页 toast 太短 + navigateBack 间隙吞了提示。
-
-**修复**：
-1. `components/module-task/module-task.js` — `api.completeAction` 成功后调 `wx.showToast`，文案从 `phrases.js` 随机完成池取
-2. `pages/create/create.js` — 提交成功后 toast 1000ms，navigateBack 延迟 1000ms，确保用户看到提示
-
-**验收**：
-1. 日常页点"完成" → 立即弹出 toast "委托达成！"，卡片 0.5s 后消失
-2. 创建页点提交 → toast "已创建" → 1s 后自动返回
-
----
-
 ## 方案四：跳转和交互补全
 
 **关联 Bug**：
