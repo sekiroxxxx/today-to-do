@@ -202,3 +202,12 @@ Page({
     })
   }
 })
+
+function getDateString(date) {
+  var y = date.getFullYear()
+  var m = String(date.getMonth() + 1)
+  if (m.length === 1) m = '0' + m
+  var d = String(date.getDate())
+  if (d.length === 1) d = '0' + d
+  return y + '-' + m + '-' + d
+}
