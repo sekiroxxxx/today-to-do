@@ -10,13 +10,7 @@ const db = cloud.database()
  * 用户打开首页时调用，读取今天已生成的行动清单。
  * 如果今天还没生成过（返回空数组），前端应接着调用 generateDailyActions。
  *
- * 设计意图：读和写分离。getTodayActions 只负责查询，
- * generateDailyActions 只负责生成。前端逻辑清晰：
- *
- *   onShow() {
- *     getTodayActions()  →  有数据就渲染
- *                       →  没数据就调 generateDailyActions → 再渲染
- *   }
+ * 返回全部 action（含已完成/已推迟），由前端自行过滤或分组。
  *
  * 【调用方式（前端）】
  * wx.cloud.callFunction({ name: 'getTodayActions', data: {} })
@@ -34,13 +28,11 @@ exports.main = async (event, context) => {
 
   try {
     // ========== 查询今天的 daily_actions ==========
-    // 过滤掉已完成和已跳过的记录，只展示待处理的
+    // 不在此层过滤 completed/postponed，由各前端页面自行决定显示逻辑
     const result = await db.collection('daily_actions')
       .where({
         _openid: openid,
-        date: todayDate,
-        completed: false,
-        postponed: false
+        date: todayDate
       })
       .orderBy('normalizedScore', 'desc')
       .get()
