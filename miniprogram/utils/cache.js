@@ -95,6 +95,7 @@ module.exports = {
 
   /** 获取今日清单 */
   getToday: async function (forceRefresh = false) {
+    const key = 'today'
     if (!forceRefresh && !isStale(key)) {
       const cache = read(key)
       if (cache) { clearDirty('today'); return cache.data }
