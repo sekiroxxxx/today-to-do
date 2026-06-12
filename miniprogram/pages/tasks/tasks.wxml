@@ -1,9 +1,10 @@
-<!-- 任务管理 v1.1 — 批量管理工具（无已完成 Tab） -->
+<!-- 任务管理 v1.1 — 批量管理工具 -->
 <view class="page">
-  <!-- 切换 Tab -->
+  <!-- 切换 Tab + 批量管理 -->
   <view class="tab-row">
     <view class="tab {{filter === 'active' ? 'tab--active' : ''}}" data-filter="active" bindtap="onFilterSwitch">进行中</view>
     <view class="tab {{filter === 'disabled' ? 'tab--active' : ''}}" data-filter="disabled" bindtap="onFilterSwitch">已禁用</view>
+    <text class="batch-btn" bindtap="onToggleBatch">{{batchMode ? '取消' : '批量管理'}}</text>
   </view>
 
   <empty-state wx:if="{{!loading && filter === 'active' && highTasks.length === 0 && midTasks.length === 0 && lowTasks.length === 0}}"
@@ -15,38 +16,53 @@
   <view class="{{filter === 'active' ? '' : 'hidden'}}">
     <view wx:for="{{sections}}" wx:key="level" class="section">
       <text class="section-title"><text class="pri-dot {{item.dotClass}}">◆</text> {{item.label}}</text>
-      <view wx:for="{{item.tasks}}" wx:key="_id" class="task-card"
+      <view wx:for="{{item.tasks}}" wx:key="_id" class="task-card {{batchMode ? 'task-card--selectable' : ''}}"
             data-id="{{item._id}}" data-enabled="{{true}}"
-            bindtap="onEdit" bindlongpress="onLongPress">
+            bindtap="onCardTap"
+            bindlongpress="onCardLongPress">
+        <!-- 批量模式：复选框 -->
+        <view wx:if="{{batchMode}}" class="checkbox {{selectedIds[item._id] ? 'checkbox--checked' : ''}}">
+          <text wx:if="{{selectedIds[item._id]}}">✓</text>
+        </view>
         <text class="pri-dot {{item.dotClass}}">◆</text>
         <view class="task-body">
           <text class="task-title text-ellipsis">{{item.title}}</text>
           <text wx:if="{{item.tagLine}}" class="task-tagline">{{item.tagLine}}</text>
         </view>
-        <text class="task-arrow">›</text>
+        <text wx:if="{{!batchMode}}" class="task-arrow">›</text>
       </view>
     </view>
   </view>
 
   <!-- 已禁用列表（CSS 显隐） -->
   <view class="section {{filter === 'disabled' && disabledTasks.length > 0 ? '' : 'hidden'}}">
-    <view wx:for="{{disabledTasks}}" wx:key="_id" class="task-card task-card--disabled"
+    <view wx:for="{{disabledTasks}}" wx:key="_id" class="task-card task-card--disabled {{batchMode ? 'task-card--selectable' : ''}}"
           data-id="{{item._id}}" data-enabled="{{false}}"
-          bindtap="onEdit" bindlongpress="onLongPress">
+          bindtap="onCardTap"
+          bindlongpress="onCardLongPress">
+      <view wx:if="{{batchMode}}" class="checkbox {{selectedIds[item._id] ? 'checkbox--checked' : ''}}">
+        <text wx:if="{{selectedIds[item._id]}}">✓</text>
+      </view>
       <text class="task-title text-ellipsis">{{item.title}}</text>
       <text class="task-disabled-tag">已禁用</text>
-      <text class="task-arrow">›</text>
+      <text wx:if="{{!batchMode}}" class="task-arrow">›</text>
     </view>
   </view>
 
-  <!-- 长按提示 -->
-  <view wx:if="{{filter === 'active' && (highTasks.length + midTasks.length + lowTasks.length > 0)}}"
+  <!-- 长按提示（非批量模式） -->
+  <view wx:if="{{!batchMode && filter === 'active' && (highTasks.length + midTasks.length + lowTasks.length > 0)}}"
         class="hint-text" style="text-align:center; padding: var(--spacing-sm); color: var(--color-text-hint); font-size: var(--font-caption)">
     长按任务卡片可编辑、禁用或删除
   </view>
 
-  <!-- 悬浮按钮 -->
-  <view class="fab" bindtap="onAdd">＋</view>
+  <!-- 悬浮按钮（非批量模式） -->
+  <view wx:if="{{!batchMode}}" class="fab" bindtap="onAdd">＋</view>
+
+  <!-- 批量操作底部栏 -->
+  <view wx:if="{{batchMode}}" class="batch-bar">
+    <text class="batch-count">已选 {{selectedCount}} 项</text>
+    <button class="batch-delete-btn" bindtap="onBatchDelete" disabled="{{selectedCount === 0}}">删除选中</button>
+  </view>
 </view>
 
 <!-- 操作弹窗 -->

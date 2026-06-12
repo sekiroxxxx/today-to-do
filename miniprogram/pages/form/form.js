@@ -139,7 +139,8 @@ Page({
         if (res.success) {
           app.markDirty(['jobs', 'today', 'progress', 'mine'])
           wx.showToast({ title: isEdit ? '已更新' : '已添加', icon: 'success' })
-          setTimeout(function () { wx.navigateBack() }, 800)
+          var delay = isEdit ? 1000 : 800
+          setTimeout(function () { wx.navigateBack() }, delay)
         } else {
           wx.showToast({ title: res.errMsg || '操作失败', icon: 'none' })
           ctx.resetComponent()
@@ -157,7 +158,8 @@ Page({
         if (res.success) {
           app.markDirty(['tasks', 'today', 'progress', 'mine'])
           wx.showToast({ title: isEdit ? '已更新' : '已添加', icon: 'success' })
-          setTimeout(function () { wx.navigateBack() }, 800)
+          var delay = isEdit ? 1000 : 800
+          setTimeout(function () { wx.navigateBack() }, delay)
         } else {
           wx.showToast({ title: res.errMsg || '操作失败', icon: 'none' })
           ctx.resetComponent()

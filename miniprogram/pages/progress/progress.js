@@ -43,11 +43,14 @@ Page({
     var currentModuleInfo = phrases.MODULES.find(function (m) { return m.key === activeModule }) || enabled[0]
     this.setData({ modules: enabled, currentModule: activeModule, currentModuleInfo: currentModuleInfo })
 
-    if (!app.globalData.dirty.progress) return
+    if (!app.globalData.dirty.progress) {
+      this.loadData(activeModule, true)
+      return
+    }
     this.loadData(activeModule)
   },
 
-  loadData(moduleKey) {
+  loadData(moduleKey, silent) {
     var key = moduleKey || this.data.currentModule
     var mod = phrases.MODULES.find(function (m) { return m.key === key })
     if (mod) wx.setNavigationBarTitle({ title: mod.name })
@@ -56,7 +59,9 @@ Page({
 
     var info = phrases.MODULES.find(function (m) { return m.key === key })
     var dailyLimit = (app.globalData.userInfo && app.globalData.userInfo.preferences && app.globalData.userInfo.preferences.dailyLimit) || 5
-    this.setData({ currentModuleInfo: info, dailyLimit: dailyLimit, showHistory: false })
+    var setDataObj = { currentModuleInfo: info, dailyLimit: dailyLimit }
+    if (!silent) setDataObj.showHistory = false
+    this.setData(setDataObj)
 
     var ctx = this
 
@@ -301,6 +306,10 @@ Page({
         if (res.success) {
           wx.showToast({ title: '每日求职推荐上限已设为 ' + limit + ' 条', icon: 'success' })
           app.markDirty(['today', 'progress'])
+          // 强制重新生成今日清单以应用新 limit
+          api.generateDailyActions(true).then(function () {
+            ctx.loadData()
+          })
         } else {
           wx.showToast({ title: res.errMsg || '设置失败', icon: 'none' })
         }

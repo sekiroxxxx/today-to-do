@@ -1,6 +1,6 @@
 // 任务管理 v1.1 — 批量管理工具
-const api = require('../../utils/api')
-const app = getApp()
+var api = require('../../utils/api')
+var app = getApp()
 
 Page({
   data: {
@@ -15,7 +15,11 @@ Page({
     loading: true,
     showActionSheet: false,
     selectedTask: null,
-    actionItems: []
+    actionItems: [],
+    // 批量管理
+    batchMode: false,
+    selectedIds: {},
+    selectedCount: 0
   },
 
   onLoad(options) {
@@ -58,7 +62,8 @@ Page({
       ctx.setData({
         tasks: tasks, sections: sections,
         highTasks: high, midTasks: mid, lowTasks: low,
-        disabledTasks: tasks.filter(function (t) { return !t.enabled })
+        disabledTasks: tasks.filter(function (t) { return !t.enabled }),
+        batchMode: false, selectedIds: {}, selectedCount: 0
       })
       app.globalData.dirty.tasks = false
     }).catch(function () {
@@ -93,6 +98,91 @@ Page({
   onEdit(e) {
     var id = e.currentTarget.dataset.id
     wx.navigateTo({ url: '/pages/form/form?mode=edit&type=task&id=' + id })
+  },
+
+  // 卡片点击分发（批量模式→选择，普通模式→编辑）
+  onCardTap(e) {
+    if (this.data.batchMode) {
+      this.onToggleSelect(e)
+    } else {
+      this.onEdit(e)
+    }
+  },
+
+  // 卡片长按分发（批量模式下禁用）
+  onCardLongPress(e) {
+    if (this.data.batchMode) return
+    this.onLongPress(e)
+  },
+
+  // ========== 批量管理 ==========
+  onToggleBatch() {
+    var entering = !this.data.batchMode
+    this.setData({
+      batchMode: entering,
+      selectedIds: {},
+      selectedCount: 0
+    })
+  },
+
+  onToggleSelect(e) {
+    if (!this.data.batchMode) return
+    var id = e.currentTarget.dataset.id
+    var selectedIds = Object.assign({}, this.data.selectedIds)
+    if (selectedIds[id]) {
+      delete selectedIds[id]
+    } else {
+      selectedIds[id] = true
+    }
+    var count = Object.keys(selectedIds).length
+    this.setData({ selectedIds: selectedIds, selectedCount: count })
+  },
+
+  onBatchDelete() {
+    var ids = Object.keys(this.data.selectedIds)
+    if (ids.length === 0) return
+
+    var ctx = this
+    wx.showModal({
+      title: '批量删除',
+      content: '确定删除选中的 ' + ids.length + ' 个任务吗？此操作不可撤销。',
+      confirmColor: '#FF4D4F',
+      success: function (res) {
+        if (res.confirm) {
+          ctx.executeBatchDelete(ids)
+        }
+      }
+    })
+  },
+
+  executeBatchDelete(ids) {
+    var ctx = this
+    wx.showLoading({ title: '删除中...', mask: true })
+
+    // 依次删除
+    var chain = Promise.resolve()
+    var failed = 0
+    ids.forEach(function (id) {
+      chain = chain.then(function () {
+        return api.deleteTask(id).then(function (res) {
+          if (!res.success) failed++
+        })
+      })
+    })
+
+    chain.then(function () {
+      wx.hideLoading()
+      if (failed > 0) {
+        wx.showToast({ title: '删除完成，' + failed + ' 个失败', icon: 'none' })
+      } else {
+        wx.showToast({ title: '已删除 ' + ids.length + ' 个任务', icon: 'success' })
+      }
+      app.markDirty(['today', 'mine', 'progress'])
+      ctx.loadTasks()
+    }).catch(function () {
+      wx.hideLoading()
+      wx.showToast({ title: '删除过程中出错', icon: 'none' })
+    })
   },
 
   // ========== 长按操作 ==========
