@@ -29,6 +29,13 @@
 .task-arrow { font-size: 20px; color: #CCC; flex-shrink: 0; margin-top: 2px; }
 .task-disabled-tag { font-size: var(--font-tag); color: var(--color-text-hint); margin-left: auto; }
 
+/* 已完成卡片 */
+.task-card--completed { opacity: 0.7; display: flex; flex-wrap: wrap; align-items: center; }
+.task-completed-tag { font-size: var(--font-tag); color: #52C41A; margin-left: auto; flex-shrink: 0; }
+.completed-actions { width: 100%; display: flex; gap: 12px; margin-top: 10px; }
+.redo-btn { font-size: var(--font-caption); color: var(--color-primary); padding: 4px 10px; border: 1px solid var(--color-primary); border-radius: 6px; }
+.delete-btn { font-size: var(--font-caption); color: #FF4D4F; padding: 4px 10px; border: 1px solid #FF4D4F; border-radius: 6px; }
+
 /* 悬浮按钮 */
 .fab {
   position: fixed; bottom: 80px; right: 24px;

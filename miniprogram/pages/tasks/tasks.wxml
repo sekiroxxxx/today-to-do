@@ -4,6 +4,7 @@
   <view class="tab-row">
     <view class="tab {{filter === 'active' ? 'tab--active' : ''}}" data-filter="active" bindtap="onFilterSwitch">进行中</view>
     <view class="tab {{filter === 'disabled' ? 'tab--active' : ''}}" data-filter="disabled" bindtap="onFilterSwitch">已禁用</view>
+    <view class="tab {{filter === 'completed' ? 'tab--active' : ''}}" data-filter="completed" bindtap="onFilterSwitch">已完成</view>
   </view>
 
   <empty-state wx:if="{{!loading && filter === 'active' && highTasks.length === 0 && midTasks.length === 0 && lowTasks.length === 0}}"
@@ -38,6 +39,21 @@
       <text class="task-arrow">›</text>
     </view>
   </view>
+
+  <!-- 已完成列表（CSS 显隐） -->
+  <view class="section {{filter === 'completed' && completedTasks.length > 0 ? '' : 'hidden'}}">
+    <view wx:for="{{completedTasks}}" wx:key="_id" class="task-card task-card--completed">
+      <text class="task-title text-ellipsis">{{item.title}}</text>
+      <text class="task-completed-tag">✓ 已完成</text>
+      <view class="completed-actions">
+        <text class="redo-btn" data-id="{{item._id}}" bindtap="onRedo">再做一次</text>
+        <text class="delete-btn" data-id="{{item._id}}" bindtap="onDeleteCompleted">删除</text>
+      </view>
+    </view>
+  </view>
+
+  <empty-state wx:if="{{!loading && filter === 'completed' && completedTasks.length === 0}}"
+    text="今天还没有已完成的任务" />
 
   <!-- 长按提示 -->
   <view wx:if="{{filter === 'active' && (highTasks.length + midTasks.length + lowTasks.length > 0)}}"

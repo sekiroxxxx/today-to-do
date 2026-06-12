@@ -63,6 +63,13 @@
 .advance-icon { font-size: 20px; }
 .advance-text { font-size: var(--font-tag); color: var(--color-text-hint); }
 
+/* 清理已关闭岗位 */
+.cleanup-bar {
+  text-align: center; padding: 10px; margin-bottom: var(--spacing-sm);
+  background: #FFF1F0; border: 1px solid #FFCCC7; border-radius: 8px;
+  font-size: var(--font-caption); color: #FF4D4F;
+}
+
 /* 悬浮按钮 */
 .fab {
   position: fixed; bottom: 80px; right: 24px;

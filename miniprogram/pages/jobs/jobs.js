@@ -10,7 +10,8 @@ Page({
       pending: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0
     },
     funnelTotal: 0,         // 总岗位数，用于计算百分比宽度
-    currentFilter: 'all',   // 当前筛选：'all' | '待投递' | '已投递' | '面试中' | 'Offer' | '已拒绝'
+    closedCount: 0,         // 已关闭岗位数
+    currentFilter: 'all',   // 当前筛选：'all' | '待投递' | '已投递' | '面试中' | 'Offer' | '已关闭'
     keyword: '',            // 搜索关键词
     loading: true
   },
@@ -37,11 +38,14 @@ Page({
       // 从岗位列表本地算出漏斗，不等 getStats（消除延迟）
       const localFunnel = this.calcFunnel(jobs)
 
+      var closedCount = jobs.filter(function (j) { return j.status === '已拒绝' }).length
+
       this.setData({
-        jobs,
+        jobs: jobs,
         filteredJobs: filtered,
         funnel: localFunnel,
         funnelTotal: jobs.length,
+        closedCount: closedCount,
         loading: false
       })
       app.globalData.dirty.jobs = false
@@ -104,6 +108,33 @@ Page({
       )
     }
     return result
+  },
+
+  // ========== 清理已关闭岗位 ==========
+  onCleanupClosed() {
+    var ctx = this
+    wx.showModal({
+      title: '清理已关闭岗位',
+      content: '将删除所有已关闭的岗位，此操作不可恢复',
+      confirmColor: '#FF4D4F',
+      success: function (res) {
+        if (res.confirm) {
+          var closedJobs = ctx.data.jobs.filter(function (j) { return j.status === '已拒绝' })
+          var total = closedJobs.length
+          var done = 0
+          closedJobs.forEach(function (j) {
+            api.deleteJob(j._id).then(function () {
+              done++
+              if (done >= total) {
+                wx.showToast({ title: '已清理 ' + total + ' 个岗位', icon: 'success' })
+                app.markDirty(['today', 'mine'])
+                ctx.loadData()
+              }
+            })
+          })
+        }
+      }
+    })
   },
 
   // ========== 导航 ==========

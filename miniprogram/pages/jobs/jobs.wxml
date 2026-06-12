@@ -44,6 +44,11 @@
     </scroll-view>
   </view>
 
+  <!-- ===== 清理已关闭岗位 ===== -->
+  <view wx:if="{{closedCount > 0}}" class="cleanup-bar" bindtap="onCleanupClosed">
+    <text>已关闭岗位 ({{closedCount}}) — 点击清理</text>
+  </view>
+
   <!-- ===== 岗位列表 ===== -->
   <empty-state wx:if="{{!loading && filteredJobs.length === 0}}"
     text="暂无岗位，去添加第一个吧" showBtn="{{true}}" btnText="添加岗位" bind:action="onAddJob" />

@@ -10,6 +10,7 @@ Page({
     midTasks: [],
     lowTasks: [],
     disabledTasks: [],
+    completedTasks: [],
     filter: 'active',
     loading: true,
     showActionSheet: false,
@@ -33,28 +34,45 @@ Page({
     if (showLoading) {
       this.setData({ loading: true })
     }
-    api.getTaskList().then(res => {
-      const tasks = (res.tasks || []).map(t => this.addTagLine(t))
-      const active = tasks.filter(t => t.enabled)
-      const high = active.filter(t => t.priority === 1)
-      const mid  = active.filter(t => t.priority === 2)
-      const low  = active.filter(t => t.priority === 3)
+    var ctx = this
+    Promise.all([api.getTaskList(), api.getTodayActions()]).then(function (results) {
+      var taskRes = results[0]
+      var todayRes = results[1]
 
-      const sections = []
+      // 交叉匹配：今天完成的 action 对应的 task
+      var completedSourceIds = (todayRes.actions || [])
+        .filter(function (a) { return a.completed && a.sourceType !== 'job' })
+        .map(function (a) { return a.sourceId })
+
+      var tasks = (taskRes.tasks || []).map(function (t) { return ctx.addTagLine(t) })
+
+      var active = tasks.filter(function (t) {
+        return t.enabled && completedSourceIds.indexOf(t._id) === -1
+      })
+      var high = active.filter(function (t) { return t.priority === 1 })
+      var mid  = active.filter(function (t) { return t.priority === 2 })
+      var low  = active.filter(function (t) { return t.priority === 3 })
+
+      var sections = []
       if (high.length) sections.push({ level: 'high', label: '高优先级', dotClass: 'pri-dot--high', tasks: high })
       if (mid.length)  sections.push({ level: 'mid',  label: '中优先级', dotClass: 'pri-dot--mid',  tasks: mid })
       if (low.length)  sections.push({ level: 'low',  label: '低优先级', dotClass: 'pri-dot--low',  tasks: low })
 
-      this.setData({
-        tasks, sections,
+      var completedTasks = tasks.filter(function (t) {
+        return completedSourceIds.indexOf(t._id) > -1
+      })
+
+      ctx.setData({
+        tasks: tasks, sections: sections,
         highTasks: high, midTasks: mid, lowTasks: low,
-        disabledTasks: tasks.filter(t => !t.enabled)
+        disabledTasks: tasks.filter(function (t) { return !t.enabled }),
+        completedTasks: completedTasks
       })
       app.globalData.dirty.tasks = false
-    }).catch(() => {
+    }).catch(function () {
       app.globalData.dirty.tasks = false
-    }).finally(() => {
-      this.setData({ loading: false })
+    }).finally(function () {
+      ctx.setData({ loading: false })
     })
   },
 
@@ -68,6 +86,54 @@ Page({
     if (task.postponeCount >= 3) parts.push(`已推迟${task.postponeCount}次`)
     task.tagLine = parts.join(' · ')
     return task
+  },
+
+  // ========== 已完成操作 ==========
+  onRedo(e) {
+    var id = e.currentTarget.dataset.id
+    var ctx = this
+    wx.showModal({
+      title: '再做一次',
+      content: '该任务将重新出现在今日清单中',
+      success: function (res) {
+        if (res.confirm) {
+          api.updateTask({ taskId: id }).then(function (result) {
+            if (result.success) {
+              wx.showToast({ title: '已重新加入今日清单', icon: 'success' })
+              app.markDirty(['today', 'progress'])
+              ctx.loadTasks()
+            } else {
+              wx.showToast({ title: result.errMsg || '操作失败', icon: 'none' })
+            }
+          })
+        }
+      }
+    })
+  },
+
+  onDeleteCompleted(e) {
+    var id = e.currentTarget.dataset.id
+    var task = this.data.completedTasks.find(function (t) { return t._id === id })
+    var title = task ? task.title : '此任务'
+    var ctx = this
+    wx.showModal({
+      title: '删除任务',
+      content: '确定删除「' + title + '」吗？',
+      confirmColor: '#FF4D4F',
+      success: function (res) {
+        if (res.confirm) {
+          api.deleteTask(id).then(function (result) {
+            if (result.success) {
+              wx.showToast({ title: '已删除', icon: 'success' })
+              app.markDirty(['today', 'mine'])
+              ctx.loadTasks()
+            } else {
+              wx.showToast({ title: result.errMsg || '删除失败', icon: 'none' })
+            }
+          })
+        }
+      }
+    })
   },
 
   // ========== 导航 ==========
