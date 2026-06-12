@@ -32,7 +32,13 @@ Page({
     if (!app.globalData.dirty.tasks && this.data.tasks.length > 0) return
 
     var hasData = this.data.tasks.length > 0
-    this.loadTasks(!hasData)
+    var ctx = this
+    if (app.globalData.dirty.tasks) {
+      // 延迟 500ms 给云 DB 副本同步留时间
+      setTimeout(function () { ctx.loadTasks(!hasData) }, 500)
+    } else {
+      this.loadTasks(!hasData)
+    }
   },
 
   loadTasks(showLoading) {
@@ -159,29 +165,27 @@ Page({
     var ctx = this
     wx.showLoading({ title: '删除中...', mask: true })
 
-    // 依次删除
-    var chain = Promise.resolve()
-    var failed = 0
-    ids.forEach(function (id) {
-      chain = chain.then(function () {
-        return api.deleteTask(id).then(function (res) {
-          if (!res.success) failed++
-        })
+    // 并行删除
+    var deletes = ids.map(function (id) {
+      return api.deleteTask(id).then(function (res) {
+        return res.success
+      }).catch(function () {
+        return false
       })
     })
 
-    chain.then(function () {
+    Promise.all(deletes).then(function (results) {
       wx.hideLoading()
-      if (failed > 0) {
-        wx.showToast({ title: '删除完成，' + failed + ' 个失败', icon: 'none' })
-      } else {
-        wx.showToast({ title: '已删除 ' + ids.length + ' 个任务', icon: 'success' })
+      var failed = results.filter(function (ok) { return !ok }).length
+      var succeeded = ids.length - failed
+      if (succeeded > 0) {
+        wx.showToast({ title: '已删除 ' + succeeded + ' 个任务', icon: 'success' })
       }
-      app.markDirty(['today', 'mine', 'progress'])
+      if (failed > 0) {
+        wx.showToast({ title: failed + ' 个删除失败', icon: 'none' })
+      }
+      app.markDirty(['today', 'mine'])
       ctx.loadTasks()
-    }).catch(function () {
-      wx.hideLoading()
-      wx.showToast({ title: '删除过程中出错', icon: 'none' })
     })
   },
 

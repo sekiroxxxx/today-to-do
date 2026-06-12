@@ -47,7 +47,9 @@ Page({
       this.loadData(activeModule, true)
       return
     }
-    this.loadData(activeModule)
+    // dirty=true：延迟 500ms 给云 DB 副本同步留时间
+    var ctx = this
+    setTimeout(function () { ctx.loadData(activeModule) }, 500)
   },
 
   loadData(moduleKey, silent) {
@@ -170,13 +172,13 @@ Page({
               if (modalRes.confirm) {
                 api.updateJobStatus({ jobId: res.jobInfo._id, newStatus: option.next })
               }
-              app.markDirty(['today', 'progress', 'mine', 'tasks'])
+              app.markDirty(['today', 'mine', 'tasks'])
             }
           })
           return
         }
       }
-      app.markDirty(['today', 'progress', 'mine', 'tasks'])
+      app.markDirty(['today', 'mine', 'tasks'])
     }).catch(function () {
       wx.showToast({ title: '操作失败，请重试', icon: 'none' })
       // 恢复
@@ -212,7 +214,7 @@ Page({
       success: function (modalRes) {
         if (modalRes.confirm) {
           api.updateJobStatus({ jobId: detail.jobId, newStatus: option.next }).then(function () {
-            app.markDirty(['today', 'progress', 'mine', 'tasks'])
+            app.markDirty(['today', 'mine', 'tasks'])
             ctx.loadData()
           })
         }
@@ -243,7 +245,7 @@ Page({
           api.updateTask({ taskId: sourceId }).then(function (result) {
             if (result.success) {
               wx.showToast({ title: '已重新加入今日清单', icon: 'success' })
-              app.markDirty(['today', 'progress', 'mine', 'tasks'])
+              app.markDirty(['today', 'mine', 'tasks'])
               ctx.loadData()
             } else {
               wx.showToast({ title: result.errMsg || '操作失败', icon: 'none' })
@@ -268,7 +270,7 @@ Page({
           api.deleteTask(sourceId).then(function (result) {
             if (result.success) {
               wx.showToast({ title: '已删除', icon: 'success' })
-              app.markDirty(['today', 'progress', 'mine', 'tasks'])
+              app.markDirty(['today', 'mine', 'tasks'])
               // 本地移除
               var completed = ctx.data.completedTasks.filter(function (t) { return t._id !== actionId })
               ctx.setData({ completedTasks: completed })
@@ -305,7 +307,7 @@ Page({
       api.updatePreference({ dailyLimit: limit }).then(function (res) {
         if (res.success) {
           wx.showToast({ title: '每日求职推荐上限已设为 ' + limit + ' 条', icon: 'success' })
-          app.markDirty(['today', 'progress'])
+          app.markDirty(['today'])
           // 强制重新生成今日清单以应用新 limit
           api.generateDailyActions(true).then(function () {
             ctx.loadData()
