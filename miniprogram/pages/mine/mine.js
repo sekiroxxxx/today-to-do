@@ -98,12 +98,26 @@ Page({
   // ========== 模块开关 ==========
   onModuleToggle(e) {
     const key = e.currentTarget.dataset.key
+
+    // 冷却期内：回弹开关，拒绝操作
+    if (this._moduleLocked) {
+      var revertModules = this._moduleLocked
+      this.setData({
+        userModules: revertModules,
+        allModules: phrases.MODULES.map(function (m) {
+          return Object.assign({}, m, { checked: revertModules.indexOf(m.key) > -1 })
+        })
+      })
+      return
+    }
+
     var modules = this.data.userModules.slice()
     const idx = modules.indexOf(key)
     if (idx > -1) modules.splice(idx, 1)
     else modules.push(key)
 
-    // 立即更新 UI（乐观）
+    // 立即更新 UI + 锁定 800ms
+    this._moduleLocked = modules
     app.globalData.userInfo.modules = modules
     var ctx = this
     this.setData({
@@ -115,15 +129,16 @@ Page({
     app.markDirty(['today'], 'moduleChange')
     app.markDirty(['progress'])
 
-    // 防抖写 DB（快速反复开关只写最后一次）
-    if (ctx._moduleTimer) clearTimeout(ctx._moduleTimer)
-    ctx._moduleTimer = setTimeout(function () {
-      const db = wx.cloud.database()
-      const user = ctx.data.userInfo
-      if (user && user._id) {
-        db.collection('users').doc(user._id).update({ data: { modules: ctx.data.userModules } })
-      }
-    }, 400)
+    // 写 DB，完成后解锁
+    const db = wx.cloud.database()
+    const user = this.data.userInfo
+    if (user && user._id) {
+      db.collection('users').doc(user._id).update({ data: { modules: modules } }).finally(function () {
+        setTimeout(function () { ctx._moduleLocked = null }, 800)
+      })
+    } else {
+      setTimeout(function () { ctx._moduleLocked = null }, 800)
+    }
   },
 
   // ========== 通用 ==========
