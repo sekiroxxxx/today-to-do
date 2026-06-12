@@ -368,19 +368,20 @@ function generateDailyList(options) {
     .map(task => ({
       sourceType: 'custom',
       sourceId: task._id,
+      module: task.module || 'custom',
       company: null,
       position: null,
       status: null,
-    attractionScore: null,
-    preparednessScore: null,
-    priority: task.priority,
-    title: task.title,
-    note: task.note,
-    estimatedMinutes: task.estimatedMinutes,
-    repeatRule: task.repeatRule,
-    createdAt: task.createdAt,
-    rawScore: calcTaskScore(task, today)
-  }))
+      attractionScore: null,
+      preparednessScore: null,
+      priority: task.priority,
+      title: task.title,
+      note: task.note,
+      estimatedMinutes: task.estimatedMinutes,
+      repeatRule: task.repeatRule,
+      createdAt: task.createdAt,
+      rawScore: calcTaskScore(task, today)
+    }))
 
   // ---- Step 3: 各自归一化 ----
   // 分别对求职和任务做归一化，保证两类在混合排序时公平

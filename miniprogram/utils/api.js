@@ -187,44 +187,71 @@ module.exports = {
   _runLocalAlgorithm: async function (forceRegenerate) {
     const todayDate = dateStr(new Date())
     try {
-      const todayLogs = await tracked.getCompletedLogs(todayDate, todayDate)
-      const completedSourceIds = (todayLogs.logs || []).map(l => l.sourceId)
-      const [trackedItems, tasksRes] = await Promise.all([
-        tracked.getActiveTrackedItems(),
-        apiDb.getTaskList()
-      ])
-      const tasks = tasksRes.success ? tasksRes.tasks : []
-      const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-      const recentLogs = await tracked.getCompletedLogs(dateStr(sevenDaysAgo), todayDate)
-      const recentActions = (recentLogs.logs || []).map(l => ({ date: l.date, sourceType: l.sourceType }))
-      // 从用户 modulePrefs 读取各模块的 dailyLimit
-      let dailyLimit = 5
+      // 读取用户启用的模块
+      let userModules = ['jobseeker', 'custom']
+      let user = null
       try {
         const userResult = await wx.cloud.database().collection('users').where({}).get()
         if (userResult.data && userResult.data[0]) {
-          const user = userResult.data[0]
-          // 对 jobseeker 模块取对应的 limit（后续算法支持多模块时改为按 module 取）
-          const cfg = phrases.getModuleConfig('jobseeker', user)
-          dailyLimit = cfg.dailyLimit
+          user = userResult.data[0]
+          if (user.modules && user.modules.length > 0) userModules = user.modules
         }
       } catch (_) { }
-      const result = algorithm.generateDailyList({
-        jobs: trackedItems.map(ti => ({
-          _id: ti._id, company: (ti.fields || {}).company || '', position: (ti.fields || {}).position || '',
-          status: ti.status,
-          attractionScore: ((ti.fields || {}).scores || {}).attraction || 1,
-          preparednessScore: ((ti.fields || {}).scores || {}).preparedness || 1,
-          nextActionDate: ti.nextActionDate, postponeCount: ti.postponeCount || 0, createdAt: ti.createdAt
-        })),
-        tasks, recentActions, dailyLimit, excludeSourceIds: completedSourceIds
-      })
-      const actions = result.actions.map(a => ({
-        ...a,
-        _id: `local_${a.sourceType}_${a.sourceId}`,
-        module: a.module || (a.sourceType === 'job' ? 'jobseeker' : 'custom'),
-        completed: false, postponed: false, date: todayDate
-      }))
-      return { success: true, actions, date: todayDate, generated: true, diversityApplied: result.diversityApplied }
+
+      // 今天已完成的 sourceId
+      const todayLogs = await tracked.getCompletedLogs(todayDate, todayDate)
+      const completedSourceIds = (todayLogs.logs || []).map(l => l.sourceId)
+      const allActions = []
+
+      // 1) jobseeker 模块：跑算法
+      if (userModules.indexOf('jobseeker') > -1) {
+        const trackItems = await tracked.getActiveTrackedItems()
+        const cfg = phrases.getModuleConfig('jobseeker', user)
+        const recentLogs = await tracked.getCompletedLogs(dateStr(new Date(Date.now() - 7 * 86400000)), todayDate)
+        const recentActions = (recentLogs.logs || []).map(l => ({ date: l.date, sourceType: l.sourceType }))
+        const result = algorithm.generateDailyList({
+          jobs: trackItems.map(ti => ({
+            _id: ti._id, company: (ti.fields || {}).company || '', position: (ti.fields || {}).position || '',
+            status: ti.status,
+            attractionScore: ((ti.fields || {}).scores || {}).attraction || 1,
+            preparednessScore: ((ti.fields || {}).scores || {}).preparedness || 1,
+            nextActionDate: ti.nextActionDate, postponeCount: ti.postponeCount || 0, createdAt: ti.createdAt
+          })),
+          tasks: [], recentActions, dailyLimit: cfg.dailyLimit, excludeSourceIds: completedSourceIds
+        })
+        result.actions.forEach(a => {
+          allActions.push({
+            ...a,
+            _id: 'local_' + a.sourceType + '_' + a.sourceId,
+            module: 'jobseeker', completed: false, postponed: false, date: todayDate
+          })
+        })
+      }
+
+      // 2) 其他模块：直接取任务列表（不跑算法）
+      const otherModules = userModules.filter(function (m) { return m !== 'jobseeker' })
+      if (otherModules.length > 0) {
+        const tasksRes = await apiDb.getTaskList()
+        const allTasks = tasksRes.success ? tasksRes.tasks : []
+        otherModules.forEach(function (mod) {
+          const modTasks = allTasks.filter(function (t) {
+            var m = t.module || 'custom'
+            return m === mod && t.enabled && completedSourceIds.indexOf(t._id) === -1
+          })
+          modTasks.forEach(function (t) {
+            allActions.push({
+              _id: 'local_custom_' + t._id,
+              sourceType: 'custom', sourceId: t._id,
+              module: t.module || 'custom',
+              title: t.title, description: t.note || '',
+              normalizedScore: 0, rawScore: 0,
+              completed: false, postponed: false, date: todayDate
+            })
+          })
+        })
+      }
+
+      return { success: true, actions: allActions, date: todayDate, generated: true, diversityApplied: false }
     } catch (err) {
       console.warn('[api] 本地算法失败，回退云函数:', err)
       return call('generateDailyActions', { forceRegenerate })
