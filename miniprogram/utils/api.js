@@ -168,8 +168,8 @@ module.exports = {
         }
         return response
       }
-      // 旧 daily_actions _id → 回退云函数
-      return call('completeAction', { actionId })
+      // 非本地 action → 返回错误
+      return { success: false, errMsg: '不支持的操作' }
     })()
   },
 
@@ -206,8 +206,8 @@ module.exports = {
       }
       return { success: true, postponeType, needRegenerate: true }
     }
-    // 旧 daily_actions → 云函数
-    return call('postponeAction', { actionId, postponeType })
+    // 非本地 action → 不支持
+    return { success: false, errMsg: '不支持的操作' }
   },
 
   // ========== 统计（completed_log + tracked_items） ==========

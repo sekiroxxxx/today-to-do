@@ -14,7 +14,7 @@ Page({
 
   onShow() {
     app.getUserInfo().then(user => {
-      if (user && user._id && user.persona && user.persona.trim()) {
+      if (user && user._id && user.modules && user.modules.length > 0) {
         wx.switchTab({ url: '/pages/today/today' })
       } else {
         this.setData({ checking: false })
@@ -54,11 +54,9 @@ Page({
         const db = wx.cloud.database()
         return db.collection('users').doc(user._id).update({
           data: {
-            persona: 'daily',
             modules: this.data.selected
           }
         }).then(() => {
-          app.globalData.userInfo.persona = 'daily'
           app.globalData.userInfo.modules = this.data.selected
           wx.switchTab({ url: '/pages/today/today' })
         })

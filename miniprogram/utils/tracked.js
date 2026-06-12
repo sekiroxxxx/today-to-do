@@ -134,7 +134,6 @@ module.exports = {
   /** 删除追踪项 → { success } */
   deleteTrackedItem: async function (itemId) {
     if (!itemId) return { success: false, errMsg: '缺少 ID' }
-    await db().collection('daily_actions').where({ sourceId: itemId }).remove()
     await db().collection('tracked_items').doc(itemId).remove()
     return { success: true }
   },

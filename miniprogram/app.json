@@ -5,10 +5,8 @@
     "pages/today/today",
     "pages/progress/progress",
     "pages/jobs/jobs",
-    "pages/jobs/add/add",
     "pages/jobs/detail/detail",
     "pages/tasks/tasks",
-    "pages/tasks/add/add",
     "pages/form/form",
     "pages/mine/mine"
   ],

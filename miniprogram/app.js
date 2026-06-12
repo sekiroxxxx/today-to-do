@@ -88,7 +88,7 @@ App({
           this.globalData.userInfo = cached
           return cached
         }
-        return { _id: '', _openid: '', nickname: '冒险者', persona: '', preferences: { dailyLimit: 5 } }
+        return { _id: '', _openid: '', nickname: '冒险者', modules: ['jobseeker', 'custom'], modulePrefs: { jobseeker: { dailyLimit: 5 } } }
       })
   }
 })

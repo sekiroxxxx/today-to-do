@@ -1,7 +1,6 @@
 const api = require('../../utils/api')
 const app = getApp()
 const phrases = require('../../utils/phrases')
-const algorithm = require('../../utils/algorithm')
 
 let dismissedSourceIds = []
 let isRefreshing = false
@@ -187,27 +186,6 @@ Page({
     })
   },
 
-  onPostpone(e) {
-    const id = e.currentTarget.dataset.id
-    const type = e.currentTarget.dataset.type || 'skip'
-    const target = this.findAction(id)
-    if (!target) return
-
-    // 调云函数标记推迟
-    api.postponeAction(id, type).then(() => {
-      this.removeAction(id)
-
-      if (type === 'skip') {
-        api.generateDailyActions(true).then(genRes => {
-          const filtered = this.filterDismissed(genRes.actions || [])
-          this.setData({ modules: this.buildModules(filtered) })
-          app.globalData.dirty.today = false
-        })
-      }
-      app.markDirty(['mine'])
-    })
-  },
-
   // 从模块列表中移除一张卡片（模块完成后保留，显示 ✓）
   removeAction(actionId) {
     const target = this.findAction(actionId)
@@ -246,25 +224,6 @@ Page({
   },
 
   onGoToCreate() { wx.switchTab({ url: '/pages/create/create' }) },
-
-  // L4.5: 本地跑算法即时渲染，避免等云函数
-  runLocalAlgorithm() {
-    return Promise.all([api.getJobList(), api.getTaskList()]).then(([jobRes, taskRes]) => {
-      const jobs = (jobRes.jobs || []).filter(j => j.status !== 'Offer' && j.status !== '已关闭')
-      const tasks = (taskRes.tasks || []).filter(t => t.enabled)
-      const result = algorithm.generateDailyList({ jobs, tasks, dailyLimit: 5 })
-      return result.actions.map(a => ({
-        sourceType: a.sourceType,
-        sourceId: a.sourceId,
-        title: a.title,
-        description: a.description,
-        normalizedScore: a.normalizedScore,
-        rawScore: a.rawScore,
-        createdAt: a.createdAt,
-        module: a.sourceType === 'job' ? 'jobseeker' : ((tasks.find(function (t) { return t._id === a.sourceId }) || {}).module || 'custom')
-      }))
-    })
-  },
 
   filterDismissed(actions) {
     return actions.filter(a => {
