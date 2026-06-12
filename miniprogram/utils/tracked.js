@@ -134,11 +134,19 @@ module.exports = {
   /** 删除追踪项 → { success } */
   deleteTrackedItem: async function (itemId) {
     if (!itemId) return { success: false, errMsg: '缺少 ID' }
+    await db().collection('completed_log').where({sourceId: itemId}).remove()
     await db().collection('tracked_items').doc(itemId).remove()
     return { success: true }
   },
 
   // ==================== completed_log ====================
+
+  /** 删除完成日志 → { success } */
+  deleteCompletedLog: async function (logId) {
+    if (!logId) return { success: false, errMsg: '缺少 ID' }
+    await db().collection('completed_log').doc(logId).remove()
+    return { success: true }
+  },
 
   /** 写入完成日志 → { success } */
   logComplete: async function (data) {

@@ -96,7 +96,7 @@
         <!-- 已完成卡片操作按钮 -->
         <view wx:for="{{completedTasks}}" wx:key="_id" class="completed-ops">
           <text class="redo-btn" data-id="{{item._id}}" data-source="{{item.sourceId}}" bindtap="onRedo">再做一次</text>
-          <text class="delete-btn" data-id="{{item._id}}" data-source="{{item.sourceId}}" bindtap="onDeleteCompleted">删除</text>
+          <text class="delete-btn" data-id="{{item._id}}" data-source="{{item.sourceId}}" data-source-type="{{item.sourceType}}" bindtap="onDeleteCompleted">删除</text>
         </view>
       </block>
     </block>

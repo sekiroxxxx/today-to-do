@@ -314,6 +314,7 @@ Page({
   onDeleteCompleted(e) {
     var actionId = e.currentTarget.dataset.id
     var sourceId = e.currentTarget.dataset.source
+    var sourceType = e.currentTarget.dataset.sourceType
     var ctx = this
     wx.showModal({
       title: '删除任务',
@@ -325,17 +326,19 @@ Page({
           var completed = ctx.data.completedTasks.filter(function (t) { return t._id !== actionId })
           ctx.setData({ completedTasks: completed })
           wx.showToast({ title: '已删除', icon: 'success' })
-          // 后台 API
-          api.deleteTask(sourceId).then(function (result) {
-            if (result.success) {
-              app.markDirty(['today', 'progress', 'mine', 'tasks'])
-            } else {
-              wx.showToast({ title: result.errMsg || '删除失败', icon: 'none' })
-              app.markDirty(['today', 'progress', 'mine', 'tasks'])
-              ctx.loadData()
+          // 后台：先删 completed_log 条目
+          tracked.deleteCompletedLog(actionId).then(function () {
+            // 再删源任务（容错：源任务已不存在时也能正常移除）
+            if (sourceId) {
+              if (sourceType === 'job') {
+                api.deleteTrackedItem(sourceId).catch(function () {})
+              } else {
+                api.deleteTask(sourceId).catch(function () {})
+              }
             }
+            app.markDirty(['today', 'progress', 'mine', 'tasks'])
           }).catch(function () {
-            wx.showToast({ title: '网络异常，请刷新', icon: 'none' })
+            wx.showToast({ title: '删除失败，请重试', icon: 'none' })
             ctx.loadData()
           })
         }

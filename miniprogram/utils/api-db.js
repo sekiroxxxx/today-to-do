@@ -108,6 +108,7 @@ module.exports = {
 
   deleteTask: async function (taskId) {
     if (!taskId) return { success: false, errMsg: '缺少任务 ID' }
+    await db().collection('completed_log').where({sourceId: taskId}).remove()
     await db().collection('custom_tasks').doc(taskId).remove()
     return { success: true }
   }
