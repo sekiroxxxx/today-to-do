@@ -97,34 +97,33 @@ Page({
 
   // ========== 模块开关 ==========
   onModuleToggle(e) {
-    if (this._toggleLock) return
-    this._toggleLock = true
     const key = e.currentTarget.dataset.key
     var modules = this.data.userModules.slice()
-    const oldModules = modules.slice()
     const idx = modules.indexOf(key)
     if (idx > -1) modules.splice(idx, 1)
     else modules.push(key)
 
-    const db = wx.cloud.database()
-    const user = this.data.userInfo
-    if (user && user._id) {
-      db.collection('users').doc(user._id).update({ data: { modules } }).then(() => {
-        app.globalData.userInfo.modules = modules
-        this._toggleLock = false
-        this.setData({
-          userModules: modules,
-          allModules: phrases.MODULES.map(function (m) {
-            return Object.assign({}, m, { checked: modules.indexOf(m.key) > -1 })
-          })
-        })
-        // 模块变更始终通知 today 页本地重建（不调云函数）
-        // added.length === 0 → 只关模块，本地 rebuild 即生效
-        // added.length > 0  → 开了新模块，本地 rebuild + 后台静默刷新
-        app.markDirty(['today'], 'moduleChange')
-        app.markDirty(['progress'])
-      }).catch(() => { this._toggleLock = false })
-    } else { this._toggleLock = false }
+    // 立即更新 UI（乐观）
+    app.globalData.userInfo.modules = modules
+    var ctx = this
+    this.setData({
+      userModules: modules,
+      allModules: phrases.MODULES.map(function (m) {
+        return Object.assign({}, m, { checked: modules.indexOf(m.key) > -1 })
+      })
+    })
+    app.markDirty(['today'], 'moduleChange')
+    app.markDirty(['progress'])
+
+    // 防抖写 DB（快速反复开关只写最后一次）
+    if (ctx._moduleTimer) clearTimeout(ctx._moduleTimer)
+    ctx._moduleTimer = setTimeout(function () {
+      const db = wx.cloud.database()
+      const user = ctx.data.userInfo
+      if (user && user._id) {
+        db.collection('users').doc(user._id).update({ data: { modules: ctx.data.userModules } })
+      }
+    }, 400)
   },
 
   // ========== 通用 ==========
