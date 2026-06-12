@@ -149,9 +149,13 @@ Page({
     const target = this.findAction(id)
     if (!target) return
 
+    // 1. 立即从 UI 移除（0ms 反馈）
+    this.removeAction(id)
+
+    // 2. 后台 API
     var ctx = this
     api.completeAction(id).then(function (res) {
-      wx.showToast({ title: phrases.pick(phrases.COMPLETE), icon: 'success', duration: 1200 })
+      wx.showToast({ title: phrases.pick(phrases.COMPLETE), icon: 'success', duration: 800 })
       // 求职任务：完成 action 后询问是否推进岗位状态
       if (res.sourceType === 'job' && res.jobInfo) {
         var statusMap = {
@@ -170,18 +174,16 @@ Page({
               if (modalRes.confirm) {
                 api.updateJobStatus({ jobId: res.jobInfo._id, newStatus: option.next })
               }
-              ctx.removeAction(id)
               app.markDirty(['today', 'progress', 'mine'])
             }
           })
-        } else {
-          ctx.removeAction(id)
-          app.markDirty(['today', 'progress', 'mine'])
+          return
         }
-      } else {
-        ctx.removeAction(id)
-        app.markDirty(['today', 'progress', 'mine'])
       }
+      app.markDirty(['today', 'progress', 'mine'])
+    }).catch(function () {
+      wx.showToast({ title: '操作失败，请重试', icon: 'none' })
+      app.markDirty(['today', 'progress', 'mine'])
     })
   },
 

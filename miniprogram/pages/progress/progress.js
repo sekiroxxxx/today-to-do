@@ -88,10 +88,20 @@ Page({
   // ========== 任务操作 ==========
   onComplete(e) {
     const id = e.currentTarget.dataset.id
+    const idx = this.data.tasks.findIndex(function (t) { return t._id === id })
+    if (idx === -1) return
+
+    // 1. 立即从列表移除（0ms 反馈）
+    var task = this.data.tasks[idx]
+    var tasks = this.data.tasks.slice()
+    tasks.splice(idx, 1)
+    this.setData({ tasks: tasks })
+
+    // 2. 后台 API
     var ctx = this
     api.completeAction(id).then(function (res) {
-      wx.showToast({ title: phrases.pick(phrases.COMPLETE), icon: 'success' })
-      // 求职任务：询问是否推进状态
+      wx.showToast({ title: phrases.pick(phrases.COMPLETE), icon: 'success', duration: 800 })
+
       if (res.sourceType === 'job' && res.jobInfo) {
         var statusMap = {
           '待投递': { next: '已投递', label: '已投递简历' },
@@ -110,14 +120,17 @@ Page({
                 api.updateJobStatus({ jobId: res.jobInfo._id, newStatus: option.next })
               }
               app.markDirty(['today', 'progress', 'mine'])
-              ctx.loadData()
             }
           })
           return
         }
       }
       app.markDirty(['today', 'progress', 'mine'])
-      ctx.loadData()
+    }).catch(function () {
+      wx.showToast({ title: '操作失败，请重试', icon: 'none' })
+      var restored = ctx.data.tasks.slice()
+      restored.splice(idx, 0, task)
+      ctx.setData({ tasks: restored })
     })
   },
 
