@@ -1,5 +1,5 @@
 // 今日行动清单 — 小程序入口
-const cache = require('./utils/cache')
+const api = require('./utils/api')
 
 App({
   onLaunch: function () {
@@ -17,9 +17,10 @@ App({
       traceUser: true  // 在云函数日志中记录用户访问
     })
 
-    // ========== 本地缓存初始化 ==========
-    // 启动时全量拉取云数据，写入本地 Storage
-    cache.syncAll()
+    // ========== 数据预热 ==========
+    // 启动时预拉取，后续页面 onShow 走 dirty 标记判断是否重新请求
+    api.getTrackedItems().catch(function () {})
+    api.getTaskList().catch(function () {})
 
     // ========== 网络状态监听 ==========
     wx.onNetworkStatusChange(res => {
