@@ -66,7 +66,6 @@ Page({
     const item = phrases.ENCOURAGEMENT.find(e => rate >= e.min) || phrases.ENCOURAGEMENT[phrases.ENCOURAGEMENT.length - 1]
     return {
       completed: summary.completed,
-      postponed: summary.postponed,
       total: summary.total,
       completionRate: Math.round(rate * 100),
       moodText: item.text

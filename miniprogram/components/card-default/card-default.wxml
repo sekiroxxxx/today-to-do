@@ -10,7 +10,6 @@
     <view wx:if="{{action.taskInfo}}" class="card-meta">
       <text wx:if="{{action.taskInfo.estimatedMinutes}}" class="meta-item">{{action.taskInfo.estimatedMinutes}}分钟</text>
       <text wx:if="{{action.taskInfo.repeatRule && action.taskInfo.repeatRule.type !== 'none'}}" class="meta-item">{{action.taskInfo.repeatRule.type === 'daily' ? '每天' : '每周' + action.taskInfo.repeatRule.daysOfWeek.length + '天'}}</text>
-      <text wx:if="{{action.taskInfo.postponeCount >= 3}}" class="meta-item">已推迟{{action.taskInfo.postponeCount}}次</text>
     </view>
     <view class="card-actions">
       <button class="btn-edit" bindtap="onEdit">编辑</button>

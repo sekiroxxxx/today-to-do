@@ -173,43 +173,6 @@ module.exports = {
     })()
   },
 
-  /** 推迟一条行动 → 回退云函数（涉及多表更新） */
-  postponeAction(actionId, postponeType) {
-    if (!postponeType || !['later', 'skip'].includes(postponeType)) return Promise.resolve({ success: false, errMsg: 'postponeType 必须为 later 或 skip' })
-    // 本地 action：仅更新 tracked_items / custom_tasks 的 postponeCount
-    if (actionId.startsWith('local_')) {
-      const rest = actionId.replace('local_', '')
-      let sourceType, sourceId
-      if (rest.startsWith('tracked_')) { sourceType = 'tracked'; sourceId = rest.replace('tracked_', '') }
-      else if (rest.startsWith('custom_')) { sourceType = 'custom'; sourceId = rest.replace('custom_', '') }
-      else { sourceType = 'job'; sourceId = rest.replace('job_', '') }
-      if (postponeType === 'skip' && sourceId) {
-        const db = wx.cloud.database()
-        const now = new Date()
-        if (sourceType === 'tracked' || sourceType === 'job') {
-          return db.collection('tracked_items').doc(sourceId).get().then(r => {
-            if (r.data) {
-              const curNext = r.data.nextActionDate ? new Date(r.data.nextActionDate) : new Date()
-              curNext.setDate(curNext.getDate() + 1)
-              return db.collection('tracked_items').doc(sourceId).update({
-                data: { postponeCount: db.command.inc(1), nextActionDate: curNext, updatedAt: now }
-              })
-            }
-          }).then(() => ({ success: true, postponeType, needRegenerate: true }))
-            .catch(err => { console.warn('[api] 直连 postpone 失败:', err); return call('postponeAction', { actionId, postponeType }) })
-        } else {
-          return db.collection('custom_tasks').doc(sourceId).update({
-            data: { postponeCount: db.command.inc(1), updatedAt: now }
-          }).then(() => ({ success: true, postponeType, needRegenerate: true }))
-            .catch(err => { console.warn('[api] 直连 postpone 失败:', err); return call('postponeAction', { actionId, postponeType }) })
-        }
-      }
-      return { success: true, postponeType, needRegenerate: true }
-    }
-    // 非本地 action → 不支持
-    return { success: false, errMsg: '不支持的操作' }
-  },
-
   // ========== 统计（completed_log + tracked_items） ==========
 
   getStats(range) {

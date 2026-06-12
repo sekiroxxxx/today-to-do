@@ -15,24 +15,6 @@ const COMPLETE = [
   '轻松拿下'
 ]
 
-// 推迟 — 稍后提醒
-const POSTPONE_LATER = [
-  '待会儿见',
-  '没问题，晚点做',
-  '不急～',
-  '先放放',
-  '晚点回来'
-]
-
-// 推迟 — 跳过今天
-const POSTPONE_SKIP = [
-  '明天继续',
-  '今天先放过你',
-  '明天见',
-  '明日再战',
-  '好的，明天'
-]
-
 // 状态页鼓励（按完成率范围）
 const ENCOURAGEMENT = [
   { min: 0.9,  text: '效率拉满！这周几乎全清了' },
@@ -42,10 +24,7 @@ const ENCOURAGEMENT = [
   { min: -1,   text: '本周还没有行动记录' }
 ]
 
-// 频繁推迟
-const FREQUENT_POSTPONE = '今天的委托不太对？去委托页调整优先级或添加新任务吧'
-
-// 评级配置（阈值、标签、颜色）— action-card 组件引用
+// 评级配置（阈值、标签、颜色）
 const RATING_TIERS = [
   { min: 80, label: 'S', bg: '#FFF1F0', color: '#CF1322' },
   { min: 55, label: 'A', bg: '#FFFBE6', color: '#D48A00' },
@@ -103,10 +82,7 @@ function pick(arr) {
 
 module.exports = {
   COMPLETE,
-  POSTPONE_LATER,
-  POSTPONE_SKIP,
   ENCOURAGEMENT,
-  FREQUENT_POSTPONE,
   RATING_TIERS,
   TAB_NAMES,
   MODULES,

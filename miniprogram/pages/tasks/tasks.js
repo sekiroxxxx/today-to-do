@@ -80,7 +80,6 @@ Page({
     if (task.repeatRule && task.repeatRule.type !== 'none') {
       parts.push(task.repeatRule.type === 'daily' ? '每天' : '每周' + task.repeatRule.daysOfWeek.length + '天')
     }
-    if (task.postponeCount >= 3) parts.push('已推迟' + task.postponeCount + '次')
     task.tagLine = parts.join(' · ')
     return task
   },
