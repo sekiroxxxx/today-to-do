@@ -1,127 +1,128 @@
 /**
- * API 封装层 — 将所有云函数调用统一封装
+ * API 封装层 — 直连数据库优先 + 云函数 fallback
  *
- * 【为什么需要这一层】
- * 1. 页面代码不用反复写 wx.cloud.callFunction({ name: 'xxx', data: {} })
- * 2. 统一错误处理：网络异常时全局 toast 提示
- * 3. 如果将来换后端（比如从云函数换到自己写的服务器），只改这一个文件
+ * 阶段 A：所有 CRUD 方法先走 wx.cloud.database() 直连，
+ * 失败时回退到云函数。API 签名不变，页面层无需任何改动。
  *
- * 【使用方式】
- * const api = require('../../utils/api')
- * api.login().then(res => console.log(res.user))
- * api.getJobList({ filter: { status: '待投递' } }).then(res => console.log(res.jobs))
+ * login 仅走云函数（微信登录必需）。
  */
 
-// ---------- 内部：统一调用方法 ----------
+const apiDb = require('./api-db')
+
+// ==================== 内部工具 ====================
 
 function call(name, data = {}) {
   return wx.cloud.callFunction({ name, data })
     .then(res => {
-      if (res.result && res.result.success === false) {
-        // 业务层错误（如参数校验失败），不弹 toast，让调用方自己处理
-        return res.result
-      }
+      if (res.result && res.result.success === false) return res.result
       return res.result
     })
     .catch(err => {
-      // 网络层错误（断网、云函数崩溃等）
       wx.showToast({ title: '网络异常，请稍后重试', icon: 'none', duration: 2000 })
       console.error(`[api] ${name} 调用失败:`, err)
       return { success: false, errMsg: '网络异常' }
     })
 }
 
-// ---------- 对外导出的 API ----------
+/**
+ * 包装直接函数：优先走直连，失败时回退云函数。
+ * @param {string} cloudName 云函数名称
+ * @param {*} cloudParams 传给云函数的参数
+ * @param {Function} directFn 直接数据库实现的函数（签名为 async (params) => result）
+ * @param {*} directArgs 传给 directFn 的参数
+ */
+function tryDirect(cloudName, cloudParams, directFn, directArgs) {
+  try {
+    return directFn(directArgs).catch(err => {
+      console.warn(`[api] 直连失败，回退云函数 ${cloudName}:`, err)
+      return call(cloudName, cloudParams)
+    })
+  } catch (err) {
+    return call(cloudName, cloudParams)
+  }
+}
+
+// ==================== 对外 API ====================
 
 module.exports = {
 
-  // ==================== 用户 ====================
-
-  /** 登录 → { user } */
+  /** 登录 → { user }  仅走云函数（微信登录必需） */
   login() {
     return call('login')
   },
 
   /** 更新偏好 → { success } */
   updatePreference(data) {
-    return call('updatePreference', data)
+    return tryDirect('updatePreference', data, apiDb.updatePreference, data)
   },
-
-  // ==================== 求职岗位 ====================
 
   /** 添加岗位 → { success, job } */
   addJob(data) {
-    return call('addJob', data)
+    return tryDirect('addJob', data, apiDb.addJob, data)
   },
 
   /** 获取岗位列表 → { jobs, total } */
   getJobList(filter = {}) {
-    return call('getJobList', { filter })
+    return tryDirect('getJobList', { filter }, apiDb.getJobList, filter)
   },
 
   /** 更新岗位基本信息 → { success, job } */
   updateJob(data) {
-    return call('updateJob', data)
+    return tryDirect('updateJob', data, apiDb.updateJob, data)
   },
 
   /** 推进岗位状态 → { success, job } */
   updateJobStatus(data) {
-    return call('updateJobStatus', data)
+    return tryDirect('updateJobStatus', data, apiDb.updateJobStatus, data)
   },
 
   /** 删除岗位 → { success } */
   deleteJob(jobId) {
-    return call('deleteJob', { jobId })
+    return tryDirect('deleteJob', { jobId }, apiDb.deleteJob, jobId)
   },
-
-  // ==================== 自定义任务 ====================
 
   /** 添加任务 → { success, task } */
   addTask(data) {
-    return call('addTask', data)
+    return tryDirect('addTask', data, apiDb.addTask, data)
   },
 
   /** 获取任务列表 → { tasks, total } */
   getTaskList(filter = {}) {
-    return call('getTaskList', { filter })
+    return tryDirect('getTaskList', { filter }, apiDb.getTaskList, filter)
   },
 
   /** 更新任务 → { success, task } */
   updateTask(data) {
-    return call('updateTask', data)
+    return tryDirect('updateTask', data, apiDb.updateTask, data)
   },
 
   /** 删除任务 → { success } */
   deleteTask(taskId) {
-    return call('deleteTask', { taskId })
+    return tryDirect('deleteTask', { taskId }, apiDb.deleteTask, taskId)
   },
-
-  // ==================== 今日清单 ====================
 
   /** 查询今日已生成的清单 → { actions, date } */
   getTodayActions() {
-    return call('getTodayActions')
+    return tryDirect('getTodayActions', {}, apiDb.getTodayActions)
   },
 
-  /** 生成/刷新今日清单 → { actions, generated, diversityApplied } */
+  /** 生成/刷新今日清单 → { actions, generated, diversityApplied, date } */
   generateDailyActions(forceRegenerate = false) {
-    return call('generateDailyActions', { forceRegenerate })
+    return tryDirect('generateDailyActions', { forceRegenerate }, apiDb.generateDailyActions, forceRegenerate)
   },
 
   /** 完成一条行动 → { success, sourceType, jobInfo?, taskInfo? } */
   completeAction(actionId) {
-    return call('completeAction', { actionId })
+    return tryDirect('completeAction', { actionId }, apiDb.completeAction, actionId)
   },
 
   /** 推迟一条行动 → { success, postponeType, needRegenerate } */
   postponeAction(actionId, postponeType) {
-    return call('postponeAction', { actionId, postponeType })
+    return tryDirect('postponeAction', { actionId, postponeType }, apiDb.postponeAction, actionId, postponeType)
   },
 
-  // ==================== 统计 ====================
-
-  /** 获取统计数据 → { summary, funnel, dailyDetail, ... } */
+  /** 获取统计数据 → { summary, funnel, dailyDetail, categoryBreakdown, ... } */
   getStats(range = 'week') {
-    return call('getStats', { range })
+    return tryDirect('getStats', { range }, apiDb.getStats, range)
   }
 }
