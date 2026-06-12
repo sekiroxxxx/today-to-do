@@ -164,11 +164,20 @@ Page({
     action.then(function (res) {
       if (res.success) {
         getApp().markDirty(['tasks', 'today', 'progress', 'jobs', 'mine'])
-        wx.showToast({ title: '已添加', icon: 'success', duration: 500 })
-        setTimeout(function () {
-          ctx.setData({ saving: false, form: cloneForm(ctx.data.currentModule) })
-          wx.switchTab({ url: '/pages/today/today' })
-        }, 500)
+        // 强制重新生成每日清单，确保日常页/推进页立即看到新任务
+        api.generateDailyActions(true).then(function () {
+          wx.showToast({ title: '已添加', icon: 'success', duration: 500 })
+          setTimeout(function () {
+            ctx.setData({ saving: false, form: cloneForm(ctx.data.currentModule) })
+            wx.switchTab({ url: '/pages/today/today' })
+          }, 300)
+        }).catch(function () {
+          wx.showToast({ title: '已添加', icon: 'success', duration: 500 })
+          setTimeout(function () {
+            ctx.setData({ saving: false, form: cloneForm(ctx.data.currentModule) })
+            wx.switchTab({ url: '/pages/today/today' })
+          }, 300)
+        })
       } else {
         wx.showToast({ title: res.errMsg || '操作失败', icon: 'none' })
         ctx.setData({ saving: false })
