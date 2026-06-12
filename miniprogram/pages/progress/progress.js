@@ -143,6 +143,10 @@ Page({
     wx.navigateTo({ url: '/pages/jobs/jobs' })
   },
 
+  onGoTasks() {
+    wx.navigateTo({ url: '/pages/tasks/tasks' })
+  },
+
   // ========== 导航 ==========
   onBack() {
     wx.switchTab({ url: '/pages/today/today' })

@@ -55,19 +55,33 @@
     </view>
   </view>
 
-  <!-- 工具箱（求职模块） -->
-  <view class="section" wx:if="{{currentModule === 'jobseeker'}}">
+  <!-- 工具箱 -->
+  <view class="section">
     <text class="section-title">工具箱</text>
-    <view class="tool-card">
-      <text class="tool-label">每日求职推荐上限</text>
-      <slider min="1" max="10" value="{{dailyLimit}}" show-value block-size="16"
-              activeColor="#D97706" bindchange="onDailyLimitChange" style="width:60%"/>
-    </view>
-    <view class="tool-card tool-card--action" bindtap="onGoJobs">
-      <text class="tool-icon">📋</text>
+
+    <!-- 求职模块专属 -->
+    <block wx:if="{{currentModule === 'jobseeker'}}">
+      <view class="tool-card">
+        <text class="tool-label">每日求职推荐上限</text>
+        <slider min="1" max="10" value="{{dailyLimit}}" show-value block-size="16"
+                activeColor="#D97706" bindchange="onDailyLimitChange" style="width:60%"/>
+      </view>
+      <view class="tool-card tool-card--action" bindtap="onGoJobs">
+        <text class="tool-icon">📋</text>
+        <view class="tool-info">
+          <text class="tool-name">岗位管理</text>
+          <text class="tool-desc">查看、筛选、推进所有岗位</text>
+        </view>
+        <text class="tool-arrow">›</text>
+      </view>
+    </block>
+
+    <!-- 所有模块通用 -->
+    <view class="tool-card tool-card--action" bindtap="onGoTasks">
+      <text class="tool-icon">📝</text>
       <view class="tool-info">
-        <text class="tool-name">岗位管理</text>
-        <text class="tool-desc">查看、筛选、推进所有岗位</text>
+        <text class="tool-name">任务管理</text>
+        <text class="tool-desc">查看、编辑、管理所有任务</text>
       </view>
       <text class="tool-arrow">›</text>
     </view>
