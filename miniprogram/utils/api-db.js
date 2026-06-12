@@ -62,7 +62,13 @@ module.exports = {
     if (typeof filter.enabled === 'boolean') cond.enabled = filter.enabled
     const andCond = []
     if (filter.module && filter.module.trim()) {
-      andCond.push({ $or: [{ module: filter.module.trim() }, { module: db().command.exists(false) }] })
+      const mod = filter.module.trim()
+      // custom 模块兼容旧数据（无 module 字段的视为 custom）
+      if (mod === 'custom') {
+        andCond.push({ $or: [{ module: 'custom' }, { module: db().command.exists(false) }] })
+      } else {
+        cond.module = mod
+      }
     }
     if (filter.keyword && filter.keyword.trim()) {
       const kw = filter.keyword.trim()

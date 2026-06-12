@@ -113,15 +113,16 @@
         <slider min="{{limitMin}}" max="{{limitMax}}" value="{{dailyLimit}}" show-value block-size="16"
                 activeColor="#D97706" bindchange="onDailyLimitChange" style="width:60%"/>
       </view>
-      <view class="tool-card tool-card--action" bindtap="onGoJobs">
-        <text class="tool-icon">📋</text>
-        <view class="tool-info">
-          <text class="tool-name">岗位管理</text>
-          <text class="tool-desc">查看、筛选、推进所有岗位</text>
-        </view>
-        <text class="tool-arrow">›</text>
-      </view>
     </block>
+    <!-- 求职模块专属：岗位管理 -->
+    <view class="tool-card tool-card--action" bindtap="onGoJobs" wx:if="{{currentModule === 'jobseeker'}}">
+      <text class="tool-icon">📋</text>
+      <view class="tool-info">
+        <text class="tool-name">岗位管理</text>
+        <text class="tool-desc">查看、筛选、推进所有岗位</text>
+      </view>
+      <text class="tool-arrow">›</text>
+    </view>
 
     <!-- 非求职模块：任务管理 -->
     <view class="tool-card tool-card--action" bindtap="onGoTasks" wx:if="{{currentModule !== 'jobseeker'}}">
