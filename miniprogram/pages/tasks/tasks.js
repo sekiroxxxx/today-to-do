@@ -131,6 +131,23 @@ Page({
     })
   },
 
+  removeTaskLocally(task) {
+    var tasks = this.data.tasks.filter(function (t) { return t._id !== task._id })
+    var active = tasks.filter(function (t) { return t.enabled })
+    var high = active.filter(function (t) { return t.priority === 1 })
+    var mid  = active.filter(function (t) { return t.priority === 2 })
+    var low  = active.filter(function (t) { return t.priority === 3 })
+    var sections = []
+    if (high.length) sections.push({ level: 'high', label: '高优先级', dotClass: 'pri-dot--high', tasks: high })
+    if (mid.length)  sections.push({ level: 'mid',  label: '中优先级', dotClass: 'pri-dot--mid',  tasks: mid })
+    if (low.length)  sections.push({ level: 'low',  label: '低优先级', dotClass: 'pri-dot--low',  tasks: low })
+    this.setData({
+      tasks: tasks, sections: sections,
+      highTasks: high, midTasks: mid, lowTasks: low,
+      disabledTasks: tasks.filter(function (t) { return !t.enabled })
+    })
+  },
+
   onToggleSelect(e) {
     if (!this.data.batchMode) return
     var id = e.currentTarget.dataset.id
@@ -243,26 +260,22 @@ Page({
           confirmColor: '#FF4D4F',
           success: function (res) {
             if (res.confirm) {
+              // 先本地移除 + toast（乐观更新）
+              ctx.removeTaskLocally(task)
+              wx.showToast({ title: '已删除', icon: 'success' })
+              // 后台 API
               api.deleteTask(task._id).then(function (result) {
                 if (result.success) {
                   app.markDirty(['today', 'mine', 'progress'])
-                  wx.showToast({ title: '已删除', icon: 'success' })
-                  // 本地 splice
-                  var tasks = ctx.data.tasks.filter(function (t) { return t._id !== task._id })
-                  var active = tasks.filter(function (t) { return t.enabled })
-                  var high = active.filter(function (t) { return t.priority === 1 })
-                  var mid  = active.filter(function (t) { return t.priority === 2 })
-                  var low  = active.filter(function (t) { return t.priority === 3 })
-                  var sections = []
-                  if (high.length) sections.push({ level: 'high', label: '高优先级', dotClass: 'pri-dot--high', tasks: high })
-                  if (mid.length)  sections.push({ level: 'mid',  label: '中优先级', dotClass: 'pri-dot--mid',  tasks: mid })
-                  if (low.length)  sections.push({ level: 'low',  label: '低优先级', dotClass: 'pri-dot--low',  tasks: low })
-                  ctx.setData({
-                    tasks: tasks, sections: sections,
-                    highTasks: high, midTasks: mid, lowTasks: low,
-                    disabledTasks: tasks.filter(function (t) { return !t.enabled })
-                  })
+                } else {
+                  wx.showToast({ title: result.errMsg || '删除失败', icon: 'none' })
+                  app.markDirty(['today', 'mine', 'progress'])
+                  ctx.loadTasks()
                 }
+              }).catch(function () {
+                wx.showToast({ title: '网络异常，请刷新', icon: 'none' })
+                app.markDirty(['today', 'mine', 'progress'])
+                ctx.loadTasks()
               })
             }
           }

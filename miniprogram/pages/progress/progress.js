@@ -211,8 +211,27 @@ Page({
       cancelText: '否',
       success: function (modalRes) {
         if (modalRes.confirm) {
+          // 先本地更新状态（乐观UI）
+          var active = ctx.data.activeTasks.map(function (a) {
+            if (a.sourceId === detail.jobId && a.jobInfo) {
+              var updated = Object.assign({}, a, {
+                jobInfo: Object.assign({}, a.jobInfo, { status: option.next }),
+                toolLabel: (function () {
+                  var map = { '待投递': '投了', '已投递': '面试', '面试中': 'Offer' }
+                  return map[option.next] || ''
+                })()
+              })
+              return updated
+            }
+            return a
+          })
+          ctx.setData({ activeTasks: active })
+          wx.showToast({ title: '已更新为' + option.label, icon: 'success' })
+          // 后台 API
           api.updateJobStatus({ jobId: detail.jobId, newStatus: option.next }).then(function () {
             app.markDirty(['today', 'progress', 'mine', 'tasks'])
+          }).catch(function () {
+            wx.showToast({ title: '同步失败，请刷新', icon: 'none' })
             ctx.loadData()
           })
         }
@@ -265,16 +284,22 @@ Page({
       confirmColor: '#FF4D4F',
       success: function (res) {
         if (res.confirm) {
+          // 先本地移除 + toast
+          var completed = ctx.data.completedTasks.filter(function (t) { return t._id !== actionId })
+          ctx.setData({ completedTasks: completed })
+          wx.showToast({ title: '已删除', icon: 'success' })
+          // 后台 API
           api.deleteTask(sourceId).then(function (result) {
             if (result.success) {
-              wx.showToast({ title: '已删除', icon: 'success' })
               app.markDirty(['today', 'progress', 'mine', 'tasks'])
-              // 本地移除
-              var completed = ctx.data.completedTasks.filter(function (t) { return t._id !== actionId })
-              ctx.setData({ completedTasks: completed })
             } else {
               wx.showToast({ title: result.errMsg || '删除失败', icon: 'none' })
+              app.markDirty(['today', 'progress', 'mine', 'tasks'])
+              ctx.loadData()
             }
+          }).catch(function () {
+            wx.showToast({ title: '网络异常，请刷新', icon: 'none' })
+            ctx.loadData()
           })
         }
       }

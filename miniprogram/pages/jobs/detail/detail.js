@@ -108,16 +108,20 @@ Page({
       content: `将状态改为「${item.label}」？`,
       success: (res) => {
         if (res.confirm) {
+          // 先本地更新 + toast
+          this.setData({ 'job.status': item.value })
+          wx.showToast({ title: '状态已更新', icon: 'success' })
+          // 后台 API
+          var ctx = this
           api.updateJobStatus({
-            jobId: this.data.jobId,
+            jobId: ctx.data.jobId,
             newStatus: item.value
-          }).then(result => {
+          }).then(function (result) {
             if (result.success) {
               app.markDirty(['jobs', 'today', 'mine'])
-              wx.showToast({ title: '状态已更新', icon: 'success' })
-              this.loadJob()
             } else {
               wx.showToast({ title: result.errMsg, icon: 'none' })
+              ctx.loadJob()
             }
           })
         }
