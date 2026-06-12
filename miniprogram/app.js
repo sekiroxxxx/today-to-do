@@ -1,4 +1,6 @@
 // 今日行动清单 — 小程序入口
+const cache = require('./utils/cache')
+
 App({
   onLaunch: function () {
     // ========== 云开发初始化 ==========
@@ -14,6 +16,10 @@ App({
       env: '',
       traceUser: true  // 在云函数日志中记录用户访问
     })
+
+    // ========== 本地缓存初始化 ==========
+    // 启动时全量拉取云数据，写入本地 Storage
+    cache.syncAll()
 
     // ========== 网络状态监听 ==========
     wx.onNetworkStatusChange(res => {
