@@ -32,13 +32,7 @@ Page({
     if (!app.globalData.dirty.tasks && this.data.tasks.length > 0) return
 
     var hasData = this.data.tasks.length > 0
-    var ctx = this
-    if (app.globalData.dirty.tasks) {
-      // 延迟 500ms 给云 DB 副本同步留时间
-      setTimeout(function () { ctx.loadTasks(!hasData) }, 500)
-    } else {
-      this.loadTasks(!hasData)
-    }
+    this.loadTasks(!hasData)
   },
 
   loadTasks(showLoading) {

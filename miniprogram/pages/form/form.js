@@ -121,7 +121,7 @@ Page({
     })
   },
 
-  // ========== 表单提交（乐观UI：先反馈，后台同步） ==========
+  // ========== 表单提交 ==========
   onSubmit(e) {
     var now = Date.now()
     if (now - lastSubmitTime < SUBMIT_GAP) return
@@ -132,47 +132,52 @@ Page({
     var isEdit = this.data.mode === 'edit'
 
     if (this.data.module === 'jobseeker') {
-      var actionFn = isEdit
-        ? function () { return api.updateJob(Object.assign({ jobId: ctx.data.editId }, formData)) }
-        : function () { return api.addJob(formData) }
+      var action = isEdit
+        ? api.updateJob(Object.assign({ jobId: this.data.editId }, formData))
+        : api.addJob(formData)
 
-      // 立即反馈
-      app.markDirty(['jobs', 'today', 'progress', 'mine'])
-      if (!isEdit) api.generateDailyActions(true)
-      wx.showToast({ title: isEdit ? '已更新' : '已添加', icon: 'success', duration: 800 })
-      wx.navigateBack()
+      // 即时反馈：保存中
+      wx.showToast({ title: '保存中...', icon: 'loading', duration: 10000 })
 
-      // 后台同步
-      actionFn().then(function (res) {
-        if (!res.success) {
-          wx.showToast({ title: res.errMsg || '操作失败，请检查', icon: 'none' })
+      action.then(function (res) {
+        wx.hideToast()
+        if (res.success) {
           app.markDirty(['jobs', 'today', 'progress', 'mine'])
+          if (!isEdit) api.generateDailyActions(true)
+          wx.showToast({ title: isEdit ? '已更新' : '已添加', icon: 'success', duration: 800 })
+          setTimeout(function () { wx.navigateBack() }, 300)
+        } else {
+          wx.showToast({ title: res.errMsg || '操作失败', icon: 'none' })
+          ctx.resetComponent()
         }
       }).catch(function () {
-        wx.showToast({ title: '网络异常，操作可能未保存', icon: 'none' })
-        app.markDirty(['jobs', 'today', 'progress', 'mine'])
+        wx.hideToast()
+        wx.showToast({ title: '网络异常，请稍后重试', icon: 'none' })
+        ctx.resetComponent()
       })
     } else {
       formData.module = this.data.module
-      var actionFn = isEdit
-        ? function () { return api.updateTask(Object.assign({ taskId: ctx.data.editId }, formData)) }
-        : function () { return api.addTask(formData) }
+      var action = isEdit
+        ? api.updateTask(Object.assign({ taskId: this.data.editId }, formData))
+        : api.addTask(formData)
 
-      // 立即反馈
-      app.markDirty(['tasks', 'today', 'progress', 'mine'])
-      if (!isEdit) api.generateDailyActions(true)
-      wx.showToast({ title: isEdit ? '已更新' : '已添加', icon: 'success', duration: 800 })
-      wx.navigateBack()
+      wx.showToast({ title: '保存中...', icon: 'loading', duration: 10000 })
 
-      // 后台同步
-      actionFn().then(function (res) {
-        if (!res.success) {
-          wx.showToast({ title: res.errMsg || '操作失败，请检查', icon: 'none' })
+      action.then(function (res) {
+        wx.hideToast()
+        if (res.success) {
           app.markDirty(['tasks', 'today', 'progress', 'mine'])
+          if (!isEdit) api.generateDailyActions(true)
+          wx.showToast({ title: isEdit ? '已更新' : '已添加', icon: 'success', duration: 800 })
+          setTimeout(function () { wx.navigateBack() }, 300)
+        } else {
+          wx.showToast({ title: res.errMsg || '操作失败', icon: 'none' })
+          ctx.resetComponent()
         }
       }).catch(function () {
-        wx.showToast({ title: '网络异常，操作可能未保存', icon: 'none' })
-        app.markDirty(['tasks', 'today', 'progress', 'mine'])
+        wx.hideToast()
+        wx.showToast({ title: '网络异常，请稍后重试', icon: 'none' })
+        ctx.resetComponent()
       })
     }
   },
