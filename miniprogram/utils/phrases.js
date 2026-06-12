@@ -63,7 +63,7 @@ function getRating(score) {
 /** 获取模块配置（用户值优先于模块默认） */
 function getModuleConfig(key, user) {
   const mod = MODULES.find(function (m) { return m.key === key })
-  const defaults = mod ? mod.config : { dailyLimit: 5, limitLabel: '每日上限', limitRange: [1, 10] }
+  const defaults = (mod && mod.config) || { dailyLimit: 5, limitLabel: '每日上限', limitRange: [1, 10] }
   // 用户个性化值：modulePrefs[module].dailyLimit 覆盖默认
   if (user && user.modulePrefs && user.modulePrefs[key]) {
     return Object.assign({}, defaults, user.modulePrefs[key])
