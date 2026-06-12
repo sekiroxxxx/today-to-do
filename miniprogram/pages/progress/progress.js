@@ -119,13 +119,13 @@ Page({
               if (modalRes.confirm) {
                 api.updateJobStatus({ jobId: res.jobInfo._id, newStatus: option.next })
               }
-              app.markDirty(['today', 'progress', 'mine'])
+              app.markDirty(['today', 'progress', 'mine', 'tasks'])
             }
           })
           return
         }
       }
-      app.markDirty(['today', 'progress', 'mine'])
+      app.markDirty(['today', 'progress', 'mine', 'tasks'])
     }).catch(function () {
       wx.showToast({ title: '操作失败，请重试', icon: 'none' })
       var restored = ctx.data.tasks.slice()
