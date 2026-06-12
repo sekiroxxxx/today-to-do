@@ -10,20 +10,16 @@
  * 页面代码从 api.xxx() 改为 cache.xxx()，接口签名相同。
  * 缓存键规则：cache_jobs / cache_tasks / cache_today / cache_user / cache_stats_{range}
  */
-
 const api = require('./api')
+function app() { return getApp() }
 // ==================== 内部工具 ====================
-
 /** 存储键前缀 */
 const PREFIX = 'cache_'
 
 /** 缓存过期时间（秒），0=永不过期 */
 const TTL = {
-  tracked: 300,     // 5 分钟
-  tasks: 300,
-  today: 120,       // 2 分钟，今日清单变化频繁
-  user: 0,          // 永不过期
-  stats_month: 600
+  tracked: 300, tasks: 300, today: 120,
+  user: 0, stats_week: 600, stats_month: 600
 }
 
 /** 读缓存 */
@@ -66,7 +62,6 @@ function clearDirty(tab) {
 // ==================== 读取（缓存优先） ====================
 
 module.exports = {
-
   /** 获取追踪项列表（新模型） */
   getTrackedItems: async function (filter = {}, forceRefresh = false) {
     const key = 'tracked'
@@ -139,7 +134,6 @@ module.exports = {
     const stale = read(key)
     return stale ? stale.data : res
   },
-
   // ==================== 写入（先更新本地 → 后调 API） ====================
 
   /** 添加岗位 */
@@ -366,13 +360,18 @@ module.exports = {
     return res
   },
 
-  /** 更新偏好 */
+  /** 更新偏好 → modulePrefs */
   updatePreference: async function (data) {
-    const res = await api.updatePreference(data)
-    if (res.success) {
-      remove('user')  // 用户信息缓存过期
-      app().markDirty(['today', 'progress'])
+    const mod = data.module || 'jobseeker'
+    const cache = read('user')
+    if (cache && cache.data) {
+      if (!cache.data.modulePrefs) cache.data.modulePrefs = {}
+      if (!cache.data.modulePrefs[mod]) cache.data.modulePrefs[mod] = {}
+      cache.data.modulePrefs[mod].dailyLimit = Number(data.dailyLimit)
+      write('user', cache.data)
     }
+    const res = await api.updatePreference(data)
+    if (res.success) { remove('user'); app().markDirty(['today', 'progress']) }
     return res
   },
 

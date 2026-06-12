@@ -106,11 +106,11 @@
   <view class="section">
     <text class="section-title">工具箱</text>
 
-    <!-- 求职模块专属 -->
-    <block wx:if="{{currentModule === 'jobseeker'}}">
+    <!-- 模块配置驱动：显示上限滑块 -->
+    <block wx:if="{{showLimitSlider}}">
       <view class="tool-card">
-        <text class="tool-label">每日求职推荐上限</text>
-        <slider min="1" max="10" value="{{dailyLimit}}" show-value block-size="16"
+        <text class="tool-label">{{limitLabel}}</text>
+        <slider min="{{limitMin}}" max="{{limitMax}}" value="{{dailyLimit}}" show-value block-size="16"
                 activeColor="#D97706" bindchange="onDailyLimitChange" style="width:60%"/>
       </view>
       <view class="tool-card tool-card--action" bindtap="onGoJobs">

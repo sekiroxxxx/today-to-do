@@ -10,6 +10,7 @@
 const apiDb = require('./api-db')
 const tracked = require('./tracked')
 const algorithm = require('./algorithm')
+const phrases = require('./phrases')
 
 // ==================== 内部工具 ====================
 
@@ -226,11 +227,15 @@ module.exports = {
       const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
       const recentLogs = await tracked.getCompletedLogs(dateStr(sevenDaysAgo), todayDate)
       const recentActions = (recentLogs.logs || []).map(l => ({ date: l.date, sourceType: l.sourceType }))
+      // 从用户 modulePrefs 读取各模块的 dailyLimit
       let dailyLimit = 5
       try {
         const userResult = await wx.cloud.database().collection('users').where({}).get()
-        if (userResult.data && userResult.data[0] && userResult.data[0].preferences) {
-          dailyLimit = userResult.data[0].preferences.dailyLimit || 5
+        if (userResult.data && userResult.data[0]) {
+          const user = userResult.data[0]
+          // 对 jobseeker 模块取对应的 limit（后续算法支持多模块时改为按 module 取）
+          const cfg = phrases.getModuleConfig('jobseeker', user)
+          dailyLimit = cfg.dailyLimit
         }
       } catch (_) { }
       const result = algorithm.generateDailyList({

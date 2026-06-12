@@ -25,7 +25,9 @@ Page({
   loadData() {
     app.getUserInfo().then(user => {
       const nickname = (user && user.nickname) || '冒险者'
-      const dailyLimit = (user && user.preferences && user.preferences.dailyLimit) || 5
+      // 从 modulePrefs 读取 jobseeker 模块的 dailyLimit（兼容旧 preferences）
+      const jobseekerCfg = phrases.getModuleConfig('jobseeker', user)
+      const dailyLimit = jobseekerCfg.dailyLimit
       const userModules = (user && user.modules) || ['jobseeker', 'custom']
       // 预计算勾选态（WXML 不支持 .indexOf()）
       const allModules = phrases.MODULES.map(function (m) {

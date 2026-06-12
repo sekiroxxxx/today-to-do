@@ -11,12 +11,22 @@ module.exports = {
 
   // ========== 用户 ==========
 
+  /**
+   * 更新偏好 → 写入 users.modulePrefs[module]
+   * data: { module: 'jobseeker', dailyLimit: 5 }
+   * 兼容旧调用：data: { dailyLimit: 5 } → 自动映射到 jobseeker 模块
+   */
   updatePreference: async function (data) {
+    const mod = data.module || 'jobseeker'
     const dailyLimit = Number(data.dailyLimit)
-    if (!dailyLimit || dailyLimit < 1 || dailyLimit > 10) return { success: false, errMsg: '每日求职推荐上限需为 1~10' }
-    const result = await db().collection('users').where({}).update({ data: { 'preferences.dailyLimit': dailyLimit } })
+    const modCfg = require('./phrases').getModuleConfig(mod)
+    const [min, max] = modCfg.limitRange
+    if (!dailyLimit || dailyLimit < min || dailyLimit > max) return { success: false, errMsg: `${modCfg.limitLabel}需为 ${min}~${max}` }
+    const result = await db().collection('users').where({}).update({
+      data: { ['modulePrefs.' + mod + '.dailyLimit']: dailyLimit }
+    })
     if (result.stats.updated === 0) return { success: false, errMsg: '用户记录不存在' }
-    return { success: true, dailyLimit }
+    return { success: true, dailyLimit, module: mod }
   },
 
   // ========== 自定义任务 ==========

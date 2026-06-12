@@ -24,7 +24,11 @@ Page({
     showSheet: false,
     showHistory: false,
     isLoading: false,
-    dailyLimit: 5
+    dailyLimit: 5,
+    limitMin: 1,
+    limitMax: 10,
+    limitLabel: '每日推荐上限',
+    showLimitSlider: true
   },
 
   onShow() {
@@ -58,8 +62,16 @@ Page({
     app.globalData.dirty.progress = false
 
     var info = phrases.MODULES.find(function (m) { return m.key === key })
-    var dailyLimit = (app.globalData.userInfo && app.globalData.userInfo.preferences && app.globalData.userInfo.preferences.dailyLimit) || 5
-    var setDataObj = { currentModuleInfo: info, dailyLimit: dailyLimit }
+    // 从模块配置读取 dailyLimit（用户值优先于默认值，兼容旧 preferences）
+    var cfg = phrases.getModuleConfig(key, app.globalData.userInfo)
+    var setDataObj = {
+      currentModuleInfo: info,
+      dailyLimit: cfg.dailyLimit,
+      limitMin: cfg.limitRange[0],
+      limitMax: cfg.limitRange[1],
+      limitLabel: cfg.limitLabel,
+      showLimitSlider: !!(cfg.limitRange && cfg.limitRange.length === 2)
+    }
     if (!silent) setDataObj.showHistory = false
     this.setData(setDataObj)
 
@@ -323,18 +335,21 @@ Page({
   // ========== 工具箱 ==========
   onDailyLimitChange(e) {
     var limit = e.detail.value
+    var mod = this.data.currentModule
     var ctx = this
     this.setData({ dailyLimit: limit })
     if (ctx._limitTimer) clearTimeout(ctx._limitTimer)
     ctx._limitTimer = setTimeout(function () {
-      api.updatePreference({ dailyLimit: limit }).then(function (res) {
+      api.updatePreference({ module: mod, dailyLimit: limit }).then(function (res) {
         if (res.success) {
-          wx.showToast({ title: '每日求职推荐上限已设为 ' + limit + ' 条', icon: 'success' })
+          wx.showToast({ title: ctx.data.limitLabel + '已设为 ' + limit + ' 条', icon: 'success' })
+          // 更新 app.globalData 中的用户值（下次 getModuleConfig 读到新值）
+          if (!app.globalData.userInfo) app.globalData.userInfo = {}
+          if (!app.globalData.userInfo.modulePrefs) app.globalData.userInfo.modulePrefs = {}
+          if (!app.globalData.userInfo.modulePrefs[mod]) app.globalData.userInfo.modulePrefs[mod] = {}
+          app.globalData.userInfo.modulePrefs[mod].dailyLimit = limit
           app.markDirty(['today', 'progress'])
-          // 强制重新生成今日清单以应用新 limit
-          api.generateDailyActions(true).then(function () {
-            ctx.loadData()
-          })
+          api.generateDailyActions(true).then(function () { ctx.loadData() })
         } else {
           wx.showToast({ title: res.errMsg || '设置失败', icon: 'none' })
         }

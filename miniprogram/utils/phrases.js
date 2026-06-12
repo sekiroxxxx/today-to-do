@@ -53,13 +53,13 @@ const RATING_TIERS = [
   { min: 0,  label: 'C', bg: '#E6FFFB', color: '#08979C' }
 ]
 
-// 模块配置（v1.1）
+// 模块配置（v1.1 → v1.2 加 config）
 const MODULES = [
-  { key: 'jobseeker', icon: '🎯', name: '求职日常', color: '#CF1322' },
-  { key: 'work',      icon: '💼', name: '工作日常', color: '#D48A00' },
-  { key: 'study',     icon: '🎓', name: '学业日常', color: '#1677FF' },
-  { key: 'freelance', icon: '🚀', name: '自由职业', color: '#722ED1' },
-  { key: 'custom',    icon: '📝', name: '自定义任务', color: '#999999' }
+  { key: 'jobseeker', icon: '🎯', name: '求职日常', color: '#CF1322', config: { dailyLimit: 5, limitLabel: '每日推荐上限', limitRange: [1, 10] } },
+  { key: 'work',      icon: '💼', name: '工作日常', color: '#D48A00', config: { dailyLimit: 3, limitLabel: '每日任务上限', limitRange: [1, 5] } },
+  { key: 'study',     icon: '🎓', name: '学业日常', color: '#1677FF', config: { dailyLimit: 3, limitLabel: '每日任务上限', limitRange: [1, 5] } },
+  { key: 'freelance', icon: '🚀', name: '自由职业', color: '#722ED1', config: { dailyLimit: 3, limitLabel: '每日项目上限', limitRange: [1, 5] } },
+  { key: 'custom',    icon: '📝', name: '自定义任务', color: '#999999', config: { dailyLimit: 5, limitLabel: '每日任务上限', limitRange: [1, 10] } }
 ]
 
 // Tab 名称（文档约定值，json 里同步改）
@@ -81,6 +81,21 @@ function getRating(score) {
   return RATING_TIERS[RATING_TIERS.length - 1]
 }
 
+/** 获取模块配置（用户值优先于模块默认） */
+function getModuleConfig(key, user) {
+  const mod = MODULES.find(function (m) { return m.key === key })
+  const defaults = mod ? mod.config : { dailyLimit: 5, limitLabel: '每日上限', limitRange: [1, 10] }
+  // 用户个性化值：modulePrefs[module].dailyLimit 覆盖默认
+  if (user && user.modulePrefs && user.modulePrefs[key]) {
+    return Object.assign({}, defaults, user.modulePrefs[key])
+  }
+  // 兼容旧数据：preferences.dailyLimit（仅 jobseeker 模块使用）
+  if (key === 'jobseeker' && user && user.preferences && user.preferences.dailyLimit) {
+    return Object.assign({}, defaults, { dailyLimit: user.preferences.dailyLimit })
+  }
+  return defaults
+}
+
 /** 从数组中随机取一个 */
 function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)]
@@ -96,6 +111,7 @@ module.exports = {
   TAB_NAMES,
   MODULES,
   DEFAULT_NICKNAME,
+  getModuleConfig,
   getRating,
   pick
 }
