@@ -35,10 +35,10 @@ const RATING_TIERS = [
 // 模块配置（v1.1 → v1.2 加 config）
 const MODULES = [
   { key: 'jobseeker', icon: '🎯', name: '求职日常', color: '#CF1322', config: { dailyLimit: 5, limitLabel: '每日推荐上限', limitRange: [1, 10] } },
-  { key: 'work',      icon: '💼', name: '工作日常', color: '#D48A00', config: { dailyLimit: 3, limitLabel: '每日任务上限', limitRange: [1, 5] } },
-  { key: 'study',     icon: '🎓', name: '学业日常', color: '#1677FF', config: { dailyLimit: 3, limitLabel: '每日任务上限', limitRange: [1, 5] } },
-  { key: 'freelance', icon: '🚀', name: '自由职业', color: '#722ED1', config: { dailyLimit: 3, limitLabel: '每日项目上限', limitRange: [1, 5] } },
-  { key: 'custom',    icon: '📝', name: '自定义任务', color: '#999999', config: { dailyLimit: 5, limitLabel: '每日任务上限', limitRange: [1, 10] } }
+  { key: 'work',      icon: '💼', name: '工作日常', color: '#D48A00' },
+  { key: 'study',     icon: '🎓', name: '学业日常', color: '#1677FF' },
+  { key: 'freelance', icon: '🚀', name: '自由职业', color: '#722ED1' },
+  { key: 'custom',    icon: '📝', name: '自定义任务', color: '#999999' }
 ]
 
 // Tab 名称（文档约定值，json 里同步改）

@@ -68,7 +68,7 @@ Page({
       limitMin: cfg.limitRange[0],
       limitMax: cfg.limitRange[1],
       limitLabel: cfg.limitLabel,
-      showLimitSlider: !!(cfg.limitRange && cfg.limitRange.length === 2)
+      showLimitSlider: key === 'jobseeker'
     }
     if (!silent) setDataObj.showHistory = false
     this.setData(setDataObj)
