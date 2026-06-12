@@ -157,7 +157,7 @@ Page({
   },
 
   onGoTasks() {
-    wx.navigateTo({ url: '/pages/tasks/tasks' })
+    wx.navigateTo({ url: '/pages/tasks/tasks?module=' + this.data.currentModule })
   },
 
   // ========== 导航 ==========
