@@ -11,8 +11,8 @@
   <empty-state wx:if="{{!loading && filter === 'disabled' && disabledTasks.length === 0}}"
     text="没有已禁用的任务" />
 
-  <!-- 按优先级分组 -->
-  <view wx:if="{{filter === 'active'}}">
+  <!-- 按优先级分组（CSS 显隐，0ms 切换） -->
+  <view class="{{filter === 'active' ? '' : 'hidden'}}">
     <view wx:for="{{sections}}" wx:key="level" class="section">
       <text class="section-title"><text class="pri-dot {{item.dotClass}}">◆</text> {{item.label}}</text>
       <view wx:for="{{item.tasks}}" wx:key="_id" class="task-card"
@@ -28,8 +28,8 @@
     </view>
   </view>
 
-  <!-- 已禁用列表 -->
-  <view wx:if="{{filter === 'disabled' && disabledTasks.length > 0}}" class="section">
+  <!-- 已禁用列表（CSS 显隐） -->
+  <view class="section {{filter === 'disabled' && disabledTasks.length > 0 ? '' : 'hidden'}}">
     <view wx:for="{{disabledTasks}}" wx:key="_id" class="task-card task-card--disabled"
           data-id="{{item._id}}" data-enabled="{{false}}"
           bindtap="onEdit" bindlongpress="onLongPress">

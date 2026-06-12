@@ -20,7 +20,6 @@ Page({
 
   onShow() {
     this.setData({ isOffline: app.globalData.isOffline || false })
-
     // 读本地缓存（断网兜底）
     const cache = wx.getStorageSync('dailyCache')
     if (!this.data.modules.length && cache && cache.date === getDateString(new Date())) {
@@ -34,7 +33,6 @@ Page({
 
   loadTodayActions(showLoading = false) {
     if (showLoading) this.setData({ loading: true })
-
     const fetch = app.globalData.dirty.today
       ? api.generateDailyActions(true)
       : api.getTodayActions().then(res => {
@@ -72,7 +70,6 @@ Page({
     var map = {}
     actions.forEach(function (a) {
       var m = a.module || (a.sourceType === 'job' ? 'jobseeker' : 'custom')
-      if (userModules.indexOf(m) === -1) return
       if (!map[m]) map[m] = []
       map[m].push(a)
     })
@@ -80,9 +77,9 @@ Page({
     var result = []
     for (var i = 0; i < phrases.MODULES.length; i++) {
       var mod = phrases.MODULES[i]
-      if (userModules.indexOf(mod.key) === -1) continue
+      var enabled = userModules.indexOf(mod.key) > -1
       var hasActions = map[mod.key] && map[mod.key].length > 0
-      if (hasActions || generated) {
+      if ((hasActions || generated) && enabled) {
         result.push({
           icon: mod.icon,
           name: mod.name,
