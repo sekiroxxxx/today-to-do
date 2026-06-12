@@ -1,4 +1,4 @@
-<!-- 推进 Tab v1.1 -->
+<!-- 推进 Tab v1.1 — 组件家族版 -->
 <view class="page">
   <!-- 操作栏 -->
   <view class="topbar">
@@ -40,19 +40,66 @@
   <view class="section">
     <view class="section-header">
       <text class="section-title">今日任务</text>
+      <text class="history-btn" bindtap="toggleHistory">{{showHistory ? '收起' : '📋 历史'}}</text>
       <text class="section-add" bindtap="onAddTask">+ 添加</text>
     </view>
-    <view wx:if="{{tasks.length === 0}}" class="empty-hint">今天还没有任务</view>
-    <view wx:for="{{tasks}}" wx:key="_id" class="task-card">
-      <view class="task-card-row1">
-        <view wx:if="{{item.badge}}" class="task-rank" style="background:{{item.badge.bg}};color:{{item.badge.color}}">{{item.badge.label}}</view>
-        <text class="task-card-name">{{item.title}}</text>
-      </view>
-      <text wx:if="{{item.description}}" class="task-card-desc">{{item.description}}</text>
-      <view class="task-card-actions">
-        <button class="btn-done" data-id="{{item._id}}" bindtap="onComplete">完成</button>
-      </view>
+
+    <!-- 加载中 -->
+    <view wx:if="{{isLoading}}" class="empty-hint">加载中...</view>
+
+    <!-- 空数据 -->
+    <view wx:elif="{{activeTasks.length === 0}}" class="empty-hint">今天还没有任务</view>
+
+    <!-- 进行中卡片：按模块分发组件 -->
+    <block wx:else>
+      <block wx:if="{{currentModule === 'jobseeker'}}">
+        <card-jobseeker
+          wx:for="{{activeTasks}}" wx:key="_id"
+          action="{{item}}" completed="{{false}}"
+          bind:complete="onCardComplete"
+          bind:tool="onCardTool"
+          bind:nav="onCardNav"
+        />
+      </block>
+      <block wx:else>
+        <card-default
+          wx:for="{{activeTasks}}" wx:key="_id"
+          action="{{item}}" completed="{{false}}"
+          bind:complete="onCardComplete"
+          bind:edit="onCardEdit"
+        />
+      </block>
+    </block>
+  </view>
+
+  <!-- 已完成折叠区 -->
+  <view wx:if="{{showHistory}}" class="section">
+    <view class="section-header">
+      <text class="section-title">今日已完成</text>
     </view>
+
+    <view wx:if="{{completedTasks.length === 0}}" class="empty-hint">暂无已完成任务</view>
+
+    <block wx:else>
+      <block wx:if="{{currentModule === 'jobseeker'}}">
+        <card-jobseeker
+          wx:for="{{completedTasks}}" wx:key="_id"
+          action="{{item}}" completed="{{true}}"
+          bind:nav="onCardNav"
+        />
+      </block>
+      <block wx:else>
+        <card-default
+          wx:for="{{completedTasks}}" wx:key="_id"
+          action="{{item}}" completed="{{true}}"
+        />
+        <!-- 已完成卡片操作按钮 -->
+        <view wx:for="{{completedTasks}}" wx:key="_id" class="completed-ops">
+          <text class="redo-btn" data-id="{{item._id}}" data-source="{{item.sourceId}}" bindtap="onRedo">再做一次</text>
+          <text class="delete-btn" data-id="{{item._id}}" data-source="{{item.sourceId}}" bindtap="onDeleteCompleted">删除</text>
+        </view>
+      </block>
+    </block>
   </view>
 
   <!-- 工具箱 -->

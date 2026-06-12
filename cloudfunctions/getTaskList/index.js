@@ -8,7 +8,7 @@ const db = cloud.database()
  *
  * 【功能说明】
  * 用户进入"任务管理"页面时调用，返回当前用户的所有任务。
- * 支持按优先级、启用状态筛选，以及关键词搜索。
+ * 支持按优先级、启用状态、模块筛选，以及关键词搜索。
  *
  * 【调用方式（前端）】
  * wx.cloud.callFunction({ name: 'getTaskList', data: {} })
@@ -16,8 +16,8 @@ const db = cloud.database()
  * // 只看高优先级
  * wx.cloud.callFunction({ name: 'getTaskList', data: { filter: { priority: 1 } } })
  *
- * // 只看启用的
- * wx.cloud.callFunction({ name: 'getTaskList', data: { filter: { enabled: true } } })
+ * // 按模块筛选（v1.1 兼容旧数据无 module 字段）
+ * wx.cloud.callFunction({ name: 'getTaskList', data: { filter: { module: 'custom' } } })
  *
  * // 关键词搜索
  * wx.cloud.callFunction({ name: 'getTaskList', data: { filter: { keyword: 'LeetCode' } } })
@@ -25,6 +25,7 @@ const db = cloud.database()
  * 【入参说明】
  * filter.priority  - 选填，1=高, 2=中, 3=低
  * filter.enabled   - 选填，true/false，筛选启用/禁用的任务
+ * filter.module    - 选填，按模块筛选，兼容旧数据（无 module 字段默认视为 custom）
  * filter.keyword   - 选填，搜索关键词，匹配标题和备注
  *
  * 【出参】
@@ -35,33 +36,53 @@ exports.main = async (event, context) => {
 
   try {
     // ========== 第1步：构建查询条件 ==========
-    const queryCondition = { _openid: openid }
+    // 用独立 conditions 数组收集，最后通过 _.and 组合
+    const baseCondition = { _openid: openid }
+    const andConditions = []
 
     // 按优先级筛选
     if (event.filter && event.filter.priority) {
       const pri = Number(event.filter.priority)
       if ([1, 2, 3].includes(pri)) {
-        queryCondition.priority = pri
+        baseCondition.priority = pri
       }
     }
 
     // 按启用状态筛选
     if (event.filter && typeof event.filter.enabled === 'boolean') {
-      queryCondition.enabled = event.filter.enabled
+      baseCondition.enabled = event.filter.enabled
     }
 
-    // 按模块筛选（v1.1）
+    // 按模块筛选（v1.1 兼容旧数据：匹配指定模块 或 module 字段不存在）
     if (event.filter && event.filter.module && event.filter.module.trim()) {
-      queryCondition.module = event.filter.module.trim()
+      const mod = event.filter.module.trim()
+      andConditions.push({
+        $or: [
+          { module: mod },
+          { module: db.command.exists(false) }
+        ]
+      })
     }
 
     // 关键词搜索（标题 + 备注）
     if (event.filter && event.filter.keyword && event.filter.keyword.trim()) {
       const keyword = event.filter.keyword.trim()
-      queryCondition.$or = [
-        { title: db.RegExp({ regexp: keyword, options: 'i' }) },
-        { note: db.RegExp({ regexp: keyword, options: 'i' }) }
-      ]
+      andConditions.push({
+        $or: [
+          { title: db.RegExp({ regexp: keyword, options: 'i' }) },
+          { note: db.RegExp({ regexp: keyword, options: 'i' }) }
+        ]
+      })
+    }
+
+    // 组装最终查询条件
+    let queryCondition
+    if (andConditions.length === 0) {
+      queryCondition = baseCondition
+    } else if (andConditions.length === 1) {
+      queryCondition = Object.assign({}, baseCondition, { $or: andConditions[0].$or })
+    } else {
+      queryCondition = db.command.and([baseCondition].concat(andConditions))
     }
 
     // ========== 第2步：查询数据库 ==========
@@ -71,12 +92,18 @@ exports.main = async (event, context) => {
       .orderBy('createdAt', 'desc')
       .get()
 
-    console.log(`查询任务列表: ${openid}, 结果数: ${result.data.length}`)
+    // 补齐旧数据的 module 字段（仅返回值，不写库）
+    const tasks = result.data.map(function (task) {
+      if (!task.module) task.module = 'custom'
+      return task
+    })
+
+    console.log(`查询任务列表: ${openid}, 结果数: ${tasks.length}`)
 
     return {
       success: true,
-      tasks: result.data,
-      total: result.data.length
+      tasks: tasks,
+      total: tasks.length
     }
 
   } catch (error) {

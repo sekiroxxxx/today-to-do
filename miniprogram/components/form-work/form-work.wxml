@@ -1,0 +1,41 @@
+<!-- form-work：work 模块表单 -->
+<view class="form-card">
+  <!-- 标题 -->
+  <view class="form-item">
+    <text class="form-label">任务标题 <text class="required">*</text></text>
+    <input class="form-input" placeholder="如：完成 Q2 绩效评估" value="{{form.title}}"
+           data-field="title" bindinput="onInput" />
+  </view>
+
+  <!-- 项目名 -->
+  <view class="form-item">
+    <text class="form-label">项目名称</text>
+    <input class="form-input" placeholder="如：绩效系统重构" value="{{form.projectName}}"
+           data-field="projectName" bindinput="onInput" />
+  </view>
+
+  <!-- 优先级 -->
+  <view class="form-item">
+    <text class="form-label">优先级</text>
+    <view class="priority-row">
+      <view class="priority-btn {{form.priority === 1 ? 'priority-btn--high' : ''}}"
+            data-priority="1" bindtap="onPrioritySelect">高</view>
+      <view class="priority-btn {{form.priority === 2 ? 'priority-btn--mid' : ''}}"
+            data-priority="2" bindtap="onPrioritySelect">中</view>
+      <view class="priority-btn {{form.priority === 3 ? 'priority-btn--low' : ''}}"
+            data-priority="3" bindtap="onPrioritySelect">低</view>
+    </view>
+  </view>
+
+  <!-- 截止日期 -->
+  <view class="form-item">
+    <text class="form-label">截止日期</text>
+    <picker mode="date" value="{{form.deadline}}" start="{{today}}" bindchange="onDeadlineChange">
+      <view class="form-input">{{form.deadline || '选择日期'}}</view>
+    </picker>
+  </view>
+</view>
+
+<button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
+  {{submitting ? '保存中...' : (mode === 'edit' ? '保存修改' : '添加任务')}}
+</button>

@@ -1,0 +1,30 @@
+.card {
+  background: #fff; border-radius: var(--radius-md);
+  padding: var(--spacing-md); margin-bottom: var(--spacing-sm);
+  box-shadow: var(--shadow-card);
+}
+.card--done { opacity: 0.55; }
+
+/* 第一行：状态标签 + 星级 */
+.card-row1 { display: flex; align-items: center; gap: var(--spacing-xs); margin-bottom: var(--spacing-xs); }
+.ratings { display: flex; gap: var(--spacing-sm); margin-left: auto; }
+
+/* 第二行：公司 · 岗位 */
+.card-row2 { display: flex; align-items: baseline; margin-bottom: 2px; }
+.company-name { font-size: var(--font-body); font-weight: 600; max-width: 60%; }
+.company-name--done { text-decoration: line-through; color: var(--color-text-hint); }
+.position-name { font-size: var(--font-caption); color: var(--color-text-secondary); }
+.position-name--done { color: var(--color-text-hint); text-decoration: line-through; }
+
+/* 第三行：薪资/截止日 */
+.card-meta { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-bottom: var(--spacing-xs); }
+.meta-item { font-size: var(--font-tag); color: var(--color-text-hint); }
+
+/* 操作按钮 */
+.card-actions { display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-sm); padding-top: var(--spacing-xs); border-top: 1px solid var(--color-border); }
+.btn-tool, .btn-done { flex: 1; padding: 8px 0; font-size: var(--font-caption); border-radius: var(--radius-round); text-align: center; border: none; }
+.btn-tool { background: var(--color-bg); color: var(--color-primary); }
+.btn-done { background: var(--color-primary); color: #fff; }
+
+/* 已完成标记 */
+.done-mark { color: var(--color-success); font-size: 18px; font-weight: 700; margin-left: auto; }

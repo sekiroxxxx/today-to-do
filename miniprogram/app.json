@@ -9,6 +9,7 @@
     "pages/jobs/detail/detail",
     "pages/tasks/tasks",
     "pages/tasks/add/add",
+    "pages/form/form",
     "pages/mine/mine"
   ],
   "window": {

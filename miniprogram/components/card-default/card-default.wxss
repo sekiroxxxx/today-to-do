@@ -1,0 +1,33 @@
+.card {
+  background: #fff; border-radius: var(--radius-md);
+  padding: var(--spacing-md); margin-bottom: var(--spacing-sm);
+  box-shadow: var(--shadow-card);
+}
+.card--done { opacity: 0.55; }
+
+/* 第一行：优先级点 + 标题 */
+.card-row1 { display: flex; align-items: center; gap: var(--spacing-xs); margin-bottom: 4px; }
+.pri-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  font-size: 11px; color: #fff; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.card-title { font-size: var(--font-body); font-weight: 600; flex: 1; min-width: 0; }
+.card-title--done { text-decoration: line-through; color: var(--color-text-hint); }
+
+/* 描述 */
+.card-desc { font-size: var(--font-caption); color: var(--color-text-secondary); display: block; margin-bottom: var(--spacing-xs); }
+.card-desc--done { color: var(--color-text-hint); text-decoration: line-through; }
+
+/* 副信息行 */
+.card-meta { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-bottom: var(--spacing-xs); }
+.meta-item { font-size: var(--font-tag); color: var(--color-text-hint); }
+
+/* 操作按钮 */
+.card-actions { display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-sm); padding-top: var(--spacing-xs); border-top: 1px solid var(--color-border); }
+.btn-edit, .btn-done { flex: 1; padding: 8px 0; font-size: var(--font-caption); border-radius: var(--radius-round); text-align: center; border: none; }
+.btn-edit { background: var(--color-bg); color: var(--color-text-secondary); }
+.btn-done { background: var(--color-primary); color: #fff; }
+
+/* 已完成标记 */
+.done-mark { color: var(--color-success); font-size: 18px; font-weight: 700; margin-left: var(--spacing-xs); }

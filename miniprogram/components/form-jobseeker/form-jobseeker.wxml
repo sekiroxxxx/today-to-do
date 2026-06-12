@@ -1,0 +1,60 @@
+<!-- form-jobseeker：求职模块表单 -->
+<view class="form-card">
+  <!-- 公司名称 -->
+  <view class="form-item">
+    <text class="form-label">公司名称 <text class="required">*</text></text>
+    <input class="form-input" placeholder="如：字节跳动" value="{{form.company}}"
+           data-field="company" bindinput="onInput" />
+  </view>
+
+  <!-- 岗位 -->
+  <view class="form-item">
+    <text class="form-label">岗位名称 <text class="required">*</text></text>
+    <input class="form-input" placeholder="如：前端开发工程师" value="{{form.position}}"
+           data-field="position" bindinput="onInput" />
+  </view>
+
+  <!-- 薪资范围 -->
+  <view class="form-item">
+    <text class="form-label">薪资范围</text>
+    <input class="form-input" placeholder="如：20k-35k 或 面议" value="{{form.salaryRange}}"
+           data-field="salaryRange" bindinput="onInput" />
+  </view>
+
+  <!-- 投递链接 -->
+  <view class="form-item">
+    <text class="form-label">投递链接</text>
+    <input class="form-input" placeholder="如：https://zhaopin.xxx.com" value="{{form.applyLink}}"
+           data-field="applyLink" bindinput="onInput" />
+  </view>
+
+  <!-- 截止日 -->
+  <view class="form-item">
+    <text class="form-label">截止日期</text>
+    <picker mode="date" value="{{form.deadline}}" start="{{today}}" bindchange="onDeadlineChange">
+      <view class="form-input">{{form.deadline || '选择日期'}}</view>
+    </picker>
+  </view>
+
+  <!-- 吸引力评分 -->
+  <view class="form-item">
+    <text class="form-label">吸引力评分</text>
+    <view class="score-row">
+      <star-rating value="{{form.attractionScore}}" size="lg" bind:change="onAttractionChange" />
+      <text class="score-hint">{{scoreHints.attraction[form.attractionScore]}}</text>
+    </view>
+  </view>
+
+  <!-- 准备度评分 -->
+  <view class="form-item">
+    <text class="form-label">准备度评分</text>
+    <view class="score-row">
+      <star-rating value="{{form.preparednessScore}}" size="lg" bind:change="onPreparednessChange" />
+      <text class="score-hint">{{scoreHints.preparedness[form.preparednessScore]}}</text>
+    </view>
+  </view>
+</view>
+
+<button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
+  {{submitting ? '保存中...' : (mode === 'edit' ? '保存修改' : '添加岗位')}}
+</button>

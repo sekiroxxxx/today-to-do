@@ -1,0 +1,47 @@
+<!-- card-jobseeker: 求职模块任务卡片 -->
+<view class="card {{completed ? 'card--done' : ''}}" bindtap="onCardTap">
+
+  <!-- 未完成态 -->
+  <block wx:if="{{!completed}}">
+    <!-- 第一行：状态标签 + 星级 -->
+    <view class="card-row1">
+      <status-tag status="{{action.jobInfo.status}}" />
+      <view class="ratings">
+        <star-rating wx:if="{{action.jobInfo.attractionScore}}" value="{{action.jobInfo.attractionScore}}" readonly="{{true}}" size="sm" />
+        <star-rating wx:if="{{action.jobInfo.preparednessScore}}" value="{{action.jobInfo.preparednessScore}}" readonly="{{true}}" size="sm" />
+      </view>
+    </view>
+
+    <!-- 第二行：公司 · 岗位 -->
+    <view class="card-row2">
+      <text class="company-name text-ellipsis">{{action.jobInfo.company || '未命名公司'}}</text>
+      <text wx:if="{{action.jobInfo.position}}" class="position-name">· {{action.jobInfo.position}}</text>
+    </view>
+
+    <!-- 第三行：薪资 / 截止日 -->
+    <view wx:if="{{action.jobInfo.salaryRange || action.jobInfo.deadline}}" class="card-meta">
+      <text wx:if="{{action.jobInfo.salaryRange}}" class="meta-item">{{action.jobInfo.salaryRange}}</text>
+      <text wx:if="{{action.jobInfo.deadline}}" class="meta-item">截止 {{action.jobInfo.deadline}}</text>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="card-actions" catchtap="">
+      <button wx:if="{{toolLabelMap[action.jobInfo.status]}}"
+        class="btn-tool" bindtap="onTool">{{toolLabelMap[action.jobInfo.status]}}</button>
+      <button class="btn-done" bindtap="onComplete">完成</button>
+    </view>
+  </block>
+
+  <!-- 已完成态 -->
+  <block wx:else>
+    <view class="card-row1">
+      <status-tag status="{{action.jobInfo.status}}" />
+      <text class="done-mark">✓</text>
+    </view>
+    <view class="card-row2">
+      <text class="company-name company-name--done">{{action.jobInfo.company || '未命名公司'}}</text>
+      <text wx:if="{{action.jobInfo.position}}" class="position-name position-name--done">· {{action.jobInfo.position}}</text>
+    </view>
+  </block>
+
+</view>

@@ -139,7 +139,7 @@ Page({
 
   // ========== 导航 ==========
   onAddJob() {
-    wx.navigateTo({ url: '/pages/jobs/add/add' })
+    wx.navigateTo({ url: '/pages/form/form?mode=create&module=jobseeker' })
   },
 
   onJobDetail(e) {

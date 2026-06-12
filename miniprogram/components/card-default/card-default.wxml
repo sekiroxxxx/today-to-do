@@ -1,0 +1,29 @@
+<!-- card-default: 非求职模块任务卡片 -->
+<view class="card {{completed ? 'card--done' : ''}}">
+  <!-- 未完成态 -->
+  <block wx:if="{{!completed}}">
+    <view class="card-row1">
+      <view class="pri-dot" style="background:{{priMap[action.taskInfo.priority].color}}">{{priMap[action.taskInfo.priority].label}}</view>
+      <text class="card-title text-ellipsis">{{action.title}}</text>
+    </view>
+    <text wx:if="{{action.description}}" class="card-desc">{{action.description}}</text>
+    <view wx:if="{{action.taskInfo}}" class="card-meta">
+      <text wx:if="{{action.taskInfo.estimatedMinutes}}" class="meta-item">{{action.taskInfo.estimatedMinutes}}分钟</text>
+      <text wx:if="{{action.taskInfo.repeatRule && action.taskInfo.repeatRule.type !== 'none'}}" class="meta-item">{{action.taskInfo.repeatRule.type === 'daily' ? '每天' : '每周' + action.taskInfo.repeatRule.daysOfWeek.length + '天'}}</text>
+      <text wx:if="{{action.taskInfo.postponeCount >= 3}}" class="meta-item">已推迟{{action.taskInfo.postponeCount}}次</text>
+    </view>
+    <view class="card-actions">
+      <button class="btn-edit" bindtap="onEdit">编辑</button>
+      <button class="btn-done" bindtap="onComplete">完成</button>
+    </view>
+  </block>
+
+  <!-- 已完成态 -->
+  <block wx:else>
+    <view class="card-row1">
+      <text class="card-title text-ellipsis card-title--done">{{action.title}}</text>
+      <text class="done-mark">✓</text>
+    </view>
+    <text wx:if="{{action.description}}" class="card-desc card-desc--done">{{action.description}}</text>
+  </block>
+</view>

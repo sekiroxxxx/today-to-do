@@ -78,7 +78,7 @@ Page({
 
   // ========== 编辑 ==========
   onEdit() {
-    wx.navigateTo({ url: `/pages/jobs/add/add?id=${this.data.jobId}` })
+    wx.navigateTo({ url: '/pages/form/form?mode=edit&type=job&id=' + this.data.jobId })
   },
 
   // ========== 推进状态（仅正向流转） ==========

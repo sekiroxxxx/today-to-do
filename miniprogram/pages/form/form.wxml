@@ -1,0 +1,35 @@
+<!-- 统一表单页 -->
+<view class="page">
+  <!-- 加载遮罩 -->
+  <view wx:if="{{loadingData}}" class="loading-mask">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 表单分发 -->
+  <view wx:if="{{!loadingData && componentName}}" class="form-body">
+    <form-custom
+      wx:if="{{componentName === 'form-custom'}}"
+      id="form-custom"
+      initialData="{{initialData}}"
+      mode="{{mode}}"
+      bind:submit="onSubmit"
+      bind:cancel="onCancel"
+    />
+    <form-work
+      wx:elif="{{componentName === 'form-work'}}"
+      id="form-work"
+      initialData="{{initialData}}"
+      mode="{{mode}}"
+      bind:submit="onSubmit"
+      bind:cancel="onCancel"
+    />
+    <form-jobseeker
+      wx:elif="{{componentName === 'form-jobseeker'}}"
+      id="form-jobseeker"
+      initialData="{{initialData}}"
+      mode="{{mode}}"
+      bind:submit="onSubmit"
+      bind:cancel="onCancel"
+    />
+  </view>
+</view>

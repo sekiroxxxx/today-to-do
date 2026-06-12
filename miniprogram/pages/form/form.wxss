@@ -1,0 +1,4 @@
+.page { padding: var(--spacing-md); min-height: 100vh; }
+.loading-mask { display: flex; align-items: center; justify-content: center; height: 100vh; }
+.loading-text { font-size: var(--font-body); color: var(--color-text-hint); }
+.form-body { padding-bottom: 40px; }

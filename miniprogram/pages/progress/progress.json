@@ -1,4 +1,1 @@
-{
-  "usingComponents": {},
-  "navigationBarTitleText": "推进"
-}
+{ "usingComponents": { "card-default": "/components/card-default/card-default", "card-jobseeker": "/components/card-jobseeker/card-jobseeker" }, "navigationBarTitleText": "推进" }
