@@ -145,9 +145,8 @@ exports.main = async (event, context) => {
         rawScore: null
       }))
 
-    // ========== 第7步：合并（求职优先，自定义补位） ==========
-    // 先放求职（已排序），再放自定义，总数不超过 dailyLimit
-    const mergedActions = [...jobActions, ...customActions].slice(0, dailyLimit)
+    // ========== 第7步：合并（求职优先 = dailyLimit 控制，自定义不限制） ==========
+    const mergedActions = [...jobActions, ...customActions]
 
     console.log(`生成完成: 求职 ${jobActions.length} 条, 自定义 ${customActions.length} 条, 合并 ${mergedActions.length} 条`)
 

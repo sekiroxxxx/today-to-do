@@ -57,8 +57,8 @@
   <view class="card">
     <text class="card-title">偏好设置</text>
     <view class="setting-item flex-between">
-      <text>每日清单上限</text>
-      <slider min="3" max="5" value="{{dailyLimit}}" show-value block-size="18"
+      <text>每日求职推荐上限</text>
+      <slider min="1" max="10" value="{{dailyLimit}}" show-value block-size="18"
               activeColor="#D97706" bindchange="onDailyLimitChange" style="width:50%" />
     </view>
   </view>

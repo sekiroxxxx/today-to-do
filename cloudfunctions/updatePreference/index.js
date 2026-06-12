@@ -25,7 +25,7 @@ exports.main = async (event, context) => {
 
   // ========== 校验 ==========
   const dailyLimit = Number(event.dailyLimit)
-  if (!dailyLimit || dailyLimit < 3 || dailyLimit > 5) {
+  if (!dailyLimit || dailyLimit < 1 || dailyLimit > 10) {
     return { success: false, errMsg: '每日清单上限需为 3~5' }
   }
 
