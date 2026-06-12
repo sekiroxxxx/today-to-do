@@ -97,6 +97,8 @@ Page({
 
   // ========== 模块开关 ==========
   onModuleToggle(e) {
+    if (this._toggleLock) return
+    this._toggleLock = true
     const key = e.currentTarget.dataset.key
     var modules = this.data.userModules.slice()
     const oldModules = modules.slice()
@@ -104,14 +106,12 @@ Page({
     if (idx > -1) modules.splice(idx, 1)
     else modules.push(key)
 
-    // 判断变更方向
-    var added = modules.filter(function (m) { return oldModules.indexOf(m) === -1 })
-
     const db = wx.cloud.database()
     const user = this.data.userInfo
     if (user && user._id) {
       db.collection('users').doc(user._id).update({ data: { modules } }).then(() => {
         app.globalData.userInfo.modules = modules
+        this._toggleLock = false
         this.setData({
           userModules: modules,
           allModules: phrases.MODULES.map(function (m) {
@@ -123,8 +123,8 @@ Page({
         // added.length > 0  → 开了新模块，本地 rebuild + 后台静默刷新
         app.markDirty(['today'], 'moduleChange')
         app.markDirty(['progress'])
-      })
-    }
+      }).catch(() => { this._toggleLock = false })
+    } else { this._toggleLock = false }
   },
 
   // ========== 通用 ==========
