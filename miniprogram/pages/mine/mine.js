@@ -58,24 +58,6 @@ Page({
     })
   },
 
-  // ========== 调整每日求职推荐上限 ==========
-  onDailyLimitChange(e) {
-    var limit = e.detail.value
-    var ctx = this
-    // 防抖：拖动结束时才发请求
-    if (ctx._limitTimer) clearTimeout(ctx._limitTimer)
-    ctx._limitTimer = setTimeout(function () {
-      api.updatePreference({ dailyLimit: limit }).then(function (res) {
-        if (res.success) {
-          wx.showToast({ title: '每日求职推荐上限已设为 ' + limit + ' 条', icon: 'success' })
-          app.markDirty(['today', 'progress'])
-        } else {
-          wx.showToast({ title: res.errMsg || '设置失败', icon: 'none' })
-        }
-      })
-    }, 300)
-  },
-
   // 格式化统计数据（WXML 不能调 .toFixed()，提前算好）
   formatStats(summary) {
     const rate = summary.completionRate

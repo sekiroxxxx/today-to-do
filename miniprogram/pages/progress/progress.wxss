@@ -39,3 +39,14 @@
 .sheet-title { font-size: 15px; font-weight: 600; color: var(--color-text); text-align: center; padding-bottom: 12px; border-bottom: 1px solid var(--color-border); margin-bottom: 8px; }
 .sheet-item { display: flex; justify-content: space-between; padding: var(--spacing-sm) 0; font-size: var(--font-body); }
 .sheet-cancel { text-align: center; padding: var(--spacing-sm); margin-top: 8px; color: var(--color-text-hint); border-top: 1px solid var(--color-border); }
+
+/* 工具箱 */
+.tool-card { background: #fff; border: 1px solid var(--color-border); border-radius: 10px;
+  padding: 14px; margin-bottom: 10px; }
+.tool-card--action { display: flex; align-items: center; gap: 12px; }
+.tool-icon { font-size: 24px; }
+.tool-info { flex: 1; }
+.tool-name { font-size: 14px; font-weight: 500; }
+.tool-desc { font-size: var(--font-tag); color: var(--color-text-hint); }
+.tool-arrow { font-size: 18px; color: #CCC; }
+.tool-label { font-size: 14px; margin-bottom: 4px; }

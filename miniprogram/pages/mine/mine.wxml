@@ -39,30 +39,6 @@
     {{statsFormatted.moodText}}
   </view>
 
-  <!-- 投递漏斗概览 -->
-  <view class="card" wx:if="{{funnel}}">
-    <text class="card-title">求职漏斗</text>
-    <view class="mini-funnel flex-row">
-      <view class="mf-item">{{funnel.pending}}<text class="mf-label">待投</text></view>
-      <text class="mf-arrow">→</text>
-      <view class="mf-item">{{funnel.applied}}<text class="mf-label">已投</text></view>
-      <text class="mf-arrow">→</text>
-      <view class="mf-item">{{funnel.interviewing}}<text class="mf-label">面试</text></view>
-      <text class="mf-arrow">→</text>
-      <view class="mf-item mf-item--highlight">{{funnel.offer}}<text class="mf-label">Offer</text></view>
-    </view>
-  </view>
-
-  <!-- 设置 -->
-  <view class="card">
-    <text class="card-title">偏好设置</text>
-    <view class="setting-item flex-between">
-      <text>每日求职推荐上限</text>
-      <slider min="1" max="10" value="{{dailyLimit}}" show-value block-size="18"
-              activeColor="#D97706" bindchange="onDailyLimitChange" style="width:50%" />
-    </view>
-  </view>
-
   <!-- 模块开关 -->
   <view class="card">
     <text class="card-title">功能模块</text>

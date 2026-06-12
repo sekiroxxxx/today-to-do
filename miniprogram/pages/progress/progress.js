@@ -11,7 +11,8 @@ Page({
     tasks: [],
     funnel: null,
     showSheet: false,
-    isLoading: false
+    isLoading: false,
+    dailyLimit: 5
   },
 
   onShow() {
@@ -43,7 +44,8 @@ Page({
     app.globalData.dirty.progress = false
 
     var info = phrases.MODULES.find(function (m) { return m.key === key })
-    this.setData({ currentModuleInfo: info })
+    var dailyLimit = (app.globalData.userInfo && app.globalData.userInfo.preferences && app.globalData.userInfo.preferences.dailyLimit) || 5
+    this.setData({ currentModuleInfo: info, dailyLimit: dailyLimit })
 
     // 获取该模块的今日任务，求职加评级 badge
     var ctx = this
@@ -117,6 +119,28 @@ Page({
       app.markDirty(['today', 'progress', 'mine'])
       ctx.loadData()
     })
+  },
+
+  // ========== 工具箱 ==========
+  onDailyLimitChange(e) {
+    var limit = e.detail.value
+    var ctx = this
+    this.setData({ dailyLimit: limit })
+    if (ctx._limitTimer) clearTimeout(ctx._limitTimer)
+    ctx._limitTimer = setTimeout(function () {
+      api.updatePreference({ dailyLimit: limit }).then(function (res) {
+        if (res.success) {
+          wx.showToast({ title: '每日求职推荐上限已设为 ' + limit + ' 条', icon: 'success' })
+          app.markDirty(['today', 'progress'])
+        } else {
+          wx.showToast({ title: res.errMsg || '设置失败', icon: 'none' })
+        }
+      })
+    }, 300)
+  },
+
+  onGoJobs() {
+    wx.navigateTo({ url: '/pages/jobs/jobs' })
   },
 
   // ========== 导航 ==========
