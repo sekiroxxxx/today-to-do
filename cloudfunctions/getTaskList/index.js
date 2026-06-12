@@ -50,6 +50,11 @@ exports.main = async (event, context) => {
       queryCondition.enabled = event.filter.enabled
     }
 
+    // 按模块筛选（v1.1）
+    if (event.filter && event.filter.module && event.filter.module.trim()) {
+      queryCondition.module = event.filter.module.trim()
+    }
+
     // 关键词搜索（标题 + 备注）
     if (event.filter && event.filter.keyword && event.filter.keyword.trim()) {
       const keyword = event.filter.keyword.trim()
