@@ -137,11 +137,26 @@ Page({
           confirmColor: '#FF4D4F',
           success: (res) => {
             if (res.confirm) {
-              api.deleteTask(task._id).then(result => {
+              var that = this
+          api.deleteTask(task._id).then(function (result) {
                 if (result.success) {
                   app.markDirty(['today', 'mine'])
                   wx.showToast({ title: '已删除', icon: 'success' })
-                  this.loadTasks()
+                  // 本地 splice，不重拉全量
+                  var tasks = that.data.tasks.filter(function (t) { return t._id !== task._id })
+                  var active = tasks.filter(function (t) { return t.enabled })
+                  var high = active.filter(function (t) { return t.priority === 1 })
+                  var mid  = active.filter(function (t) { return t.priority === 2 })
+                  var low  = active.filter(function (t) { return t.priority === 3 })
+                  var sections = []
+                  if (high.length) sections.push({ level: 'high', label: '高优先级', dotClass: 'pri-dot--high', tasks: high })
+                  if (mid.length)  sections.push({ level: 'mid',  label: '中优先级', dotClass: 'pri-dot--mid',  tasks: mid })
+                  if (low.length)  sections.push({ level: 'low',  label: '低优先级', dotClass: 'pri-dot--low',  tasks: low })
+                  that.setData({
+                    tasks: tasks, sections: sections,
+                    highTasks: high, midTasks: mid, lowTasks: low,
+                    disabledTasks: tasks.filter(function (t) { return !t.enabled })
+                  })
                 }
               })
             }

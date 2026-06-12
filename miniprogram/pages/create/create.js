@@ -164,11 +164,11 @@ Page({
     action.then(function (res) {
       if (res.success) {
         getApp().markDirty(['tasks', 'today', 'progress', 'jobs', 'mine'])
-        wx.showToast({ title: '已添加', icon: 'success', duration: 1000 })
+        wx.showToast({ title: '已添加', icon: 'success', duration: 500 })
         setTimeout(function () {
           ctx.setData({ saving: false, form: cloneForm(ctx.data.currentModule) })
           wx.switchTab({ url: '/pages/today/today' })
-        }, 1000)
+        }, 500)
       } else {
         wx.showToast({ title: res.errMsg || '操作失败', icon: 'none' })
         ctx.setData({ saving: false })
