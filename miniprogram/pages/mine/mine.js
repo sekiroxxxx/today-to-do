@@ -116,9 +116,13 @@ Page({
   onModuleToggle(e) {
     const key = e.currentTarget.dataset.key
     var modules = this.data.userModules.slice()
+    const oldModules = modules.slice()
     const idx = modules.indexOf(key)
     if (idx > -1) modules.splice(idx, 1)
     else modules.push(key)
+
+    // 判断变更方向
+    var added = modules.filter(function (m) { return oldModules.indexOf(m) === -1 })
 
     const db = wx.cloud.database()
     const user = this.data.userInfo
@@ -131,7 +135,11 @@ Page({
             return Object.assign({}, m, { checked: modules.indexOf(m.key) > -1 })
           })
         })
-        app.markDirty(['today', 'progress'])
+        // 模块变更始终通知 today 页本地重建（不调云函数）
+        // added.length === 0 → 只关模块，本地 rebuild 即生效
+        // added.length > 0  → 开了新模块，本地 rebuild + 后台静默刷新
+        app.markDirty(['today'], 'moduleChange')
+        app.markDirty(['progress'])
       })
     }
   },

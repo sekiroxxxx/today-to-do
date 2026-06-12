@@ -27,6 +27,20 @@ Page({
     }
 
     if (!app.globalData.dirty.today) return
+
+    // 模块切换：本地重建，不调云函数，避免闪烁
+    if (app.globalData.dirtyReason.today === 'moduleChange' && this.data.modules.length > 0) {
+      var flatActions = []
+      this.data.modules.forEach(function (m) { flatActions = flatActions.concat(m.actions) })
+      var rebuilt = this.buildModules(flatActions, this.data.todayGenerated)
+      this.setData({ modules: rebuilt, loading: false })
+      app.globalData.dirty.today = false
+      delete app.globalData.dirtyReason.today
+      // 如果开了新模块，后台静默刷新获取新模块数据
+      this.loadTodayActions(false)
+      return
+    }
+
     const hasData = this.data.modules.length > 0
     this.loadTodayActions(!hasData)
   },

@@ -31,7 +31,9 @@ App({
         jobs: true,
         tasks: true,
         mine: true
-      }
+      },
+      // 脏标记变更原因，today/progress 等页面按原因走不同刷新策略
+      dirtyReason: {}
     }
   },
 
@@ -39,13 +41,19 @@ App({
    * 标记指定 Tab 的数据需要刷新
    * @param {string|string[]} tabs - 'today' | 'jobs' | 'tasks' | 'mine'
    */
-  markDirty: function (tabs) {
+  markDirty: function (tabs, reason) {
     const list = Array.isArray(tabs) ? tabs : [tabs]
     list.forEach(t => {
       if (this.globalData.dirty[t] !== undefined) {
         this.globalData.dirty[t] = true
       }
     })
+    if (reason) {
+      list.forEach(t => { this.globalData.dirtyReason[t] = reason })
+    } else {
+      // 普通脏标记（完成/推迟等），清除之前的 reason 避免误入模块切换分支
+      list.forEach(t => { delete this.globalData.dirtyReason[t] })
+    }
   },
 
   // ========== 全局方法 ==========
