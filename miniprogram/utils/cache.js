@@ -12,7 +12,6 @@
  */
 
 const api = require('./api')
-function app() { return getApp() }
 // ==================== 内部工具 ====================
 
 /** 存储键前缀 */
@@ -20,11 +19,10 @@ const PREFIX = 'cache_'
 
 /** 缓存过期时间（秒），0=永不过期 */
 const TTL = {
-  jobs: 300,        // 5 分钟
+  tracked: 300,     // 5 分钟
   tasks: 300,
   today: 120,       // 2 分钟，今日清单变化频繁
   user: 0,          // 永不过期
-  stats_week: 600,  // 10 分钟
   stats_month: 600
 }
 
@@ -49,7 +47,6 @@ function remove(key) {
   try { wx.removeStorageSync(PREFIX + key) } catch (_) { }
 }
 
-/** 判断缓存是否过期 */
 function isStale(key) {
   const ttl = TTL[key] || 0
   if (ttl === 0) return false
@@ -70,18 +67,22 @@ function clearDirty(tab) {
 
 module.exports = {
 
-  /** 获取岗位列表 */
-  getJobs: async function (forceRefresh = false) {
-    const key = 'jobs'
+  /** 获取追踪项列表（新模型） */
+  getTrackedItems: async function (filter = {}, forceRefresh = false) {
+    const key = 'tracked'
     if (!forceRefresh && !isStale(key)) {
       const cache = read(key)
       if (cache) { clearDirty('jobs'); return cache.data }
     }
-    const res = await api.getJobList()
-    if (res.success) { write(key, res.jobs); clearDirty('jobs'); return res.jobs }
-    // API 失败，尝试返回过期缓存
+    const res = await api.getTrackedItems(filter)
+    if (res.success) { write(key, res.items); clearDirty('jobs'); return res.items }
     const stale = read(key)
     return stale ? stale.data : []
+  },
+
+  /** 获取岗位列表（兼容旧接口，桥接到 getTrackedItems） */
+  getJobs: async function (forceRefresh) {
+    return this.getTrackedItems({ module: 'jobseeker' }, forceRefresh)
   },
 
   /** 获取任务列表 */
@@ -99,7 +100,6 @@ module.exports = {
 
   /** 获取今日清单 */
   getToday: async function (forceRefresh = false) {
-    const key = 'today'
     if (!forceRefresh && !isStale(key)) {
       const cache = read(key)
       if (cache) { clearDirty('today'); return cache.data }
@@ -381,16 +381,16 @@ module.exports = {
   /** 启动时全量拉取并写缓存 */
   syncAll: async function () {
     try {
-      const [jobsRes, tasksRes, user] = await Promise.all([
-        api.getJobList(),
+      const [trackedRes, tasksRes, user] = await Promise.all([
+        api.getTrackedItems(),
         api.getTaskList(),
         app().getUserInfo()
       ])
-      if (jobsRes.success) write('jobs', jobsRes.jobs)
+      if (trackedRes.success) write('tracked', trackedRes.items)
       if (tasksRes.success) write('tasks', tasksRes.tasks)
       if (user) write('user', user)
 
-      // 尝试拉今日清单
+      // 尝试拉今日清单（本地算法，不依赖 daily_actions）
       const todayRes = await api.getTodayActions()
       if (todayRes.success && todayRes.actions.length > 0) {
         write('today', todayRes.actions)

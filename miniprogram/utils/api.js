@@ -1,13 +1,15 @@
 /**
  * API 封装层 — 直连数据库优先 + 云函数 fallback
  *
- * 阶段 A：所有 CRUD 方法先走 wx.cloud.database() 直连，
- * 失败时回退到云函数。API 签名不变，页面层无需任何改动。
- *
- * login 仅走云函数（微信登录必需）。
+ * 方案二：数据模型重构
+ * - tracked_items 替代 job_applications
+ * - completed_log + 本地算法替代 daily_actions
+ * - 旧方法 (addJob/getJobList/...) 保留签名，内部桥接到新方法
  */
 
 const apiDb = require('./api-db')
+const tracked = require('./tracked')
+const algorithm = require('./algorithm')
 
 // ==================== 内部工具 ====================
 
@@ -24,13 +26,6 @@ function call(name, data = {}) {
     })
 }
 
-/**
- * 包装直接函数：优先走直连，失败时回退云函数。
- * @param {string} cloudName 云函数名称
- * @param {*} cloudParams 传给云函数的参数
- * @param {Function} directFn 直接数据库实现的函数（签名为 async (params) => result）
- * @param {*} directArgs 传给 directFn 的参数
- */
 function tryDirect(cloudName, cloudParams, directFn, directArgs) {
   try {
     return directFn(directArgs).catch(err => {
@@ -42,87 +37,237 @@ function tryDirect(cloudName, cloudParams, directFn, directArgs) {
   }
 }
 
+function dateStr(d) { const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0'); return `${y}-${m}-${day}` }
+
 // ==================== 对外 API ====================
 
 module.exports = {
 
   /** 登录 → { user }  仅走云函数（微信登录必需） */
-  login() {
-    return call('login')
-  },
+  login() { return call('login') },
 
-  /** 更新偏好 → { success } */
-  updatePreference(data) {
-    return tryDirect('updatePreference', data, apiDb.updatePreference, data)
-  },
+  // ========== 追踪项（tracked_items，新模型） ==========
 
-  /** 添加岗位 → { success, job } */
+  addTrackedItem(data) { return tryDirect('addJob', data, tracked.addTrackedItem, data) },
+  getTrackedItems(filter) { return tryDirect('getJobList', { filter }, tracked.getTrackedItems, filter || {}) },
+  updateTrackedItem(data) { return tryDirect('updateJob', data, tracked.updateTrackedItem, data) },
+  updateTrackedItemStatus(data) { return tryDirect('updateJobStatus', data, tracked.updateTrackedItemStatus, data) },
+  deleteTrackedItem(itemId) { return tryDirect('deleteJob', { jobId: itemId }, tracked.deleteTrackedItem, itemId) },
+  logComplete(data) { return tryDirect('completeAction', data, tracked.logComplete, data) },
+
+  // ========== 求职岗位（桥接到 tracked_items，签名不变） ==========
+
   addJob(data) {
-    return tryDirect('addJob', data, apiDb.addJob, data)
+    return this.addTrackedItem({
+      module: 'jobseeker',
+      title: `${(data.company || '').trim()} - ${(data.position || '').trim()}`,
+      fields: {
+        company: (data.company || '').trim(), position: (data.position || '').trim(),
+        salaryRange: (data.salaryRange || '').trim(), applyLink: (data.applyLink || '').trim(),
+        deadline: data.deadline || '',
+        scores: {
+          attraction: Math.min(5, Math.max(1, Number(data.attractionScore) || 3)),
+          preparedness: Math.min(5, Math.max(1, Number(data.preparednessScore) || 1))
+        }
+      }
+    }).then(res => res.success && res.item ? { success: true, job: itemToJob(res.item) } : res)
   },
 
-  /** 获取岗位列表 → { jobs, total } */
   getJobList(filter = {}) {
-    return tryDirect('getJobList', { filter }, apiDb.getJobList, filter)
+    return this.getTrackedItems({ ...filter, module: 'jobseeker' }).then(res =>
+      res.success ? { success: true, jobs: (res.items || []).map(itemToJob), total: res.total } : res
+    )
   },
 
-  /** 更新岗位基本信息 → { success, job } */
   updateJob(data) {
-    return tryDirect('updateJob', data, apiDb.updateJob, data)
+    const fields = {}
+    ;['company', 'position', 'salaryRange', 'applyLink', 'deadline'].forEach(k => {
+      if (data[k] !== undefined) fields[k] = typeof data[k] === 'string' ? data[k].trim() : data[k]
+    })
+    if (data.attractionScore !== undefined || data.preparednessScore !== undefined) {
+      fields.scores = {}
+      if (data.attractionScore !== undefined) fields.scores.attraction = Number(data.attractionScore)
+      if (data.preparednessScore !== undefined) fields.scores.preparedness = Number(data.preparednessScore)
+    }
+    // 校验评分 (与云函数保持一致)
+    if (fields.scores) {
+      if (fields.scores.attraction !== undefined) {
+        const s = fields.scores.attraction; if (s < 1 || s > 5) return Promise.resolve({ success: false, errMsg: '吸引力评分必须在 1-5 之间' })
+      }
+      if (fields.scores.preparedness !== undefined) {
+        const s = fields.scores.preparedness; if (s < 1 || s > 5) return Promise.resolve({ success: false, errMsg: '准备度评分必须在 1-5 之间' })
+      }
+    }
+    return this.updateTrackedItem({ itemId: data.jobId, fields }).then(res =>
+      res.success && res.item ? { success: true, job: itemToJob(res.item) } : res
+    )
   },
 
-  /** 推进岗位状态 → { success, job } */
   updateJobStatus(data) {
-    return tryDirect('updateJobStatus', data, apiDb.updateJobStatus, data)
+    return this.updateTrackedItemStatus({ itemId: data.jobId, newStatus: data.newStatus, note: data.note }).then(res =>
+      res.success && res.item ? { success: true, job: itemToJob(res.item) } : res
+    )
   },
 
-  /** 删除岗位 → { success } */
-  deleteJob(jobId) {
-    return tryDirect('deleteJob', { jobId }, apiDb.deleteJob, jobId)
-  },
+  deleteJob(jobId) { return this.deleteTrackedItem(jobId) },
 
-  /** 添加任务 → { success, task } */
-  addTask(data) {
-    return tryDirect('addTask', data, apiDb.addTask, data)
-  },
+  // ========== 自定义任务（不变） ==========
 
-  /** 获取任务列表 → { tasks, total } */
-  getTaskList(filter = {}) {
-    return tryDirect('getTaskList', { filter }, apiDb.getTaskList, filter)
-  },
+  addTask(data) { return tryDirect('addTask', data, apiDb.addTask, data) },
+  getTaskList(filter) { return tryDirect('getTaskList', { filter }, apiDb.getTaskList, filter || {}) },
+  updateTask(data) { return tryDirect('updateTask', data, apiDb.updateTask, data) },
+  deleteTask(taskId) { return tryDirect('deleteTask', { taskId }, apiDb.deleteTask, taskId) },
 
-  /** 更新任务 → { success, task } */
-  updateTask(data) {
-    return tryDirect('updateTask', data, apiDb.updateTask, data)
-  },
+  // ========== 用户 ==========
 
-  /** 删除任务 → { success } */
-  deleteTask(taskId) {
-    return tryDirect('deleteTask', { taskId }, apiDb.deleteTask, taskId)
-  },
+  updatePreference(data) { return tryDirect('updatePreference', data, apiDb.updatePreference, data) },
 
-  /** 查询今日已生成的清单 → { actions, date } */
-  getTodayActions() {
-    return tryDirect('getTodayActions', {}, apiDb.getTodayActions)
-  },
+  // ========== 今日清单（本地算法 + completed_log） ==========
 
-  /** 生成/刷新今日清单 → { actions, generated, diversityApplied, date } */
-  generateDailyActions(forceRegenerate = false) {
-    return tryDirect('generateDailyActions', { forceRegenerate }, apiDb.generateDailyActions, forceRegenerate)
-  },
+  /** 查询/生成今日清单 → 本地算法计算 */
+  getTodayActions() { return this._runLocalAlgorithm() },
+  generateDailyActions(forceRegenerate) { return this._runLocalAlgorithm(forceRegenerate) },
 
-  /** 完成一条行动 → { success, sourceType, jobInfo?, taskInfo? } */
+  /** 完成一条行动 */
   completeAction(actionId) {
-    return tryDirect('completeAction', { actionId }, apiDb.completeAction, actionId)
+    return (async () => {
+      if (!actionId) return { success: false, errMsg: '缺少 action ID' }
+      // 本地算法生成的 action（_id 格式: local_tracked_xxx 或 local_custom_xxx）
+      if (actionId.startsWith('local_')) {
+        const rest = actionId.replace('local_', '')
+        let sourceType, sourceId
+        if (rest.startsWith('tracked_')) { sourceType = 'tracked'; sourceId = rest.replace('tracked_', '') }
+        else if (rest.startsWith('custom_')) { sourceType = 'custom'; sourceId = rest.replace('custom_', '') }
+        else { sourceType = 'job'; sourceId = rest.replace('job_', '') }
+        // 写 completed_log
+        const logRes = await tracked.logComplete({ date: dateStr(new Date()), sourceType, sourceId, title: '', module: sourceType === 'tracked' ? 'jobseeker' : 'custom' })
+        if (!logRes.success) return logRes
+        // 更新源记录
+        const response = { success: true, sourceType }
+        if (sourceType === 'custom') {
+          try {
+            const taskRes = await wx.cloud.database().collection('custom_tasks').doc(sourceId).get()
+            if (taskRes.data) response.taskInfo = { _id: taskRes.data._id, title: taskRes.data.title, repeatRule: taskRes.data.repeatRule }
+          } catch (_) { }
+        } else {
+          try {
+            const itemRes = await wx.cloud.database().collection('tracked_items').doc(sourceId).get()
+            if (itemRes.data) {
+              const f = itemRes.data.fields || {}
+              response.jobInfo = { _id: itemRes.data._id, status: itemRes.data.status, company: f.company || '', position: f.position || '' }
+            }
+          } catch (_) { }
+        }
+        return response
+      }
+      // 旧 daily_actions _id → 回退云函数
+      return call('completeAction', { actionId })
+    })()
   },
 
-  /** 推迟一条行动 → { success, postponeType, needRegenerate } */
+  /** 推迟一条行动 → 回退云函数（涉及多表更新） */
   postponeAction(actionId, postponeType) {
-    return tryDirect('postponeAction', { actionId, postponeType }, apiDb.postponeAction, actionId, postponeType)
+    if (!postponeType || !['later', 'skip'].includes(postponeType)) return Promise.resolve({ success: false, errMsg: 'postponeType 必须为 later 或 skip' })
+    // 本地 action：仅更新 tracked_items / custom_tasks 的 postponeCount
+    if (actionId.startsWith('local_')) {
+      const rest = actionId.replace('local_', '')
+      let sourceType, sourceId
+      if (rest.startsWith('tracked_')) { sourceType = 'tracked'; sourceId = rest.replace('tracked_', '') }
+      else if (rest.startsWith('custom_')) { sourceType = 'custom'; sourceId = rest.replace('custom_', '') }
+      else { sourceType = 'job'; sourceId = rest.replace('job_', '') }
+      if (postponeType === 'skip' && sourceId) {
+        const db = wx.cloud.database()
+        const now = new Date()
+        if (sourceType === 'tracked' || sourceType === 'job') {
+          return db.collection('tracked_items').doc(sourceId).get().then(r => {
+            if (r.data) {
+              const curNext = r.data.nextActionDate ? new Date(r.data.nextActionDate) : new Date()
+              curNext.setDate(curNext.getDate() + 1)
+              return db.collection('tracked_items').doc(sourceId).update({
+                data: { postponeCount: db.command.inc(1), nextActionDate: curNext, updatedAt: now }
+              })
+            }
+          }).then(() => ({ success: true, postponeType, needRegenerate: true }))
+            .catch(err => { console.warn('[api] 直连 postpone 失败:', err); return call('postponeAction', { actionId, postponeType }) })
+        } else {
+          return db.collection('custom_tasks').doc(sourceId).update({
+            data: { postponeCount: db.command.inc(1), updatedAt: now }
+          }).then(() => ({ success: true, postponeType, needRegenerate: true }))
+            .catch(err => { console.warn('[api] 直连 postpone 失败:', err); return call('postponeAction', { actionId, postponeType }) })
+        }
+      }
+      return { success: true, postponeType, needRegenerate: true }
+    }
+    // 旧 daily_actions → 云函数
+    return call('postponeAction', { actionId, postponeType })
   },
 
-  /** 获取统计数据 → { summary, funnel, dailyDetail, categoryBreakdown, ... } */
-  getStats(range = 'week') {
-    return tryDirect('getStats', { range }, apiDb.getStats, range)
+  // ========== 统计（completed_log + tracked_items） ==========
+
+  getStats(range) {
+    return tracked.getStatsFromLogs(range || 'week').catch(err => {
+      console.warn('[api] 直连统计失败，回退云函数 getStats:', err)
+      return call('getStats', { range: range || 'week' })
+    })
+  },
+
+  // ========== 内部：本地算法生成今日清单 ==========
+
+  _runLocalAlgorithm: async function (forceRegenerate) {
+    const todayDate = dateStr(new Date())
+    try {
+      const todayLogs = await tracked.getCompletedLogs(todayDate, todayDate)
+      const completedSourceIds = (todayLogs.logs || []).map(l => l.sourceId)
+      const [trackedItems, tasksRes] = await Promise.all([
+        tracked.getActiveTrackedItems(),
+        apiDb.getTaskList()
+      ])
+      const tasks = tasksRes.success ? tasksRes.tasks : []
+      const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+      const recentLogs = await tracked.getCompletedLogs(dateStr(sevenDaysAgo), todayDate)
+      const recentActions = (recentLogs.logs || []).map(l => ({ date: l.date, sourceType: l.sourceType }))
+      let dailyLimit = 5
+      try {
+        const userResult = await wx.cloud.database().collection('users').where({}).get()
+        if (userResult.data && userResult.data[0] && userResult.data[0].preferences) {
+          dailyLimit = userResult.data[0].preferences.dailyLimit || 5
+        }
+      } catch (_) { }
+      const result = algorithm.generateDailyList({
+        jobs: trackedItems.map(ti => ({
+          _id: ti._id, company: (ti.fields || {}).company || '', position: (ti.fields || {}).position || '',
+          status: ti.status,
+          attractionScore: ((ti.fields || {}).scores || {}).attraction || 1,
+          preparednessScore: ((ti.fields || {}).scores || {}).preparedness || 1,
+          nextActionDate: ti.nextActionDate, postponeCount: ti.postponeCount || 0, createdAt: ti.createdAt
+        })),
+        tasks, recentActions, dailyLimit, excludeSourceIds: completedSourceIds
+      })
+      const actions = result.actions.map(a => ({
+        ...a,
+        _id: `local_${a.sourceType}_${a.sourceId}`,
+        module: a.module || (a.sourceType === 'job' ? 'jobseeker' : 'custom'),
+        completed: false, postponed: false, date: todayDate
+      }))
+      return { success: true, actions, date: todayDate, generated: true, diversityApplied: result.diversityApplied }
+    } catch (err) {
+      console.warn('[api] 本地算法失败，回退云函数:', err)
+      return call('generateDailyActions', { forceRegenerate })
+    }
+  }
+}
+
+// ==================== 桥接工具 ====================
+
+/** tracked_items → 旧 job 格式 */
+function itemToJob(item) {
+  const f = item.fields || {}; const scores = f.scores || {}
+  return {
+    _id: item._id, company: f.company || '', position: f.position || '',
+    salaryRange: f.salaryRange || '', applyLink: f.applyLink || '', deadline: f.deadline || '',
+    attractionScore: scores.attraction || 3, preparednessScore: scores.preparedness || 1,
+    status: item.status, statusHistory: item.statusHistory || [],
+    nextActionDate: item.nextActionDate, postponeCount: item.postponeCount || 0,
+    createdAt: item.createdAt, updatedAt: item.updatedAt
   }
 }
