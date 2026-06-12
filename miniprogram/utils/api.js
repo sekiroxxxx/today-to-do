@@ -136,12 +136,19 @@ module.exports = {
       // 本地算法生成的 action（_id 格式: local_tracked_xxx 或 local_custom_xxx）
       if (actionId.startsWith('local_')) {
         const rest = actionId.replace('local_', '')
-        let sourceType, sourceId
-        if (rest.startsWith('tracked_')) { sourceType = 'tracked'; sourceId = rest.replace('tracked_', '') }
-        else if (rest.startsWith('custom_')) { sourceType = 'custom'; sourceId = rest.replace('custom_', '') }
-        else { sourceType = 'job'; sourceId = rest.replace('job_', '') }
-        // 写 completed_log
-        const logRes = await tracked.logComplete({ date: dateStr(new Date()), sourceType, sourceId, title: '', module: sourceType === 'tracked' ? 'jobseeker' : 'custom' })
+        let sourceType, sourceId, module = 'custom'
+        if (rest.startsWith('tracked_')) { sourceType = 'tracked'; sourceId = rest.replace('tracked_', ''); module = 'jobseeker' }
+        else if (rest.startsWith('custom_')) {
+          sourceType = 'custom'; sourceId = rest.replace('custom_', '')
+          // 查任务的实际模块（work/study/freelance/custom）
+          try {
+            const t = await wx.cloud.database().collection('custom_tasks').doc(sourceId).get()
+            if (t.data && t.data.module) module = t.data.module
+          } catch (_) { }
+        }
+        else { sourceType = 'job'; sourceId = rest.replace('job_', ''); module = 'jobseeker' }
+        // 写 completed_log（带实际模块名）
+        const logRes = await tracked.logComplete({ date: dateStr(new Date()), sourceType, sourceId, title: '', module })
         if (!logRes.success) return logRes
         // 更新源记录
         const response = { success: true, sourceType }

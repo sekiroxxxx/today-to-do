@@ -1,8 +1,9 @@
 // 推进 Tab v1.1 — 模块工作区（组件家族版）
 const api = require('../../utils/api')
+const tracked = require('../../utils/tracked')
 const phrases = require('../../utils/phrases')
 const app = getApp()
-
+function dateStr(d) { var y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0'); return y + '-' + m + '-' + day }
 // 推进按钮文案映射（预计算，避免 WXML 中括号访问）
 function getToolLabel(status) {
   var map = {
@@ -43,7 +44,6 @@ Page({
     if (enabled.filter(function (m) { return m.key === activeModule }).length === 0) {
       activeModule = enabled.length > 0 ? enabled[0].key : 'jobseeker'
     }
-
     var currentModuleInfo = phrases.MODULES.find(function (m) { return m.key === activeModule }) || enabled[0]
     this.setData({ modules: enabled, currentModule: activeModule, currentModuleInfo: currentModuleInfo })
 
@@ -60,9 +60,7 @@ Page({
     if (mod) wx.setNavigationBarTitle({ title: mod.name })
 
     app.globalData.dirty.progress = false
-
     var info = phrases.MODULES.find(function (m) { return m.key === key })
-    // 从模块配置读取 dailyLimit（用户值优先于默认值，兼容旧 preferences）
     var cfg = phrases.getModuleConfig(key, app.globalData.userInfo)
     var setDataObj = {
       currentModuleInfo: info,
@@ -76,71 +74,99 @@ Page({
     this.setData(setDataObj)
 
     var ctx = this
-
-    // 并行请求：今日清单 + 模块数据源
-    var actionPromise = api.getTodayActions()
-    var enrichPromise
+    var todayStr = dateStr(new Date())
 
     if (key === 'jobseeker') {
-      enrichPromise = api.getJobList().then(function (res) {
-        return { type: 'jobs', data: res.jobs || [] }
-      })
-      // 异步获取漏斗
-      api.getStats('week').then(function (res) {
-        if (res.funnel) ctx.setData({ funnel: res.funnel })
-      })
-    } else {
-      enrichPromise = api.getTaskList({ module: key }).then(function (res) {
-        return { type: 'tasks', data: res.tasks || [] }
-      })
-    }
+      // jobseeker: 活跃=算法输出 + 富化，已完成=completed_log
+      var actionPromise = api.getTodayActions()
+      var enrichPromise = api.getJobList().then(function (res) { return res.jobs || [] })
+      var logPromise = tracked.getCompletedLogs(todayStr, todayStr)
+      // 异步漏斗
+      api.getStats('week').then(function (res) { if (res.funnel) ctx.setData({ funnel: res.funnel }) })
 
-    Promise.all([actionPromise, enrichPromise]).then(function (results) {
-      var actionRes = results[0]
-      var enrichRes = results[1]
+      Promise.all([actionPromise, enrichPromise, logPromise]).then(function (results) {
+        var actions = results[0].actions || []
+        var jobs = results[1]
+        var allLogs = (results[2].logs || []).filter(function (l) { return l.module === 'jobseeker' })
 
-      // 按模块过滤
-      var moduleActions = (actionRes.actions || []).filter(function (a) {
-        return a.module === key
-      })
-
-      // 交叉匹配富化
-      var enriched = moduleActions.map(function (action) {
-        if (enrichRes.type === 'jobs') {
-          var job = (enrichRes.data || []).find(function (j) { return j._id === action.sourceId })
+        // 活跃：算法输出的 jobseeker 模块 actions（未完成）
+        var active = actions.filter(function (a) {
+          return a.module === 'jobseeker' && !a.completed
+        }).map(function (a) {
+          var job = jobs.find(function (j) { return j._id === a.sourceId })
           if (job) {
-            action.jobInfo = job
-            action.toolLabel = getToolLabel(job.status)
+            a.jobInfo = job
+            a.toolLabel = getToolLabel(job.status)
+            if (a.normalizedScore != null) {
+              a.badge = phrases.RATING_TIERS.filter(function (t) { return a.normalizedScore >= t.min })[0] || phrases.RATING_TIERS[phrases.RATING_TIERS.length - 1]
+            }
           }
-          if (action.normalizedScore != null) {
-            var tier = phrases.RATING_TIERS.filter(function (t) { return action.normalizedScore >= t.min })[0] || phrases.RATING_TIERS[phrases.RATING_TIERS.length - 1]
-            action.badge = tier
+          return a
+        })
+
+        // 已完成：completed_log 条目 + 交叉查 jobInfo
+        var completed = allLogs.map(function (log) {
+          var job = jobs.find(function (j) { return j._id === log.sourceId })
+          return {
+            _id: log._id,
+            sourceId: log.sourceId,
+            sourceType: 'job',
+            title: (job ? job.company + ' - ' + job.position : log.title),
+            description: '',
+            jobInfo: job || null,
+            completedAt: log.date
           }
-        } else {
-          var task = (enrichRes.data || []).find(function (t) { return t._id === action.sourceId })
-          if (task) {
-            action.taskInfo = task
-          }
-        }
-        return action
-      })
+        })
 
-      // 拆分：进行中 / 已完成
-      var active = enriched.filter(function (a) { return !a.completed })
-      var completed = enriched.filter(function (a) { return a.completed })
+        ctx.setData({ activeTasks: active, completedTasks: completed, isLoading: false })
+      }).catch(function () { ctx.setData({ isLoading: false }) })
 
-      ctx.setData({
-        activeTasks: active,
-        completedTasks: completed,
-        isLoading: false
-      })
-    }).catch(function () {
-      ctx.setData({ isLoading: false })
-    })
-
-    // 非求职模块清空漏斗
-    if (key !== 'jobseeker') {
+    } else {
+      // 非 jobseeker: 活跃=原始任务列表，已完成=completed_log
+      var tPromise = api.getTaskList({ module: key }).then(function (res) { return res.tasks || [] })
+      var lPromise = tracked.getCompletedLogs(todayStr, todayStr)
       this.setData({ funnel: null })
+
+      Promise.all([tPromise, lPromise]).then(function (results) {
+        var tasks = results[0]
+        var allLogs = (results[1].logs || []).filter(function (l) { return l.module === key })
+        // 今天已完成的 sourceId 集合
+        var completedIds = {}
+        allLogs.forEach(function (l) { completedIds[l.sourceId] = true })
+
+        // 活跃 = 已启用且今天未完成的任务
+        var active = tasks.filter(function (t) { return t.enabled && !completedIds[t._id] })
+          .map(function (t) {
+            return {
+              _id: 'local_custom_' + t._id,
+              sourceType: 'custom',
+              sourceId: t._id,
+              module: t.module || 'custom',
+              title: t.title,
+              description: t.note || '',
+              taskInfo: t,
+              normalizedScore: null,
+              completed: false,
+              postponed: false,
+              date: todayStr
+            }
+          })
+
+        // 已完成 = completed_log 条目 + 交叉查 task 数据
+        var completed = allLogs.map(function (log) {
+          var task = tasks.find(function (t) { return t._id === log.sourceId })
+          return {
+            _id: log._id,
+            sourceId: log.sourceId,
+            sourceType: 'custom',
+            title: task ? task.title : log.title,
+            description: task ? (task.note || '') : '',
+            completedAt: log.date
+          }
+        })
+
+        ctx.setData({ activeTasks: active, completedTasks: completed, isLoading: false })
+      }).catch(function () { ctx.setData({ isLoading: false }) })
     }
   },
 
@@ -151,7 +177,6 @@ Page({
     var actionId = e.detail.actionId
     var idx = this.data.activeTasks.findIndex(function (t) { return t._id === actionId })
     if (idx === -1) return
-
     var action = this.data.activeTasks[idx]
     var active = this.data.activeTasks.slice()
     active.splice(idx, 1)
@@ -329,7 +354,6 @@ Page({
     this.setData({ currentModule: key, showSheet: false, isLoading: true })
     this.loadData()
   },
-
   closeSheet() { this.setData({ showSheet: false }) },
 
   // ========== 工具箱 ==========
