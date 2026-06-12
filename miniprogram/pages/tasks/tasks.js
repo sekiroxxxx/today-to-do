@@ -42,12 +42,9 @@ Page({
       this.setData({ loading: true })
     }
     var ctx = this
-    // 按当前模块过滤
-    var filter = {}
-    if (ctx.data.currentModule) filter.module = ctx.data.currentModule
     // getTodayActions 可能因今日未生成清单而返回空，不作为致命错误
     var todayPromise = api.getTodayActions().catch(function () { return { actions: [] } })
-    Promise.all([api.getTaskList(filter), todayPromise]).then(function (results) {
+    Promise.all([api.getTaskList(), todayPromise]).then(function (results) {
       var taskRes = results[0]
       var todayRes = results[1]
 

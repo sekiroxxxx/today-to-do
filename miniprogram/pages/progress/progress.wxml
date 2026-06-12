@@ -76,8 +76,8 @@
       </view>
     </block>
 
-    <!-- 所有模块通用 -->
-    <view class="tool-card tool-card--action" bindtap="onGoTasks">
+    <!-- 非求职模块：任务管理 -->
+    <view class="tool-card tool-card--action" bindtap="onGoTasks" wx:if="{{currentModule !== 'jobseeker'}}">
       <text class="tool-icon">📝</text>
       <view class="tool-info">
         <text class="tool-name">任务管理</text>
